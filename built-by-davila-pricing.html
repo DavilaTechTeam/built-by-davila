@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Built by Davila website and digital marketing pricing for businesses ready to grow." />
+  <title>Pricing | Built by Davila</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+
+/* Pricing page */
+.active-link { color: var(--accent); }
+.pricing-hero { min-height: 570px; display: flex; align-items: center; position: relative; overflow: hidden; padding: 90px 0 105px; }
+.pricing-hero-inner { position: relative; z-index: 2; max-width: 950px; }
+.pricing-hero h1 { font-size: clamp(52px, 6.5vw, 88px); line-height: .98; max-width: 900px; }
+.pricing-hero h1 em { color: var(--accent); font-style: normal; }
+.pricing-hero p { max-width: 700px; color: var(--muted); line-height: 1.7; font-size: 18px; margin: 28px 0 34px; }
+.pricing-section { padding: 115px 0 105px; background: #111318; color: white; }
+.pricing-intro { max-width: 800px; margin-bottom: 55px; }
+.pricing-intro h2 { font-size: clamp(40px, 5vw, 64px); line-height: 1.04; margin: 0; }
+.pricing-intro h2 span { color: var(--accent); }
+.pricing-intro p { max-width: 680px; color: #9b9da4; line-height: 1.7; font-size: 16px; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
+.price-card { position: relative; padding: 32px; border: 1px solid rgba(255,255,255,.12); border-radius: 24px; background: rgba(255,255,255,.025); min-height: 660px; display: flex; flex-direction: column; }
+.price-card.price-featured { background: var(--accent); border-color: var(--accent); transform: translateY(-12px); box-shadow: 0 30px 80px rgba(0,0,0,.25); }
+.popular-badge { position: absolute; top: 18px; right: 18px; font-size: 8px; letter-spacing: .16em; font-weight: 800; background: white; color: #111; padding: 8px 10px; border-radius: 999px; }
+.price-label { font-size: 9px; letter-spacing: .2em; font-weight: 800; color: var(--accent); margin-bottom: 18px; }
+.price-featured .price-label { color: white; opacity: .85; }
+.price-card h3 { font-size: 34px; margin-bottom: 12px; }
+.price-desc { color: #a9abb2; min-height: 72px; line-height: 1.55; font-size: 14px; }
+.price-featured .price-desc { color: rgba(255,255,255,.82); }
+.price { padding: 24px 0; border-top: 1px solid rgba(255,255,255,.12); border-bottom: 1px solid rgba(255,255,255,.12); margin: 12px 0 22px; }
+.price small, .price span { display: block; font-size: 10px; color: #90939a; }
+.price-featured .price small, .price-featured .price span { color: rgba(255,255,255,.72); }
+.price strong { display: block; font: 800 48px/1.1 "Manrope", sans-serif; margin: 4px 0; }
+.price-btn { display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,.18); padding: 14px 16px; border-radius: 999px; font-weight: 700; font-size: 13px; margin-bottom: 22px; }
+.price-btn:hover { background: white; color: #111; }
+.featured-btn { background: white; color: #111; border-color: white; }
+.price-card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; font-size: 13px; color: #d1d3d8; }
+.price-featured ul { color: white; }
+.price-card li:before { content: "✓"; color: var(--accent); margin-right: 9px; font-weight: 800; }
+.price-featured li:before { color: white; }
+.pricing-note { text-align: center; margin: 34px auto 0; max-width: 760px; color: #888b92; line-height: 1.6; font-size: 13px; }
+.care-section { padding: 105px 0; background: var(--bg); }
+.care-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.care-card { background: white; border: 1px solid var(--line); border-radius: 22px; padding: 30px; }
+.care-card > span { color: var(--accent); font-size: 9px; letter-spacing: .18em; font-weight: 800; }
+.care-card h3 { font-size: 42px; margin: 16px 0 12px; }
+.care-card h3 small { font-size: 14px; color: var(--muted); }
+.care-card p { color: var(--muted); line-height: 1.65; margin: 0; font-size: 14px; }
+.addons-section { padding: 105px 0; background: white; }
+.addons-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 80px; align-items: start; }
+.addons-copy h2 { font-size: clamp(38px, 5vw, 60px); }
+.addons-copy p { color: var(--muted); line-height: 1.7; max-width: 480px; }
+.addons-list { border-top: 1px solid var(--line); }
+.addons-list div { display: flex; justify-content: space-between; gap: 20px; padding: 22px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.addons-list strong { color: var(--accent); white-space: nowrap; }
+.faq-section { padding: 105px 0; background: #eeede8; }
+.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.faq-grid details { background: white; border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; }
+.faq-grid summary { cursor: pointer; font: 700 16px "Manrope", sans-serif; }
+.faq-grid details p { color: var(--muted); line-height: 1.65; font-size: 14px; margin: 15px 0 2px; }
+@media (max-width: 960px) { .pricing-grid, .care-grid { grid-template-columns: 1fr; } .price-featured { transform: none; } .price-card { min-height: auto; } .addons-grid { grid-template-columns: 1fr; gap: 40px; } }
+@media (max-width: 680px) { .pricing-hero { min-height: auto; padding: 70px 0 80px; } .pricing-hero h1 { font-size: 48px; } .pricing-section, .care-section, .addons-section, .faq-section { padding: 80px 0; } .price-card { padding: 25px; } .faq-grid { grid-template-columns: 1fr; } .addons-list div { flex-direction: column; gap: 6px; } }
+
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="site-header" id="top">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand" aria-label="Built by Davila home">
+        <span class="brand-mark">BD</span>
+        <span class="brand-text"><strong>BUILT BY DAVILA</strong><small>WEB • MARKETING • AUTOMATION</small></span>
+      </a>
+      <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
+      <nav class="main-nav">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#work">Work</a>
+        <a href="index.html#process">Process</a>
+        <a href="pricing.html" class="active-link">Pricing</a>
+        <a href="index.html#about">About</a>
+        <a href="#contact" class="nav-cta">Start a Project</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="pricing-hero">
+      <div class="hero-glow glow-one"></div>
+      <div class="container pricing-hero-inner reveal">
+        <div class="eyebrow"><span></span> SIMPLE, TRANSPARENT STARTING POINTS</div>
+        <h1>Professional websites without the <em>agency mystery.</em></h1>
+        <p>Every business is different. These packages give you a clear starting point, and we tailor the final scope around what you actually need.</p>
+        <a href="#packages" class="btn btn-primary">See Website Packages <span>↓</span></a>
+      </div>
+    </section>
+
+    <section class="pricing-section" id="packages">
+      <div class="container">
+        <div class="pricing-intro reveal">
+          <span class="section-kicker">WEBSITE PACKAGES</span>
+          <h2>Choose the level that fits <span>where you are now.</span></h2>
+          <p>All packages are custom-built, mobile responsive and designed around your business. No cookie-cutter drag-and-drop template handoff.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="price-card reveal">
+            <div class="price-label">STARTER</div>
+            <h3>Starter</h3>
+            <p class="price-desc">For a small business that needs a polished, custom website that looks credible and professional from day one.</p>
+            <div class="price"><small>Starting at</small><strong>$3,995</strong><span>one-time</span></div>
+            <a href="mailto:hello@builtbydavila.com?subject=Starter%20Website%20Package" class="price-btn">Choose Starter <span>↗</span></a>
+            <ul>
+              <li>Up to 5 custom pages</li>
+              <li>Mobile responsive design</li>
+              <li>Contact / lead form</li>
+              <li>Basic on-page SEO setup</li>
+              <li>Social links & click-to-call</li>
+              <li>Google Maps integration</li>
+              <li>2 rounds of revisions</li>
+              <li>Launch assistance</li>
+            </ul>
+          </article>
+
+          <article class="price-card price-featured reveal">
+            <div class="popular-badge">MOST POPULAR</div>
+            <div class="price-label">BUSINESS</div>
+            <h3>Business</h3>
+            <p class="price-desc">For established businesses that need a stronger brand presence, custom design, portfolio or project presentation, and a site built to generate opportunities.</p>
+            <div class="price"><small>Starting at</small><strong>$1,995</strong><span>one-time</span></div>
+            <a href="mailto:hello@builtbydavila.com?subject=Business%20Website%20Package" class="price-btn featured-btn">Choose Business <span>↗</span></a>
+            <ul>
+              <li>Up to 10 custom pages</li>
+              <li>Everything in Starter</li>
+              <li>Premium custom visual direction</li>
+              <li>Conversion-focused page structure</li>
+              <li>Portfolio / project showcase sections</li>
+              <li>Lead capture / quote forms</li>
+              <li>Analytics + Google Business integration</li>
+              <li>2 rounds of revisions</li>
+              <li>30 days post-launch support</li>
+            </ul>
+          </article>
+
+          <article class="price-card reveal">
+            <div class="price-label">PREMIUM+</div>
+            <h3>Premium</h3>
+            <p class="price-desc">For companies that need a premium digital presence with deeper strategy, more content, advanced integrations, automation and custom functionality.</p>
+            <div class="price"><small>Starting at</small><strong>$5,995</strong><span>one-time</span></div>
+            <a href="mailto:hello@builtbydavila.com?subject=Premium%20Website%20Package" class="price-btn">Choose Premium <span>↗</span></a>
+            <ul>
+              <li>Up to 20 custom pages</li>
+              <li>Everything in Business</li>
+              <li>Advanced forms, workflows & lead routing</li>
+              <li>CRM, calendar & third-party integrations</li>
+              <li>Automation & AI workflow setup</li>
+              <li>Blog, resource center or expanded content</li>
+              <li>Advanced analytics & conversion tracking</li>
+              <li>3 rounds of revisions</li>
+              <li>60 days post-launch support</li>
+            </ul>
+          </article>
+        </div>
+        
+        <div class="pricing-note reveal" style="margin-top:32px; padding:28px; border:1px solid rgba(255,255,255,.12); border-radius:20px; background:rgba(255,255,255,.03);">
+          <div style="display:flex; justify-content:space-between; gap:24px; align-items:center; flex-wrap:wrap;">
+            <div style="text-align:left; max-width:700px;">
+              <span class="price-label" style="display:block; margin-bottom:10px;">CUSTOM DIGITAL PROJECTS</span>
+              <h3 style="font-size:30px; margin:0 0 10px;">Starting at $7,500+</h3>
+              <p style="margin:0; color:#a9abb2; line-height:1.6;">For e-commerce, portals, custom software, advanced automation, complex integrations, large content builds and projects that go beyond a standard business website.</p>
+            </div>
+            <a href="mailto:hello@builtbydavila.com?subject=Custom%20Digital%20Project" class="price-btn" style="margin:0; min-width:190px;">Request a Proposal <span>↗</span></a>
+          </div>
+        </div>
+
+        <p class="pricing-note reveal">Need e-commerce, client portals, custom software, complex integrations or a larger digital platform? Custom projects start at $7,500 and are scoped separately.</p>
+      </div>
+    </section>
+
+    <section class="care-section">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div><span class="section-kicker">AFTER LAUNCH</span><h2>Keep it running. <span>Keep it growing.</span></h2></div>
+          <p>Your website can stay with us after launch so you don’t have to worry about routine updates, monitoring or small changes.</p>
+        </div>
+        <div class="care-grid">
+          <article class="care-card reveal"><span>ESSENTIAL</span><h3>$79<small>/mo</small></h3><p>Hosting coordination, security checks, uptime monitoring and minor content updates.</p></article>
+          <article class="care-card reveal"><span>GROWTH CARE</span><h3>$149<small>/mo</small></h3><p>Everything in Essential plus priority edits, monthly analytics review and ongoing SEO basics.</p></article>
+          <article class="care-card reveal"><span>PRO CARE</span><h3>$299<small>/mo</small></h3><p>Priority support, frequent website changes, conversion improvements and deeper ongoing optimization.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="addons-section">
+      <div class="container addons-grid">
+        <div class="addons-copy reveal">
+          <span class="section-kicker">ADD-ONS & MARKETING</span>
+          <h2>Need more than a website?</h2>
+          <p>We can add marketing and automation services individually or build them into a custom growth plan.</p>
+        </div>
+        <div class="addons-list reveal">
+          <div><span>Logo / Brand Refresh</span><strong>from $395</strong></div>
+          <div><span>Landing Page</span><strong>from $495</strong></div>
+          <div><span>Local SEO Setup</span><strong>from $350</strong></div>
+          <div><span>Email Marketing Setup</span><strong>from $350</strong></div>
+          <div><span>CRM / Automation Setup</span><strong>from $750</strong></div>
+          <div><span>Ongoing Digital Marketing</span><strong>custom monthly plan</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-section">
+      <div class="container">
+        <div class="pricing-intro reveal"><span class="section-kicker">GOOD TO KNOW</span><h2>Pricing questions, <span>answered.</span></h2></div>
+        <div class="faq-grid">
+          <details class="reveal"><summary>Do I have to pay everything up front?</summary><p>No. For most projects, we can split the project into scheduled payments tied to the project timeline. The exact terms are included in your proposal.</p></details>
+          <details class="reveal"><summary>Is hosting included?</summary><p>Hosting and ongoing care are separate from the one-time website build unless your proposal specifically includes them.</p></details>
+          <details class="reveal"><summary>Can I provide my own domain?</summary><p>Yes. If you already own your domain, we can connect the completed site to it. If you need one, we can help you get it set up.</p></details>
+          <details class="reveal"><summary>What if I need something not listed?</summary><p>That’s normal. These packages are starting points. Custom integrations, e-commerce, portals, software and larger content needs are quoted separately.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section" id="contact">
+      <div class="container">
+        <div class="cta-box reveal">
+          <div class="cta-glow"></div>
+          <span class="section-kicker">READY TO GET STARTED?</span>
+          <h2>Tell us what you need.<br><span>We’ll tell you what it should cost.</span></h2>
+          <p>No pressure and no confusing agency pitch. We’ll review the project and recommend the right starting point.</p>
+          <div class="cta-actions"><a href="mailto:hello@builtbydavila.com?subject=Website%20Project%20Inquiry" class="btn btn-primary light">Request a Quote <span>↗</span></a><a href="index.html#work" class="btn btn-dark-outline">See Our Work</a></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div><a href="index.html" class="brand footer-brand"><span class="brand-mark">BD</span><span class="brand-text"><strong>BUILT BY DAVILA</strong><small>WEB • MARKETING • AUTOMATION</small></span></a><p>Websites, marketing and automation built for growth.</p></div>
+      <div class="footer-links">
+        <div><strong>Explore</strong><a href="index.html#services">Services</a><a href="index.html#work">Work</a><a href="pricing.html">Pricing</a><a href="index.html#about">About</a></div>
+        <div><strong>Services</strong><span>Web Design</span><span>Branding</span><span>Digital Marketing</span><span>AI & Automation</span></div>
+      </div>
+    </div>
+    <div class="container footer-bottom"><span>© <span id="year"></span> Built by Davila. All rights reserved.</span><span>Built with purpose.</span></div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
