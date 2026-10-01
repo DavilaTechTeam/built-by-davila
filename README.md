@@ -1,27 +1,38 @@
-# Built by Davila
+# Built by Davila V2
 
-Complete static website for GitHub Pages.
+This package contains:
 
-## Files
-- index.html
-- pricing.html
-- styles.css
-- script.js
+- `index.html` — public homepage
+- `pricing.html` — public pricing page
+- `studio.html` — Back Office / Studio prototype
+- `styles.css` — public website styling
+- `script.js` — public website navigation
+- `studio.css` — Back Office styling
+- `studio.js` — Back Office demo logic
+- `assets/built-by-davila-logo.png` — new logo
 
-## GitHub Pages
-Upload all four files to the root of the repository.
+## Back Office prototype features
+- Dashboard
+- Clients
+- Quotes
+- Quote builder
+- Invoices
+- Payments list
+- Recurring subscriptions
+- Deposit calculation
+- Convert quote to invoice/payment request
+- Local browser storage for demo records
 
-Repository:
-DavilaTechTeam/built-by-davila
+## Important
+This prototype does **not** process real payments yet.
 
-Live URL:
-https://davilatechteam.github.io/built-by-davila/
+For production:
+1. Host the back office on a secure backend (recommended: Azure).
+2. Add authentication.
+3. Use Stripe Checkout / Payment Links / Payment Intents.
+4. Use Stripe Billing for recurring payments.
+5. Store business data in PostgreSQL / Azure SQL.
+6. Never store raw card data in the application.
+7. Connect `app.builtbydavila.com` to the secure app.
 
-## Current pricing
-- Starter — $1,995
-- Business — $3,995
-- Premium — $5,995
-- Custom Digital Projects — $7,500+
-
-## Before final launch
-Replace placeholder email / phone details if needed and connect the final custom domain.
+GitHub Pages is appropriate for the public website, but not for securely processing payments by itself.

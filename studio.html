@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Built by Davila Studio</title><link rel="stylesheet" href="studio.css"></head><body>
+<div class="app">
+<aside class="side">
+<div class="side-logo"><img src="assets/built-by-davila-logo.png" alt="Built by Davila"></div><small>STUDIO BACK OFFICE</small>
+<nav>
+<button class="active" data-view="dashboard">Dashboard</button>
+<button data-view="clients">Clients</button>
+<button data-view="quotes">Quotes</button>
+<button data-view="invoices">Invoices</button>
+<button data-view="payments">Payments</button>
+<button data-view="subscriptions">Subscriptions</button>
+<button data-view="quote-builder">New Quote</button>
+</nav>
+</aside>
+<main class="main">
+<div class="topbar"><h1 id="page-title">Dashboard</h1><div class="top-actions"><a class="btn secondary" href="index.html">Public Site</a><button class="btn primary" onclick="document.querySelector('[data-view=quote-builder]').click()">+ New Quote</button></div></div>
+
+<section class="view active" id="dashboard">
+<div class="cards">
+<div class="metric"><span>Payments received</span><strong id="metric-revenue">$0</strong></div>
+<div class="metric"><span>Monthly recurring revenue</span><strong id="metric-mrr">$0</strong></div>
+<div class="metric"><span>Open invoices</span><strong id="metric-open">0</strong></div>
+<div class="metric"><span>Total quotes</span><strong id="metric-quotes">0</strong></div>
+</div>
+<div class="grid-2">
+<div class="panel"><h3>Recent invoices</h3><table><thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Status</th><th>Due</th></tr></thead><tbody id="invoice-body"></tbody></table></div>
+<div class="panel"><h3>Recurring plans</h3><div id="subs-list"></div></div>
+</div>
+</section>
+
+<section class="view" id="clients"><div class="toolbar"><input placeholder="Search clients"><button class="btn primary" id="add-client">+ Add Client</button></div><div class="panel"><table><thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th></tr></thead><tbody id="client-body"></tbody></table></div></section>
+<section class="view" id="quotes"><div class="panel"><table><thead><tr><th>Quote</th><th>Client</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody id="quote-body"></tbody></table></div></section>
+<section class="view" id="invoices"><div class="panel"><table><thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Status</th><th>Due</th></tr></thead><tbody id="invoice-body-2"></tbody></table></div></section>
+<section class="view" id="payments"><div class="notice">Payment processing is mocked in this prototype. Production should use Stripe Checkout/Payment Links or Payment Intents so card data never touches your server.</div><div class="panel" style="margin-top:14px"><table><thead><tr><th>Date</th><th>Client</th><th>Type</th><th>Amount</th></tr></thead><tbody id="payment-body"></tbody></table></div></section>
+<section class="view" id="subscriptions"><div class="toolbar"><div></div><button class="btn primary" id="add-sub">+ Add Recurring Plan</button></div><div class="panel"><h3>Active recurring payments</h3><div id="subs-list-2"></div></div></section>
+
+<section class="view" id="quote-builder">
+<div class="quote-builder">
+<div class="panel">
+<h3>Create quote</h3>
+<div class="form-grid">
+<div class="field"><label>Client / Company</label><input id="qb-client" placeholder="KPLAY USA"></div>
+<div class="field"><label>Deposit %</label><input id="qb-deposit" type="number" value="50"></div>
+<div class="field full"><label>Line items</label><div id="line-items"></div><button class="btn secondary" id="add-line">+ Add line item</button></div>
+<div class="field full"><label>Terms / Notes</label><textarea rows="5">50% deposit due to begin work. Remaining balance due prior to launch. Scope changes may require a revised quote.</textarea></div>
+</div>
+<div style="display:flex;gap:10px;margin-top:14px"><button class="btn secondary" id="save-quote">Save Draft</button><button class="btn primary" id="invoice-from-quote">Create Invoice + Payment Request</button></div>
+</div>
+<div class="quote-preview">
+<img class="logo" src="assets/built-by-davila-logo.png" alt="">
+<h2 style="margin-top:20px">Project Quote</h2><div style="color:#777;font-size:13px">Prepared for <strong id="pv-client">Client Company</strong></div><hr>
+<div id="pv-lines"></div><hr>
+<div class="totalbox"><div><span>Total project</span><strong id="pv-total">$0</strong></div><div><span>Initial payment</span><strong id="pv-deposit">$0</strong></div><div class="grand"><span>Remaining balance</span><strong id="pv-balance">$0</strong></div></div>
+</div>
+</div>
+</section>
+</main></div>
+<div class="login-note">Prototype only • local browser storage • no real payment processing yet</div>
+<script src="studio.js"></script>
+<script>
+function syncDupes(){
+  const ib=document.querySelector('#invoice-body'), ib2=document.querySelector('#invoice-body-2'); if(ib&&ib2) ib2.innerHTML=ib.innerHTML;
+  const s1=document.querySelector('#subs-list'), s2=document.querySelector('#subs-list-2'); if(s1&&s2) s2.innerHTML=s1.innerHTML;
+}
+setInterval(syncDupes,300);syncDupes();
+</script>
+</body></html>
