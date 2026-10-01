@@ -1,17 +1,27 @@
 # Built by Davila
 
-Static website suitable for GitHub Pages.
+Complete static website for GitHub Pages.
 
 ## Files
 - index.html
+- pricing.html
 - styles.css
 - script.js
 
-## Before launch
-1. Replace the demo email `hello@daviladigital.com`.
-2. Replace the demo phone number.
-3. Update portfolio examples with actual client work as you acquire permission.
-4. Verify your final business name and domain before branding publicly.
-5. In GitHub: upload these files to a repository, then enable GitHub Pages from the repository settings.
+## GitHub Pages
+Upload all four files to the root of the repository.
 
-No build system is required.
+Repository:
+DavilaTechTeam/built-by-davila
+
+Live URL:
+https://davilatechteam.github.io/built-by-davila/
+
+## Current pricing
+- Starter — $1,995
+- Business — $3,995
+- Premium — $5,995
+- Custom Digital Projects — $7,500+
+
+## Before final launch
+Replace placeholder email / phone details if needed and connect the final custom domain.
