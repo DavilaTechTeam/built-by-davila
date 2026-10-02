@@ -13,7 +13,39 @@ function showModal(id){const el=$('#'+id);if(!el)return;el.classList.add('show')
 function hideModal(id){const el=$('#'+id);if(!el)return;el.classList.remove('show');el.setAttribute('aria-hidden','true');}
 $$('[data-close]').forEach(b=>b.addEventListener('click',()=>hideModal(b.dataset.close)));
 $$('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)hideModal(m.id)}));
+
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$$('.modal-backdrop.show').forEach(m=>hideModal(m.id));});
+
+function toast(message,kind='success'){
+  const stack=$('#toast-stack');
+  const el=document.createElement('div');
+  el.className=`studio-toast ${kind}`;
+  el.innerHTML=`<div class="toast-dot"></div><div>${esc(message)}</div>`;
+  stack.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(()=>el.remove(),220);
+  },3400);
+}
+
+let confirmResolver=null;
+function studioConfirm({title='Confirm action',message='',confirmText='Continue'}={}){
+  $('#confirm-title').textContent=title;
+  $('#confirm-message').textContent=message;
+  $('#confirm-ok').textContent=confirmText;
+  showModal('confirm-modal');
+  return new Promise(resolve=>{confirmResolver=resolve;});
+}
+$('#confirm-ok').onclick=()=>{
+  hideModal('confirm-modal');
+  if(confirmResolver){confirmResolver(true);confirmResolver=null;}
+};
+$('#confirm-cancel').onclick=()=>{
+  hideModal('confirm-modal');
+  if(confirmResolver){confirmResolver(false);confirmResolver=null;}
+};
+
 
 async function rawFetch(path,options={}){
   const controller=new AbortController();
@@ -100,7 +132,7 @@ function renderQuotes(){
     <td><strong>${esc(q.quote_number)}</strong></td><td>${esc(q.company_name)}</td><td>${money(q.total)}</td><td>${Number(q.deposit_percent||0)}%</td><td>${badge(q.status)}</td><td>${dateFmt(q.created_at)}</td>
     <td class="actions-cell">${q.status!=='Accepted'?`<button class="mini-btn quote-status" data-id="${q.id}" data-status="Sent">Mark Sent</button>`:''}<button class="mini-btn primary-mini convert-quote" data-id="${q.id}">Create Invoice</button></td>
   </tr>`).join(''):`<tr><td colspan="7">No quotes yet.</td></tr>`;
-  $$('.quote-status').forEach(b=>b.onclick=async()=>{try{await api('/api/quotes/'+b.dataset.id,{method:'PATCH',body:JSON.stringify({status:b.dataset.status})});await reload('quotes')}catch(e){alert(e.message)}});
+  $$('.quote-status').forEach(b=>b.onclick=async()=>{try{await api('/api/quotes/'+b.dataset.id,{method:'PATCH',body:JSON.stringify({status:b.dataset.status})});await reload('quotes')}catch(e){toast(e.message,'error')}});
   $$('.convert-quote').forEach(b=>b.onclick=()=>convertQuote(b.dataset.id));
 }
 function renderInvoices(){
@@ -182,21 +214,49 @@ $('#add-line').onclick=()=>{lineItems.push({description:'New Service',quantity:1
 $('#qb-client').onchange=updatePreview;$('#qb-deposit').oninput=updatePreview;
 $('#clear-quote').onclick=()=>{lineItems=[{description:'Website Design & Development',quantity:1,unit_price:3995}];$('#qb-client').value='';$('#qb-deposit').value=50;renderLines();updatePreview()};
 async function saveQuote(status){
-  const client_id=$('#qb-client').value;if(!client_id)return alert('Select a client first.');
-  if(!lineItems.length)return alert('Add at least one line item.');
+  const client_id=$('#qb-client').value;if(!client_id)return toast('Select a client first.','error');
+  if(!lineItems.length)return toast('Add at least one line item.','error');
   try{
     const q=await api('/api/quotes',{method:'POST',body:JSON.stringify({client_id,status,deposit_percent:Number($('#qb-deposit').value||0),notes:$('#qb-notes').value,items:lineItems})});
-    await reload('quotes');alert(`${q.quote_number} saved.`);nav('quotes');$('#clear-quote').click();
-  }catch(e){alert(e.message)}
+    await reload('quotes');toast(`${q.quote_number} saved to the live database.`);nav('quotes');$('#clear-quote').click();
+  }catch(e){toast(e.message,'error')}
 }
 $('#save-quote').onclick=()=>saveQuote('Draft');$('#save-send-quote').onclick=()=>saveQuote('Sent');
 
 async function convertQuote(id){
-  const q=store.quotes.find(x=>x.id===id);if(!q)return;
-  if(!confirm(`Create an invoice from ${q.quote_number} for ${q.company_name}?`))return;
-  const due=new Date();due.setDate(due.getDate()+14);
-  try{const inv=await api('/api/quotes/'+id+'/convert-to-invoice',{method:'POST',body:JSON.stringify({due_date:due.toISOString().slice(0,10)})});await Promise.all([reload('quotes'),reload('invoices')]);alert(`${inv.invoice_number} created.`);nav('invoices')}
-  catch(e){alert(e.message)}
+  const q=store.quotes.find(x=>x.id===id);
+  if(!q)return;
+
+  const confirmed=await studioConfirm({
+    title:'Create Invoice',
+    message:`Create an invoice from ${q.quote_number} for ${q.company_name}?`,
+    confirmText:'Create Invoice'
+  });
+  if(!confirmed)return;
+
+  const due=new Date();
+  due.setDate(due.getDate()+14);
+
+  try{
+    setStatus('Creating invoice…','loading');
+    const inv=await api('/api/invoices/from-quote/'+id,{
+      method:'POST',
+      body:JSON.stringify({due_date:due.toISOString().slice(0,10)})
+    });
+
+    const [quotes,invoices]=await Promise.all([
+      api('/api/quotes'),
+      api('/api/invoices')
+    ]);
+    store.quotes=quotes;
+    store.invoices=invoices;
+    renderAll();
+    toast(`${inv.invoice_number} created successfully.`);
+    nav('invoices');
+  }catch(e){
+    console.error(e);
+    toast(e.message,'error');
+  }
 }
 
 /* Payments */
@@ -226,7 +286,7 @@ $('#sub-form').onsubmit=async e=>{
     await reload('subscriptions');hideModal('sub-modal');renderDashboard()
   }catch(err){msg.textContent=err.message;msg.className='form-message error'}
 };
-async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{method:'PATCH',body:JSON.stringify({status})});await reload('subscriptions')}catch(e){alert(e.message)}}
+async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{method:'PATCH',body:JSON.stringify({status})});await reload('subscriptions')}catch(e){toast(e.message,'error')}}
 
 renderLines();
 (async()=>{const ok=await initAuth();if(ok)await loadAll()})();

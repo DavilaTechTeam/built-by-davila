@@ -1,24 +1,13 @@
-# Built by Davila V9 — Full Live Studio
+# Built by Davila V10 — Invoice Fix + Branded UX
 
-This is the full website package for the public repo:
-`DavilaTechTeam/built-by-davila`
+Complete website replacement.
 
-Live PostgreSQL-backed Studio modules:
-- Clients (add/edit/search)
-- Quotes and quote line items
-- Quote-to-invoice conversion
-- Invoices and balances
-- Manual payment recording
-- Recurring subscriptions
-- Dashboard metrics
+Fixes:
+- Quote -> Invoice conversion now uses the hardened backend V3 endpoint
+- Successful conversion reloads Quotes and Invoices together
+- Native browser alert/confirm popups are replaced by branded Studio notifications and confirmation modal
+- KPLAY is not prefilled anywhere in forms
+- All V9 live database modules remain
 
-Also included:
-- Branded forms/modals
-- No KPLAY/demo placeholders in forms
-- Render wake-up handling
-- Optional Studio password login if enabled in the backend
-
-## IMPORTANT
-Deploy the matching backend V2 package to `built-by-davila-backend` first or at the same time.
-
-Stripe card/ACH processing is NOT active yet. The system tracks manual payments safely without storing card data.
+Matching backend required:
+Built by Davila Backend V3.

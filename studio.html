@@ -212,6 +212,26 @@
   </div>
 </div>
 
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<div class="modal-backdrop" id="confirm-modal" aria-hidden="true">
+  <div class="client-modal small-modal confirm-card">
+    <div class="modal-header">
+      <div>
+        <div class="eyebrow">CONFIRM ACTION</div>
+        <h2 id="confirm-title">Are you sure?</h2>
+        <p id="confirm-message"></p>
+      </div>
+      <button class="modal-close" data-close="confirm-modal">×</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn secondary" id="confirm-cancel">Cancel</button>
+      <button type="button" class="btn primary" id="confirm-ok">Continue</button>
+    </div>
+  </div>
+</div>
+
 <script src="studio.js"></script>
 </body>
 </html>
