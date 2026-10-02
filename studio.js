@@ -104,6 +104,7 @@ loadClients();
 
 
 const clientModalBackdrop=$('#client-modal-backdrop');
+if(!clientModalBackdrop){ console.error('Client modal markup not found'); }
 const openClientModal=()=>{
   $('#client-form').reset();
   $('#cf-status').value='Active';
@@ -117,17 +118,17 @@ const closeClientModal=()=>{
   clientModalBackdrop.setAttribute('aria-hidden','true');
 };
 
-$('#add-client').onclick=openClientModal;
-$('#close-client-modal').onclick=closeClientModal;
-$('#cancel-client-modal').onclick=closeClientModal;
-clientModalBackdrop.addEventListener('click',e=>{
+if($('#add-client')) $('#add-client').onclick=openClientModal;
+if($('#close-client-modal')) $('#close-client-modal').onclick=closeClientModal;
+if($('#cancel-client-modal')) $('#cancel-client-modal').onclick=closeClientModal;
+clientModalBackdrop?.addEventListener('click',e=>{
   if(e.target===clientModalBackdrop) closeClientModal();
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape' && clientModalBackdrop.classList.contains('show')) closeClientModal();
 });
 
-$('#client-form').addEventListener('submit',async e=>{
+$('#client-form')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const msg=$('#client-form-message');
   const saveBtn=$('#save-client-btn');

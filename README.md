@@ -1,13 +1,15 @@
-# Built by Davila V7 — Branded Client Modal
+# Built by Davila V8 — Fixed Studio Buttons
 
-Full site package.
+Full replacement package.
 
-Changes from V6:
-- Replaces browser prompt popups with a branded Built by Davila Add Client modal
-- Live PostgreSQL client storage remains intact
-- Fields include company, status, contact names, email, billing email, phone, website and notes
-- Quotes/invoices/payments/subscriptions remain prototype/localStorage for now
+Fixes:
+- + Add Client button now opens the branded client modal
+- Refresh Clients button works again
+- Client modal HTML now loads before studio.js
+- Added defensive JS guards so one missing UI element cannot stop the whole Studio
+- Live PostgreSQL client database connection remains unchanged
 
-Upload the CONTENTS of this folder to the root of:
+Upload the CONTENTS of this folder to:
 DavilaTechTeam/built-by-davila
-and replace the older files.
+
+Replace the older files.
