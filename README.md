@@ -1,15 +1,24 @@
-# Built by Davila V8 — Fixed Studio Buttons
+# Built by Davila V9 — Full Live Studio
 
-Full replacement package.
+This is the full website package for the public repo:
+`DavilaTechTeam/built-by-davila`
 
-Fixes:
-- + Add Client button now opens the branded client modal
-- Refresh Clients button works again
-- Client modal HTML now loads before studio.js
-- Added defensive JS guards so one missing UI element cannot stop the whole Studio
-- Live PostgreSQL client database connection remains unchanged
+Live PostgreSQL-backed Studio modules:
+- Clients (add/edit/search)
+- Quotes and quote line items
+- Quote-to-invoice conversion
+- Invoices and balances
+- Manual payment recording
+- Recurring subscriptions
+- Dashboard metrics
 
-Upload the CONTENTS of this folder to:
-DavilaTechTeam/built-by-davila
+Also included:
+- Branded forms/modals
+- No KPLAY/demo placeholders in forms
+- Render wake-up handling
+- Optional Studio password login if enabled in the backend
 
-Replace the older files.
+## IMPORTANT
+Deploy the matching backend V2 package to `built-by-davila-backend` first or at the same time.
+
+Stripe card/ACH processing is NOT active yet. The system tracks manual payments safely without storing card data.

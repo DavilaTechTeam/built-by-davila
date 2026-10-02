@@ -1,162 +1,217 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Built by Davila Studio</title><link rel="stylesheet" href="studio.css"></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Built by Davila Studio</title>
+<link rel="stylesheet" href="studio.css">
+</head>
+<body>
+
+<div class="auth-screen hidden" id="auth-screen">
+  <div class="auth-card">
+    <img src="assets/built-by-davila-mark.png" alt="Built by Davila">
+    <div class="eyebrow">STUDIO BACK OFFICE</div>
+    <h1>Welcome back.</h1>
+    <p>Enter your Studio password to continue.</p>
+    <form id="login-form">
+      <input id="login-password" type="password" placeholder="Studio password" autocomplete="current-password" required>
+      <button class="btn primary" type="submit">Enter Studio</button>
+      <div class="form-message" id="login-message"></div>
+    </form>
+  </div>
+</div>
+
 <div class="app">
 <aside class="side">
-<div class="side-logo"><img src="assets/built-by-davila-mark.png" alt="Built by Davila"></div><div class="studio-brand-name">BUILT BY DAVILA</div><small>STUDIO BACK OFFICE</small>
-<nav>
-<button class="active" data-view="dashboard">Dashboard</button>
-<button data-view="clients">Clients</button>
-<button data-view="quotes">Quotes</button>
-<button data-view="invoices">Invoices</button>
-<button data-view="payments">Payments</button>
-<button data-view="subscriptions">Subscriptions</button>
-<button data-view="quote-builder">New Quote</button>
-</nav>
+  <div class="side-logo"><img src="assets/built-by-davila-mark.png" alt="Built by Davila"></div>
+  <div class="studio-brand-name">BUILT BY DAVILA</div>
+  <small>STUDIO BACK OFFICE</small>
+  <nav>
+    <button class="active" data-view="dashboard">Dashboard</button>
+    <button data-view="clients">Clients</button>
+    <button data-view="quotes">Quotes</button>
+    <button data-view="invoices">Invoices</button>
+    <button data-view="payments">Payments</button>
+    <button data-view="subscriptions">Subscriptions</button>
+    <button data-view="quote-builder">New Quote</button>
+  </nav>
 </aside>
+
 <main class="main">
-<div class="topbar"><div><h1 id="page-title">Dashboard</h1><div class="studio-welcome">Built by Davila Studio • Quotes, invoices, payments and recurring services</div></div><div class="top-actions"><a class="btn secondary" href="index.html">Public Site</a><button class="btn primary" onclick="document.querySelector('[data-view=quote-builder]').click()">+ New Quote</button></div></div>
-
-<section class="view active" id="dashboard">
-<div class="cards">
-<div class="metric"><span>Payments received</span><strong id="metric-revenue">$0</strong></div>
-<div class="metric"><span>Monthly recurring revenue</span><strong id="metric-mrr">$0</strong></div>
-<div class="metric"><span>Open invoices</span><strong id="metric-open">0</strong></div>
-<div class="metric"><span>Total quotes</span><strong id="metric-quotes">0</strong></div>
-</div>
-<div class="grid-2">
-<div class="panel"><h3>Recent invoices</h3><table><thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Status</th><th>Due</th></tr></thead><tbody id="invoice-body"></tbody></table></div>
-<div class="panel"><h3>Recurring plans</h3><div id="subs-list"></div></div>
-</div>
-</section>
-
-<section class="view" id="clients">
-<div class="toolbar">
-  <div class="client-tools">
-    <input id="client-search" placeholder="Search clients">
-    <span id="db-status" class="db-status loading">Connecting…</span>
-  </div>
-  <div style="display:flex;gap:8px">
-    <button class="btn secondary" id="refresh-clients">Refresh Clients</button>
-    <button class="btn primary" id="add-client">+ Add Client</button>
-  </div>
-</div>
-<div class="panel">
-<table>
-<thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th><th>Status</th></tr></thead>
-<tbody id="client-body"><tr><td colspan="5">Loading clients…</td></tr></tbody>
-</table>
-</div>
-</section>
-<section class="view" id="quotes"><div class="panel"><table><thead><tr><th>Quote</th><th>Client</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody id="quote-body"></tbody></table></div></section>
-<section class="view" id="invoices"><div class="panel"><table><thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Status</th><th>Due</th></tr></thead><tbody id="invoice-body-2"></tbody></table></div></section>
-<section class="view" id="payments"><div class="notice">Payment processing is mocked in this prototype. Production should use Stripe Checkout/Payment Links or Payment Intents so card data never touches your server.</div><div class="panel" style="margin-top:14px"><table><thead><tr><th>Date</th><th>Client</th><th>Type</th><th>Amount</th></tr></thead><tbody id="payment-body"></tbody></table></div></section>
-<section class="view" id="subscriptions"><div class="toolbar"><div></div><button class="btn primary" id="add-sub">+ Add Recurring Plan</button></div><div class="panel"><h3>Active recurring payments</h3><div id="subs-list-2"></div></div></section>
-
-<section class="view" id="quote-builder">
-<div class="quote-builder">
-<div class="panel">
-<h3>Create quote</h3>
-<div class="form-grid">
-<div class="field"><label>Client / Company</label><input id="qb-client" placeholder="KPLAY USA"></div>
-<div class="field"><label>Deposit %</label><input id="qb-deposit" type="number" value="50"></div>
-<div class="field full"><label>Line items</label><div id="line-items"></div><button class="btn secondary" id="add-line">+ Add line item</button></div>
-<div class="field full"><label>Terms / Notes</label><textarea rows="5">50% deposit due to begin work. Remaining balance due prior to launch. Scope changes may require a revised quote.</textarea></div>
-</div>
-<div style="display:flex;gap:10px;margin-top:14px"><button class="btn secondary" id="save-quote">Save Draft</button><button class="btn primary" id="invoice-from-quote">Create Invoice + Payment Request</button></div>
-</div>
-<div class="quote-preview">
-<img class="logo" src="assets/built-by-davila-logo.png" alt="">
-<h2 style="margin-top:20px">Project Quote</h2><div style="color:#777;font-size:13px">Prepared for <strong id="pv-client">Client Company</strong></div><hr>
-<div id="pv-lines"></div><hr>
-<div class="totalbox"><div><span>Total project</span><strong id="pv-total">$0</strong></div><div><span>Initial payment</span><strong id="pv-deposit">$0</strong></div><div class="grand"><span>Remaining balance</span><strong id="pv-balance">$0</strong></div></div>
-</div>
-</div>
-</section>
-</main></div>
-<div class="login-note">Clients: live PostgreSQL database • Quotes/Invoices/Payments/Subscriptions: browser prototype • Stripe payments not connected yet</div>
-
-
-
-
-<div class="modal-backdrop" id="client-modal-backdrop" aria-hidden="true">
-  <div class="client-modal" role="dialog" aria-modal="true" aria-labelledby="client-modal-title">
-    <div class="modal-header">
-      <div>
-        <div class="eyebrow">CLIENT RECORD</div>
-        <h2 id="client-modal-title">Add Client</h2>
-        <p>Create a live client record in the Built by Davila database.</p>
-      </div>
-      <button class="modal-close" id="close-client-modal" aria-label="Close">×</button>
+  <div class="topbar">
+    <div>
+      <h1 id="page-title">Dashboard</h1>
+      <div class="studio-welcome">Built by Davila Studio • Live business operations</div>
     </div>
+    <div class="top-actions">
+      <span id="api-status" class="db-status loading">Connecting…</span>
+      <a class="btn secondary" href="index.html">Public Site</a>
+      <button class="btn primary" id="top-new-quote">+ New Quote</button>
+    </div>
+  </div>
 
+  <section class="view active" id="dashboard">
+    <div class="cards">
+      <div class="metric"><span>Payments received</span><strong id="metric-revenue">$0</strong></div>
+      <div class="metric"><span>Monthly recurring revenue</span><strong id="metric-mrr">$0</strong></div>
+      <div class="metric"><span>Open invoices</span><strong id="metric-open">0</strong></div>
+      <div class="metric"><span>Total quotes</span><strong id="metric-quotes">0</strong></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-heading"><h3>Recent invoices</h3></div><div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Balance</th><th>Status</th></tr></thead><tbody id="dash-invoices"></tbody></table></div></div>
+      <div class="panel"><div class="panel-heading"><h3>Recurring plans</h3></div><div id="dash-subs"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="clients">
+    <div class="toolbar">
+      <input id="client-search" placeholder="Search clients">
+      <div class="toolbar-actions">
+        <button class="btn secondary" id="refresh-clients">Refresh</button>
+        <button class="btn primary" id="add-client">+ Add Client</button>
+      </div>
+    </div>
+    <div class="panel"><div class="table-wrap"><table>
+      <thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th><th>Status</th><th></th></tr></thead>
+      <tbody id="client-body"></tbody>
+    </table></div></div>
+  </section>
+
+  <section class="view" id="quotes">
+    <div class="toolbar"><div></div><button class="btn primary go-new-quote">+ New Quote</button></div>
+    <div class="panel"><div class="table-wrap"><table>
+      <thead><tr><th>Quote</th><th>Client</th><th>Total</th><th>Deposit</th><th>Status</th><th>Date</th><th></th></tr></thead>
+      <tbody id="quote-body"></tbody>
+    </table></div></div>
+  </section>
+
+  <section class="view" id="invoices">
+    <div class="panel"><div class="table-wrap"><table>
+      <thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th>Due</th><th></th></tr></thead>
+      <tbody id="invoice-body"></tbody>
+    </table></div></div>
+  </section>
+
+  <section class="view" id="payments">
+    <div class="toolbar">
+      <div class="notice compact">Manual payment tracking is live. Stripe card/ACH processing is the next integration.</div>
+      <button class="btn primary" id="add-payment">+ Record Payment</button>
+    </div>
+    <div class="panel"><div class="table-wrap"><table>
+      <thead><tr><th>Date</th><th>Client</th><th>Invoice</th><th>Type</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody id="payment-body"></tbody>
+    </table></div></div>
+  </section>
+
+  <section class="view" id="subscriptions">
+    <div class="toolbar"><div></div><button class="btn primary" id="add-sub">+ Add Recurring Plan</button></div>
+    <div class="panel"><div id="subs-list"></div></div>
+  </section>
+
+  <section class="view" id="quote-builder">
+    <div class="quote-builder">
+      <div class="panel">
+        <div class="panel-heading"><div><div class="eyebrow">NEW PROJECT</div><h3>Create Quote</h3></div></div>
+        <div class="form-grid">
+          <div class="field"><label>Client *</label><select id="qb-client"><option value="">Select a client</option></select></div>
+          <div class="field"><label>Deposit %</label><input id="qb-deposit" type="number" min="0" max="100" value="50"></div>
+          <div class="field full"><label>Line items</label><div id="line-items"></div><button class="btn secondary" id="add-line" type="button">+ Add Line Item</button></div>
+          <div class="field full"><label>Terms / Notes</label><textarea id="qb-notes" rows="5">50% deposit due to begin work. Remaining balance due prior to launch. Scope changes may require a revised quote.</textarea></div>
+        </div>
+        <div class="builder-actions">
+          <button class="btn secondary" id="clear-quote" type="button">Clear</button>
+          <button class="btn secondary" id="save-quote" type="button">Save Draft</button>
+          <button class="btn primary" id="save-send-quote" type="button">Save as Sent</button>
+        </div>
+      </div>
+      <div class="quote-preview">
+        <img class="logo" src="assets/built-by-davila-logo.png" alt="">
+        <h2>Project Quote</h2>
+        <div class="preview-meta">Prepared for <strong id="pv-client">Select a client</strong></div>
+        <hr><div id="pv-lines"></div><hr>
+        <div class="totalbox">
+          <div><span>Total project</span><strong id="pv-total">$0</strong></div>
+          <div><span>Initial payment</span><strong id="pv-deposit">$0</strong></div>
+          <div class="grand"><span>Remaining balance</span><strong id="pv-balance">$0</strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<div class="login-note">Live PostgreSQL: Clients • Quotes • Invoices • Payments • Subscriptions</div>
+
+<!-- Client modal -->
+<div class="modal-backdrop" id="client-modal" aria-hidden="true">
+  <div class="client-modal">
+    <div class="modal-header"><div><div class="eyebrow">CLIENT RECORD</div><h2 id="client-modal-title">Add Client</h2><p>Create or update a live client record.</p></div><button class="modal-close" data-close="client-modal">×</button></div>
     <form id="client-form">
+      <input type="hidden" id="cf-id">
       <div class="form-grid two">
-        <label>
-          <span>Company Name *</span>
-          <input id="cf-company" required placeholder="KPLAY USA">
-        </label>
-        <label>
-          <span>Status</span>
-          <select id="cf-status">
-            <option>Lead</option>
-            <option selected>Active</option>
-            <option>Inactive</option>
-          </select>
-        </label>
+        <label><span>Company Name *</span><input id="cf-company" required placeholder="Company name"></label>
+        <label><span>Status</span><select id="cf-status"><option>Lead</option><option selected>Active</option><option>Inactive</option></select></label>
       </div>
-
       <div class="form-grid two">
-        <label>
-          <span>First Name</span>
-          <input id="cf-first" placeholder="First name">
-        </label>
-        <label>
-          <span>Last Name</span>
-          <input id="cf-last" placeholder="Last name">
-        </label>
+        <label><span>First Name</span><input id="cf-first" placeholder="First name"></label>
+        <label><span>Last Name</span><input id="cf-last" placeholder="Last name"></label>
       </div>
-
       <div class="form-grid two">
-        <label>
-          <span>Email</span>
-          <input id="cf-email" type="email" placeholder="name@company.com">
-        </label>
-        <label>
-          <span>Billing Email</span>
-          <input id="cf-billing-email" type="email" placeholder="billing@company.com">
-        </label>
+        <label><span>Email</span><input id="cf-email" type="email" placeholder="name@company.com"></label>
+        <label><span>Billing Email</span><input id="cf-billing-email" type="email" placeholder="billing@company.com"></label>
       </div>
-
       <div class="form-grid two">
-        <label>
-          <span>Phone</span>
-          <input id="cf-phone" placeholder="(956) 555-1234">
-        </label>
-        <label>
-          <span>Website</span>
-          <input id="cf-website" placeholder="https://company.com">
-        </label>
+        <label><span>Phone</span><input id="cf-phone" placeholder="Phone"></label>
+        <label><span>Website</span><input id="cf-website" placeholder="https://company.com"></label>
       </div>
-
-      <label>
-        <span>Notes</span>
-        <textarea id="cf-notes" rows="4" placeholder="Internal notes about this client..."></textarea>
-      </label>
-
-      <div class="modal-actions">
-        <button type="button" class="btn secondary" id="cancel-client-modal">Cancel</button>
-        <button type="submit" class="btn primary" id="save-client-btn">Save Client</button>
-      </div>
+      <label><span>Notes</span><textarea id="cf-notes" rows="4" placeholder="Internal notes..."></textarea></label>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="client-modal">Cancel</button><button class="btn primary" type="submit" id="save-client-btn">Save Client</button></div>
       <div class="form-message" id="client-form-message"></div>
     </form>
   </div>
 </div>
+
+<!-- Payment modal -->
+<div class="modal-backdrop" id="payment-modal" aria-hidden="true">
+  <div class="client-modal small-modal">
+    <div class="modal-header"><div><div class="eyebrow">PAYMENT</div><h2>Record Payment</h2><p>Record a payment received outside Stripe.</p></div><button class="modal-close" data-close="payment-modal">×</button></div>
+    <form id="payment-form">
+      <label><span>Invoice *</span><select id="pf-invoice" required></select></label>
+      <div class="form-grid two">
+        <label><span>Amount *</span><input id="pf-amount" type="number" step="0.01" min="0.01" required></label>
+        <label><span>Type</span><select id="pf-type"><option>Deposit</option><option>Balance</option><option selected>Manual</option><option>Subscription</option><option>Refund</option></select></label>
+      </div>
+      <div class="form-grid two">
+        <label><span>Method</span><select id="pf-method"><option>Card</option><option>ACH</option><option>Check</option><option>Cash</option><option>Zelle</option><option selected>Other</option></select></label>
+        <label><span>Reference</span><input id="pf-reference" placeholder="Check #, Zelle note, etc."></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="payment-modal">Cancel</button><button class="btn primary" type="submit">Record Payment</button></div>
+      <div class="form-message" id="payment-form-message"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Subscription modal -->
+<div class="modal-backdrop" id="sub-modal" aria-hidden="true">
+  <div class="client-modal small-modal">
+    <div class="modal-header"><div><div class="eyebrow">RECURRING PLAN</div><h2>Add Subscription</h2><p>Create a recurring service record.</p></div><button class="modal-close" data-close="sub-modal">×</button></div>
+    <form id="sub-form">
+      <label><span>Client *</span><select id="sf-client" required></select></label>
+      <div class="form-grid two">
+        <label><span>Plan Name *</span><input id="sf-plan" required placeholder="Website Care Plan"></label>
+        <label><span>Monthly Amount *</span><input id="sf-amount" type="number" step="0.01" min="0" required></label>
+      </div>
+      <div class="form-grid two">
+        <label><span>Status</span><select id="sf-status"><option selected>Active</option><option>Paused</option><option>Canceled</option></select></label>
+        <label><span>Next Billing Date</span><input id="sf-next" type="date"></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="sub-modal">Cancel</button><button class="btn primary" type="submit">Save Plan</button></div>
+      <div class="form-message" id="sub-form-message"></div>
+    </form>
+  </div>
+</div>
+
 <script src="studio.js"></script>
-<script>
-function syncDupes(){
-  const ib=document.querySelector('#invoice-body'), ib2=document.querySelector('#invoice-body-2'); if(ib&&ib2) ib2.innerHTML=ib.innerHTML;
-  const s1=document.querySelector('#subs-list'), s2=document.querySelector('#subs-list-2'); if(s1&&s2) s2.innerHTML=s1.innerHTML;
-}
-setInterval(syncDupes,300);syncDupes();
-</script>
-</body></html>
+</body>
+</html>
