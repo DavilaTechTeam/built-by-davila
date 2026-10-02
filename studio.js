@@ -5,7 +5,7 @@ const dateFmt=v=>v?new Date(v).toLocaleDateString('en-US'):'—';
 const esc=(v='')=>String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 let token=sessionStorage.getItem('bbd_token')||'';
 
-const store={clients:[],quotes:[],invoices:[],payments:[],subscriptions:[]};
+const store={clients:[],quotes:[],invoices:[],payments:[],subscriptions:[],dashboard:null};
 let lineItems=[{description:'Website Design & Development',quantity:1,unit_price:3995}];
 
 function setStatus(text,kind='ok'){const el=$('#api-status');if(!el)return;el.textContent=text;el.className='db-status '+kind;}
@@ -102,15 +102,16 @@ $$('.go-new-quote').forEach(b=>b.addEventListener('click',()=>nav('quote-builder
 async function loadAll(){
   setStatus('Waking server…','loading');
   try{
-    const [clients,quotes,invoices,payments,subscriptions]=await Promise.all([
-      api('/api/clients'),api('/api/quotes'),api('/api/invoices'),api('/api/payments'),api('/api/subscriptions')
+    const [clients,quotes,invoices,payments,subscriptions,dashboard]=await Promise.all([
+      api('/api/clients'),api('/api/quotes'),api('/api/invoices'),api('/api/payments'),api('/api/subscriptions'),api('/api/dashboard')
     ]);
-    Object.assign(store,{clients,quotes,invoices,payments,subscriptions});
+    Object.assign(store,{clients,quotes,invoices,payments,subscriptions,dashboard});
     renderAll();
   }catch(err){console.error(err);setStatus('Could not load','error')}
 }
 async function reload(resource){
   store[resource]=await api('/api/'+resource);
+  try{store.dashboard=await api('/api/dashboard')}catch{}
   renderAll();
 }
 
@@ -130,16 +131,25 @@ function renderClients(list=store.clients){
 function renderQuotes(){
   $('#quote-body').innerHTML=store.quotes.length?store.quotes.map(q=>`<tr>
     <td><strong>${esc(q.quote_number)}</strong></td><td>${esc(q.company_name)}</td><td>${money(q.total)}</td><td>${Number(q.deposit_percent||0)}%</td><td>${badge(q.status)}</td><td>${dateFmt(q.created_at)}</td>
-    <td class="actions-cell">${q.status!=='Accepted'?`<button class="mini-btn quote-status" data-id="${q.id}" data-status="Sent">Mark Sent</button>`:''}<button class="mini-btn primary-mini convert-quote" data-id="${q.id}">Create Invoice</button></td>
+    <td class="actions-cell">
+      <button class="mini-btn view-quote" data-id="${q.id}">View</button>
+      ${q.status!=='Accepted'?`<button class="mini-btn quote-status" data-id="${q.id}" data-status="Sent">Mark Sent</button>`:''}
+      <button class="mini-btn primary-mini convert-quote" data-id="${q.id}">Create Invoice</button>
+    </td>
   </tr>`).join(''):`<tr><td colspan="7">No quotes yet.</td></tr>`;
-  $$('.quote-status').forEach(b=>b.onclick=async()=>{try{await api('/api/quotes/'+b.dataset.id,{method:'PATCH',body:JSON.stringify({status:b.dataset.status})});await reload('quotes')}catch(e){toast(e.message,'error')}});
+  $$('.view-quote').forEach(b=>b.onclick=()=>openQuoteDetail(b.dataset.id));
+  $$('.quote-status').forEach(b=>b.onclick=async()=>{try{await api('/api/quotes/'+b.dataset.id,{method:'PATCH',body:JSON.stringify({status:b.dataset.status})});await reload('quotes');toast('Quote updated.')}catch(e){toast(e.message,'error')}});
   $$('.convert-quote').forEach(b=>b.onclick=()=>convertQuote(b.dataset.id));
 }
 function renderInvoices(){
   $('#invoice-body').innerHTML=store.invoices.length?store.invoices.map(i=>`<tr>
     <td><strong>${esc(i.invoice_number)}</strong></td><td>${esc(i.company_name)}</td><td>${money(i.total)}</td><td>${money(i.amount_paid)}</td><td>${money(i.balance_due)}</td><td>${badge(i.status)}</td><td>${dateFmt(i.due_date)}</td>
-    <td class="actions-cell">${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="mini-btn primary-mini pay-invoice" data-id="${i.id}">Record Payment</button>`:''}</td>
+    <td class="actions-cell">
+      <button class="mini-btn view-invoice" data-id="${i.id}">View</button>
+      ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="mini-btn primary-mini pay-invoice" data-id="${i.id}">Record Payment</button>`:''}
+    </td>
   </tr>`).join(''):`<tr><td colspan="8">No invoices yet.</td></tr>`;
+  $$('.view-invoice').forEach(b=>b.onclick=()=>openInvoiceDetail(b.dataset.id));
   $$('.pay-invoice').forEach(b=>b.onclick=()=>openPayment(b.dataset.id));
 }
 function renderPayments(){
@@ -156,15 +166,15 @@ function renderSubs(){
   $$('.sub-activate').forEach(b=>b.onclick=()=>updateSub(b.dataset.id,'Active'));
 }
 function renderDashboard(){
-  const received=store.payments.filter(p=>p.status==='Succeeded'&&p.type!=='Refund').reduce((s,p)=>s+Number(p.amount),0)
-    -store.payments.filter(p=>p.status==='Succeeded'&&p.type==='Refund').reduce((s,p)=>s+Number(p.amount),0);
-  const mrr=store.subscriptions.filter(s=>s.status==='Active').reduce((s,p)=>s+Number(p.amount),0);
-  $('#metric-revenue').textContent=money(received);
-  $('#metric-mrr').textContent=money(mrr);
-  $('#metric-open').textContent=store.invoices.filter(i=>Number(i.balance_due)>0&&i.status!=='Void').length;
-  $('#metric-quotes').textContent=store.quotes.length;
-  $('#dash-invoices').innerHTML=store.invoices.slice(0,5).map(i=>`<tr><td>${esc(i.invoice_number)}</td><td>${esc(i.company_name)}</td><td>${money(i.total)}</td><td>${money(i.balance_due)}</td><td>${badge(i.status)}</td></tr>`).join('')||`<tr><td colspan="5">No invoices yet.</td></tr>`;
-  $('#dash-subs').innerHTML=store.subscriptions.filter(s=>s.status==='Active').slice(0,4).map(s=>`<div class="subscription-card"><div><strong>${esc(s.company_name)}</strong><div class="sub-name">${esc(s.plan_name)}</div></div><div class="sub-right"><strong>${money(s.amount)}/mo</strong>${badge(s.status)}</div></div>`).join('')||`<div class="empty-state">No active recurring plans.</div>`;
+  const d=store.dashboard||{};
+  $('#metric-revenue').textContent=money(d.payments_received||0);
+  $('#metric-mrr').textContent=money(d.monthly_recurring_revenue||0);
+  $('#metric-open').textContent=Number(d.open_invoices||0);
+  $('#metric-quotes').textContent=Number(d.total_quotes||0);
+  const recent=d.recent_invoices||store.invoices.slice(0,5);
+  $('#dash-invoices').innerHTML=recent.map(i=>`<tr><td>${esc(i.invoice_number)}</td><td>${esc(i.company_name)}</td><td>${money(i.total)}</td><td>${money(i.balance_due)}</td><td>${badge(i.status)}</td></tr>`).join('')||`<tr><td colspan="5">No invoices yet.</td></tr>`;
+  const active=d.active_subscriptions||store.subscriptions.filter(s=>s.status==='Active').slice(0,5);
+  $('#dash-subs').innerHTML=active.map(s=>`<div class="subscription-card"><div><strong>${esc(s.company_name)}</strong><div class="sub-name">${esc(s.plan_name)}</div></div><div class="sub-right"><strong>${money(s.amount)}/mo</strong>${badge(s.status)}</div></div>`).join('')||`<div class="empty-state">No active recurring plans.</div>`;
 }
 function renderAll(){renderClients();renderQuotes();renderInvoices();renderPayments();renderSubs();renderDashboard();updatePreview()}
 
@@ -178,6 +188,14 @@ function openClient(id=''){
     $('#cf-first').value=c.contact_first_name||'';$('#cf-last').value=c.contact_last_name||'';$('#cf-email').value=c.email||'';
     $('#cf-billing-email').value=c.billing_email||'';$('#cf-phone').value=c.phone||'';$('#cf-website').value=c.website||'';$('#cf-notes').value=c.notes||'';
   }
+  let deleteBtn=$('#client-delete-btn');
+  if(deleteBtn) deleteBtn.remove();
+  if(id){
+    const btn=document.createElement('button');
+    btn.type='button';btn.id='client-delete-btn';btn.className='btn danger';btn.textContent='Delete Client';
+    btn.onclick=()=>deleteClient(id);
+    $('#client-form .modal-actions').prepend(btn);
+  }
   showModal('client-modal');setTimeout(()=>$('#cf-company').focus(),60);
 }
 $('#add-client').onclick=()=>openClient();
@@ -189,6 +207,24 @@ $('#client-form').onsubmit=async e=>{
   try{btn.disabled=true;btn.textContent='Saving…';msg.textContent='Saving to live database…';await api(id?'/api/clients/'+id:'/api/clients',{method:id?'PATCH':'POST',body:JSON.stringify(payload)});await reload('clients');hideModal('client-modal')}
   catch(err){msg.textContent=err.message;msg.className='form-message error'}finally{btn.disabled=false;btn.textContent='Save Client'}
 };
+
+
+async function deleteClient(id){
+  const c=store.clients.find(x=>x.id===id);
+  if(!c)return;
+  const ok=await studioConfirm({
+    title:'Delete Client',
+    message:`Delete ${c.company_name}? Clients with quotes, invoices, payments, or subscriptions cannot be deleted and should be marked Inactive instead.`,
+    confirmText:'Delete Client'
+  });
+  if(!ok)return;
+  try{
+    await api('/api/clients/'+id,{method:'DELETE'});
+    hideModal('client-modal');
+    await reload('clients');
+    toast(`${c.company_name} deleted.`);
+  }catch(e){toast(e.message,'error')}
+}
 
 /* Quote Builder */
 function renderLines(){
@@ -257,6 +293,79 @@ async function convertQuote(id){
     console.error(e);
     toast(e.message,'error');
   }
+}
+
+
+async function openQuoteDetail(id){
+  try{
+    const q=await api('/api/quotes/'+id);
+    $('#qd-title').textContent=q.quote_number;
+    $('#qd-subtitle').textContent=`${q.company_name} • ${dateFmt(q.created_at)} • ${q.status}`;
+    $('#qd-content').innerHTML=`
+      <div class="detail-summary">
+        <div><span>Total</span><strong>${money(q.total)}</strong></div>
+        <div><span>Deposit</span><strong>${Number(q.deposit_percent||0)}%</strong></div>
+        <div><span>Status</span>${badge(q.status)}</div>
+      </div>
+      <div class="detail-section"><h4>Line Items</h4>
+        ${(q.items||[]).map(it=>`<div class="detail-line"><div><strong>${esc(it.description)}</strong><small>${Number(it.quantity)} × ${money(it.unit_price)}</small></div><strong>${money(it.amount)}</strong></div>`).join('')}
+      </div>
+      <div class="detail-section"><h4>Notes / Terms</h4><p>${esc(q.notes||'No notes.')}</p></div>`;
+    $('#qd-actions').innerHTML=`
+      ${['Draft','Declined','Expired'].includes(q.status)?`<button class="btn danger" id="qd-delete">Delete Quote</button>`:''}
+      ${q.status!=='Accepted'?`<button class="btn secondary" id="qd-sent">Mark Sent</button><button class="btn primary" id="qd-convert">Create Invoice</button>`:''}`;
+    if($('#qd-delete')) $('#qd-delete').onclick=()=>deleteQuote(q.id,q.quote_number);
+    if($('#qd-sent')) $('#qd-sent').onclick=async()=>{try{await api('/api/quotes/'+q.id,{method:'PATCH',body:JSON.stringify({status:'Sent'})});hideModal('quote-detail-modal');await reload('quotes');toast('Quote marked Sent.')}catch(e){toast(e.message,'error')}};
+    if($('#qd-convert')) $('#qd-convert').onclick=()=>{hideModal('quote-detail-modal');convertQuote(q.id)};
+    showModal('quote-detail-modal');
+  }catch(e){toast(e.message,'error')}
+}
+async function deleteQuote(id,number){
+  const ok=await studioConfirm({title:'Delete Quote',message:`Delete ${number}? This is only allowed for unused draft/declined/expired quotes.`,confirmText:'Delete Quote'});
+  if(!ok)return;
+  try{
+    await api('/api/quotes/'+id,{method:'DELETE'});
+    hideModal('quote-detail-modal');
+    await reload('quotes');
+    toast(`${number} deleted.`);
+  }catch(e){toast(e.message,'error')}
+}
+
+async function openInvoiceDetail(id){
+  try{
+    const i=await api('/api/invoices/'+id);
+    $('#id-title').textContent=i.invoice_number;
+    $('#id-subtitle').textContent=`${i.company_name} • ${i.status} • Due ${dateFmt(i.due_date)}`;
+    $('#id-content').innerHTML=`
+      <div class="detail-summary four">
+        <div><span>Total</span><strong>${money(i.total)}</strong></div>
+        <div><span>Paid</span><strong>${money(i.amount_paid)}</strong></div>
+        <div><span>Balance</span><strong>${money(i.balance_due)}</strong></div>
+        <div><span>Status</span>${badge(i.status)}</div>
+      </div>
+      <div class="detail-section"><h4>Line Items</h4>
+        ${(i.items||[]).map(it=>`<div class="detail-line"><div><strong>${esc(it.description)}</strong><small>${Number(it.quantity)} × ${money(it.unit_price)}</small></div><strong>${money(it.amount)}</strong></div>`).join('')}
+      </div>
+      <div class="detail-section"><h4>Payment History</h4>
+        ${(i.payments||[]).length?(i.payments||[]).map(p=>`<div class="detail-line"><div><strong>${esc(p.type)} • ${esc(p.method)}</strong><small>${dateFmt(p.paid_at||p.created_at)}${p.reference?` • ${esc(p.reference)}`:''}</small></div><strong>${money(p.amount)}</strong></div>`).join(''):'<p>No payments recorded.</p>'}
+      </div>`;
+    $('#id-actions').innerHTML=`
+      ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn primary" id="id-payment">Record Payment</button>`:''}
+      ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
+    if($('#id-payment')) $('#id-payment').onclick=()=>{hideModal('invoice-detail-modal');openPayment(i.id)};
+    if($('#id-void')) $('#id-void').onclick=()=>voidInvoice(i.id,i.invoice_number);
+    showModal('invoice-detail-modal');
+  }catch(e){toast(e.message,'error')}
+}
+async function voidInvoice(id,number){
+  const ok=await studioConfirm({title:'Void Invoice',message:`Void ${number}? This keeps the accounting record but removes it from open balances.`,confirmText:'Void Invoice'});
+  if(!ok)return;
+  try{
+    await api('/api/invoices/'+id+'/void',{method:'POST'});
+    hideModal('invoice-detail-modal');
+    await reload('invoices');
+    toast(`${number} voided.`);
+  }catch(e){toast(e.message,'error')}
 }
 
 /* Payments */
