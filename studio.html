@@ -29,7 +29,24 @@
 </div>
 </section>
 
-<section class="view" id="clients"><div class="toolbar"><input placeholder="Search clients"><button class="btn primary" id="add-client">+ Add Client</button></div><div class="panel"><table><thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th></tr></thead><tbody id="client-body"></tbody></table></div></section>
+<section class="view" id="clients">
+<div class="toolbar">
+  <div class="client-tools">
+    <input id="client-search" placeholder="Search clients">
+    <span id="db-status" class="db-status loading">Connecting…</span>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn secondary" id="refresh-clients">Refresh Clients</button>
+    <button class="btn primary" id="add-client">+ Add Client</button>
+  </div>
+</div>
+<div class="panel">
+<table>
+<thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th><th>Status</th></tr></thead>
+<tbody id="client-body"><tr><td colspan="5">Loading clients…</td></tr></tbody>
+</table>
+</div>
+</section>
 <section class="view" id="quotes"><div class="panel"><table><thead><tr><th>Quote</th><th>Client</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody id="quote-body"></tbody></table></div></section>
 <section class="view" id="invoices"><div class="panel"><table><thead><tr><th>Invoice</th><th>Client</th><th>Total</th><th>Status</th><th>Due</th></tr></thead><tbody id="invoice-body-2"></tbody></table></div></section>
 <section class="view" id="payments"><div class="notice">Payment processing is mocked in this prototype. Production should use Stripe Checkout/Payment Links or Payment Intents so card data never touches your server.</div><div class="panel" style="margin-top:14px"><table><thead><tr><th>Date</th><th>Client</th><th>Type</th><th>Amount</th></tr></thead><tbody id="payment-body"></tbody></table></div></section>
@@ -56,7 +73,7 @@
 </div>
 </section>
 </main></div>
-<div class="login-note">Prototype only • local browser storage • no real payment processing yet</div>
+<div class="login-note">Clients: live PostgreSQL database • Quotes/Invoices/Payments/Subscriptions: browser prototype • Stripe payments not connected yet</div>
 <script src="studio.js"></script>
 <script>
 function syncDupes(){

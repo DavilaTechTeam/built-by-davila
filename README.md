@@ -1,13 +1,25 @@
-# Built by Davila V5 — Demo Ready
+# Built by Davila V6 — Live Clients
 
-Goal: presentation-ready for KPLAY USA without over-polishing.
+This package is the complete public Built by Davila site plus the Studio.
 
-Changes:
-- Pricing hero tightened
-- Pricing cards moved higher into the first screen
-- Existing Studio / Back Office retained
-- Existing pricing, logo, and branding retained
+## What's now real
+The Studio Clients section is connected to the live backend:
+https://built-by-davila-backend.onrender.com
 
-Important:
-The current Studio is a prototype. Its demo records are stored in the browser's localStorage.
-For production, move data to a secure server database and use Stripe for payments.
+Client records are stored in the Render PostgreSQL database and are shared across devices/browsers.
+
+## Still prototype/local for now
+- Quotes
+- Invoices
+- Payments
+- Subscriptions
+
+Those still use browser localStorage until their database tables are built.
+
+## Upload
+Upload the CONTENTS of this folder to the root of:
+DavilaTechTeam/built-by-davila
+
+Replace the older files.
+
+Do not upload database passwords, .env files, or Render connection strings to GitHub.
