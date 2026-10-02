@@ -1,26 +1,11 @@
-# Built by Davila V3 — FIXED
+# Built by Davila V4
 
-This build fixes the oversized header logo and keeps the Back Office in the package.
+This update includes:
+- tighter pricing hero
+- custom projects $7,500+ above the fold
+- package subtitles
+- scope disclaimer
+- CTA on each pricing tier
+- restyled Studio back office matching the public website
 
-## Upload ALL of these to the root of the GitHub repository
-- index.html
-- pricing.html
-- styles.css
-- script.js
-- studio.html
-- studio.css
-- studio.js
-- assets/built-by-davila-mark.png
-- assets/built-by-davila-logo.png
-
-## Live URLs after GitHub Pages finishes deploying
-Public site:
-https://davilatechteam.github.io/built-by-davila/
-
-Back Office prototype:
-https://davilatechteam.github.io/built-by-davila/studio.html
-
-IMPORTANT: type/paste the Back Office URL directly into Chrome's ADDRESS BAR. Do not put a dash in front of it and do not paste it into Google Search.
-
-## Note
-Studio is still a prototype and does not process real payments yet.
+Upload everything in this package to the repository root, replacing older files.
