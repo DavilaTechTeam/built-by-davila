@@ -82,4 +82,79 @@ function syncDupes(){
 }
 setInterval(syncDupes,300);syncDupes();
 </script>
+
+<div class="modal-backdrop" id="client-modal-backdrop" aria-hidden="true">
+  <div class="client-modal" role="dialog" aria-modal="true" aria-labelledby="client-modal-title">
+    <div class="modal-header">
+      <div>
+        <div class="eyebrow">CLIENT RECORD</div>
+        <h2 id="client-modal-title">Add Client</h2>
+        <p>Create a live client record in the Built by Davila database.</p>
+      </div>
+      <button class="modal-close" id="close-client-modal" aria-label="Close">×</button>
+    </div>
+
+    <form id="client-form">
+      <div class="form-grid two">
+        <label>
+          <span>Company Name *</span>
+          <input id="cf-company" required placeholder="KPLAY USA">
+        </label>
+        <label>
+          <span>Status</span>
+          <select id="cf-status">
+            <option>Lead</option>
+            <option selected>Active</option>
+            <option>Inactive</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-grid two">
+        <label>
+          <span>First Name</span>
+          <input id="cf-first" placeholder="First name">
+        </label>
+        <label>
+          <span>Last Name</span>
+          <input id="cf-last" placeholder="Last name">
+        </label>
+      </div>
+
+      <div class="form-grid two">
+        <label>
+          <span>Email</span>
+          <input id="cf-email" type="email" placeholder="name@company.com">
+        </label>
+        <label>
+          <span>Billing Email</span>
+          <input id="cf-billing-email" type="email" placeholder="billing@company.com">
+        </label>
+      </div>
+
+      <div class="form-grid two">
+        <label>
+          <span>Phone</span>
+          <input id="cf-phone" placeholder="(956) 555-1234">
+        </label>
+        <label>
+          <span>Website</span>
+          <input id="cf-website" placeholder="https://company.com">
+        </label>
+      </div>
+
+      <label>
+        <span>Notes</span>
+        <textarea id="cf-notes" rows="4" placeholder="Internal notes about this client..."></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="cancel-client-modal">Cancel</button>
+        <button type="submit" class="btn primary" id="save-client-btn">Save Client</button>
+      </div>
+      <div class="form-message" id="client-form-message"></div>
+    </form>
+  </div>
+</div>
+
 </body></html>

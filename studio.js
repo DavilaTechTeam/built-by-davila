@@ -102,34 +102,77 @@ function render(){
 render();
 loadClients();
 
-$('#add-client').onclick=async()=>{
-  const company_name=prompt('Company name?');
-  if(!company_name?.trim()) return;
 
-  const contact_first_name=prompt('Contact first name?')||'';
-  const contact_last_name=prompt('Contact last name?')||'';
-  const email=prompt('Email?')||'';
-  const phone=prompt('Phone?')||'';
+const clientModalBackdrop=$('#client-modal-backdrop');
+const openClientModal=()=>{
+  $('#client-form').reset();
+  $('#cf-status').value='Active';
+  $('#client-form-message').textContent='';
+  clientModalBackdrop.classList.add('show');
+  clientModalBackdrop.setAttribute('aria-hidden','false');
+  setTimeout(()=>$('#cf-company')?.focus(),50);
+};
+const closeClientModal=()=>{
+  clientModalBackdrop.classList.remove('show');
+  clientModalBackdrop.setAttribute('aria-hidden','true');
+};
+
+$('#add-client').onclick=openClientModal;
+$('#close-client-modal').onclick=closeClientModal;
+$('#cancel-client-modal').onclick=closeClientModal;
+clientModalBackdrop.addEventListener('click',e=>{
+  if(e.target===clientModalBackdrop) closeClientModal();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && clientModalBackdrop.classList.contains('show')) closeClientModal();
+});
+
+$('#client-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const msg=$('#client-form-message');
+  const saveBtn=$('#save-client-btn');
+  const company_name=$('#cf-company').value.trim();
+  if(!company_name){
+    msg.textContent='Company name is required.';
+    msg.className='form-message error';
+    return;
+  }
+
+  const payload={
+    company_name,
+    contact_first_name:$('#cf-first').value.trim()||null,
+    contact_last_name:$('#cf-last').value.trim()||null,
+    email:$('#cf-email').value.trim()||null,
+    billing_email:$('#cf-billing-email').value.trim()||null,
+    phone:$('#cf-phone').value.trim()||null,
+    website:$('#cf-website').value.trim()||null,
+    status:$('#cf-status').value||'Active',
+    notes:$('#cf-notes').value.trim()||null
+  };
 
   try{
-    const client=await createClient({
-      company_name:company_name.trim(),
-      contact_first_name:contact_first_name.trim()||null,
-      contact_last_name:contact_last_name.trim()||null,
-      email:email.trim()||null,
-      phone:phone.trim()||null,
-      status:'Active'
-    });
+    saveBtn.disabled=true;
+    saveBtn.textContent='Saving…';
+    msg.textContent='Saving client to live database…';
+    msg.className='form-message';
+    const client=await createClient(payload);
     store.clients.unshift(client);
     setDbStatus('Live database','ok');
     renderClients();
-    alert(`${client.company_name} was saved to the live database.`);
+    msg.textContent='Client saved successfully.';
+    msg.className='form-message success';
+    setTimeout(closeClientModal,600);
   }catch(err){
     console.error(err);
     setDbStatus('Save failed','error');
-    alert('Could not save the client. If the Render service was asleep, wait a few seconds and try again.');
+    msg.textContent='Could not save client. Please try again.';
+    msg.className='form-message error';
+  }finally{
+    saveBtn.disabled=false;
+    saveBtn.textContent='Save Client';
   }
-};
+});
+
 
 $('#refresh-clients')?.addEventListener('click',loadClients);
 

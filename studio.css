@@ -85,3 +85,121 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08
   .client-tools{align-items:stretch;flex-direction:column}
   .client-tools input{max-width:none}
 }
+
+
+/* V7 — branded client modal */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(15,16,18,.48);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:24px;
+}
+.modal-backdrop.show{display:flex}
+.client-modal{
+  width:min(760px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#fff;
+  border:1px solid #e7e3dd;
+  border-radius:24px;
+  box-shadow:0 28px 80px rgba(0,0,0,.22);
+  padding:26px;
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:24px;
+  margin-bottom:20px;
+}
+.modal-header h2{
+  margin:2px 0 6px;
+  font-size:30px;
+  line-height:1;
+}
+.modal-header p{
+  margin:0;
+  color:#777;
+  font-size:13px;
+}
+.eyebrow{
+  color:#ff5b3a;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+.modal-close{
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  border:1px solid #dedbd6;
+  background:#fff;
+  font-size:24px;
+  line-height:1;
+  cursor:pointer;
+}
+.form-grid{
+  display:grid;
+  gap:14px;
+  margin-bottom:14px;
+}
+.form-grid.two{grid-template-columns:1fr 1fr}
+#client-form label{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+#client-form label>span{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+  color:#4f4f4f;
+}
+#client-form input,
+#client-form select,
+#client-form textarea{
+  width:100%;
+  border:1px solid #ddd8d1;
+  background:#fbfaf8;
+  border-radius:12px;
+  padding:12px 13px;
+  font:inherit;
+  outline:none;
+  transition:.18s ease;
+  box-sizing:border-box;
+}
+#client-form input:focus,
+#client-form select:focus,
+#client-form textarea:focus{
+  border-color:#ff5b3a;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(255,91,58,.10);
+}
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:20px;
+}
+.form-message{
+  min-height:18px;
+  margin-top:10px;
+  text-align:right;
+  font-size:12px;
+  color:#777;
+}
+.form-message.success{color:#24794b}
+.form-message.error{color:#b43c29}
+#save-client-btn:disabled{opacity:.65;cursor:wait}
+
+@media(max-width:680px){
+  .client-modal{padding:20px;border-radius:20px}
+  .form-grid.two{grid-template-columns:1fr}
+  .modal-actions{flex-direction:column-reverse}
+  .modal-actions .btn{width:100%}
+}
