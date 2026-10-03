@@ -84,6 +84,12 @@
     }
   }
 
-  const observer=new MutationObserver(()=>{if(modal.classList.contains('show'))setTimeout(renderHub,0);});
+  const queueRender=()=>setTimeout(renderHub,80);
+  const observer=new MutationObserver(()=>{if(modal.classList.contains('show'))queueRender();});
   observer.observe(modal,{attributes:true,attributeFilter:['class']});
+  document.addEventListener('click',e=>{
+    const edit=e.target.closest?.('.edit-client');
+    if(edit)queueRender();
+  });
+  if(modal.classList.contains('show'))queueRender();
 })();
