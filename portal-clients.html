@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Client Portals | Built by Davila</title>
+<link rel="stylesheet" href="studio.css">
+<style>
+body{background:#f5f5f2}.portal-shell{max-width:1200px;margin:0 auto;padding:34px}.portal-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:24px}.portal-top h1{margin:4px 0 6px;font-size:34px}.portal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}.portal-card{background:#fff;border:1px solid #e2e2df;border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.04)}.portal-card h3{margin:0 0 4px}.portal-meta{font-size:13px;color:#667085;line-height:1.5}.portal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.status-pill{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;margin-top:10px}.status-live{background:#dcfce7;color:#166534}.status-setup{background:#f3f4f6;color:#475467}.empty-state{background:#fff;border:1px solid #e2e2df;border-radius:16px;padding:28px;text-align:center;color:#667085}.searchbar{width:100%;max-width:420px;border:1px solid #d9dce1;border-radius:10px;padding:11px 12px;font:inherit}.small{font-size:12px;color:#667085}.notice{margin-top:18px}
+</style>
+</head>
+<body>
+<main class="portal-shell">
+  <div class="portal-top">
+    <div><div class="eyebrow">BUILT BY DAVILA • CLIENT PORTALS</div><h1>Client Portals</h1><div class="studio-welcome">Choose a client to open or configure their website editor.</div></div>
+    <a class="btn secondary" href="studio.html">Back to Studio</a>
+  </div>
+  <div class="toolbar" style="padding:0;margin-bottom:18px;background:transparent">
+    <input id="portal-search" class="searchbar" placeholder="Search clients">
+    <button class="btn secondary" id="refresh-btn">Refresh</button>
+  </div>
+  <div id="portal-list" class="portal-grid"><div class="empty-state">Loading clients…</div></div>
+  <div class="notice compact">KPLAY USA is the first configured portal. Other clients can be added to this same system as you build their websites.</div>
+</main>
+<script>
+const API_BASE='https://built-by-davila-backend.onrender.com';
+const token=sessionStorage.getItem('bbd_token')||'';
+const list=document.getElementById('portal-list'),search=document.getElementById('portal-search');
+let clients=[];
+const esc=(v='')=>String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+function isConfigured(c){return /kplay/i.test(c.company_name||'')}
+function portalUrl(c){return isConfigured(c)?'client-portal.html':null}
+function render(){const q=search.value.toLowerCase().trim();const rows=clients.filter(c=>!q||[c.company_name,c.email,c.website,c.status].filter(Boolean).join(' ').toLowerCase().includes(q));if(!rows.length){list.innerHTML='<div class="empty-state">No matching clients.</div>';return;}list.innerHTML=rows.map(c=>{const configured=isConfigured(c),url=portalUrl(c);return `<article class="portal-card"><div class="eyebrow">${configured?'PORTAL ACTIVE':'PORTAL NOT SET UP'}</div><h3>${esc(c.company_name)}</h3><div class="portal-meta">${esc(c.website||'No website saved')}<br>${esc(c.email||'No email saved')}</div><span class="status-pill ${configured?'status-live':'status-setup'}">${configured?'Ready to Edit':'Needs Setup'}</span><div class="portal-actions">${configured?`<a class="btn primary" href="${url}">Open Visual Editor</a>`:`<button class="btn secondary" disabled>Set Up Portal</button>`}${c.website?`<a class="btn secondary" href="${esc(c.website)}" target="_blank" rel="noopener">Open Website</a>`:''}</div></article>`}).join('')}
+async function load(){list.innerHTML='<div class="empty-state">Loading clients…</div>';try{const headers={};if(token)headers.Authorization=`Bearer ${token}`;const r=await fetch(API_BASE+'/api/clients',{headers});if(r.status===401){list.innerHTML='<div class="empty-state">Your Studio session has expired. <a href="studio.html">Return to Studio and sign in again.</a></div>';return;}if(!r.ok)throw new Error('Unable to load clients');clients=await r.json();render()}catch(e){list.innerHTML='<div class="empty-state">Could not load clients from the backend.</div>'}}
+search.addEventListener('input',render);document.getElementById('refresh-btn').onclick=load;load();
+</script>
+</body>
+</html>
