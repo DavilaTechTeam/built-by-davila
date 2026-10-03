@@ -58,7 +58,7 @@ function render(){
       <td>${c.website?`<a href="${esc(c.website)}" target="_blank" rel="noopener">${esc(c.website)}</a>`:'<span class="muted">No website saved</span>'}</td>
       <td><span class="status-pill ${configured?'status-live':'status-setup'}">${configured?'Ready to Edit':'Needs Setup'}</span></td>
       <td>${esc(c.status||'—')}</td>
-      <td><div class="actions">${configured?'<a class="btn primary" href="client-portal.html">Open Editor</a>':'<button class="btn secondary" disabled>Set Up Portal</button>'}${c.website?`<a class="btn secondary" href="${esc(c.website)}" target="_blank" rel="noopener">Open Site</a>`:''}</div></td>
+      <td><div class="actions">${configured?'<a class="btn primary" href="kplay-editor.html">Open Editor</a>':'<button class="btn secondary" disabled>Set Up Portal</button>'}${c.website?`<a class="btn secondary" href="${esc(c.website)}" target="_blank" rel="noopener">Open Site</a>`:''}</div></td>
     </tr>`;
   }).join('');
 }
