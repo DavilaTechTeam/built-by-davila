@@ -29,6 +29,7 @@
   <small>STUDIO BACK OFFICE</small>
   <nav>
     <button class="active" data-view="dashboard">Dashboard</button>
+    <button type="button" onclick="window.location.href='prospects.html'">Prospects</button>
     <button data-view="clients">Clients</button>
     <button type="button" onclick="window.location.href='client-portal.html'">Client Portal</button>
     <button data-view="portal-reviews" id="portal-reviews-nav">Portal Reviews</button>
@@ -154,7 +155,7 @@
 </main>
 </div>
 
-<div class="login-note">Live PostgreSQL: Clients • Quotes • Invoices • Payments • Subscriptions • Portal Reviews</div>
+<div class="login-note">Live PostgreSQL: Prospects • Clients • Quotes • Invoices • Payments • Subscriptions • Portal Reviews</div>
 
 <div class="modal-backdrop" id="client-modal" aria-hidden="true"><div class="client-modal"><div class="modal-header"><div><div class="eyebrow">CLIENT RECORD</div><h2 id="client-modal-title">Add Client</h2><p>Create or update a live client record.</p></div><button class="modal-close" data-close="client-modal">×</button></div><form id="client-form"><input type="hidden" id="cf-id"><div class="form-grid two"><label><span>Company Name *</span><input id="cf-company" required placeholder="Company name"></label><label><span>Status</span><select id="cf-status"><option>Lead</option><option selected>Active</option><option>Inactive</option></select></label></div><div class="form-grid two"><label><span>First Name</span><input id="cf-first" placeholder="First name"></label><label><span>Last Name</span><input id="cf-last" placeholder="Last name"></label></div><div class="form-grid two"><label><span>Email</span><input id="cf-email" type="email" placeholder="name@company.com"></label><label><span>Billing Email</span><input id="cf-billing-email" type="email" placeholder="billing@company.com"></label></div><div class="form-grid two"><label><span>Phone</span><input id="cf-phone" placeholder="Phone"></label><label><span>Website</span><input id="cf-website" placeholder="https://company.com"></label></div><label><span>Notes</span><textarea id="cf-notes" rows="4" placeholder="Internal notes..."></textarea></label><div class="modal-actions"><button type="button" class="btn secondary" data-close="client-modal">Cancel</button><button class="btn primary" type="submit" id="save-client-btn">Save Client</button></div><div class="form-message" id="client-form-message"></div></form></div></div>
 
