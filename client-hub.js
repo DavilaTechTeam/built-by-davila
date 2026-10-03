@@ -65,6 +65,23 @@
       if(typeof renderClients==='function')renderClients();
     }catch(e){console.warn('Could not auto-activate converted client:',e.message)}
   }
+  async function syncConvertedClientStatuses(){
+    let tries=0;
+    const run=async()=>{
+      tries++;
+      if(!(store?.clients||[]).length){if(tries<40)setTimeout(run,150);return;}
+      try{
+        const prospects=await fetchJson('/api/prospects');
+        const convertedIds=new Set((prospects||[]).map(p=>p.converted_client_id).filter(Boolean).map(String));
+        const leads=(store.clients||[]).filter(c=>c.status==='Lead'&&convertedIds.has(String(c.id)));
+        if(!leads.length)return;
+        const updates=await Promise.all(leads.map(c=>requestJson(`/api/clients/${encodeURIComponent(c.id)}`,{method:'PATCH',body:JSON.stringify({status:'Active'})}).catch(()=>null)));
+        updates.forEach((updated,i)=>{if(updated)Object.assign(leads[i],updated)});
+        if(typeof renderClients==='function')renderClients();
+      }catch(e){console.warn('Could not sync converted client statuses:',e.message)}
+    };
+    setTimeout(run,250);
+  }
   async function renderHub(){
     const id=document.getElementById('cf-id')?.value||'';
     if(!id){hub.style.display='none';hub.innerHTML='';return;}
@@ -152,4 +169,5 @@
   document.addEventListener('click',e=>{const edit=e.target.closest?.('.edit-client');if(edit)queueRender();});
   if(modal.classList.contains('show'))queueRender();
   applyClientScope();
+  syncConvertedClientStatuses();
 })();
