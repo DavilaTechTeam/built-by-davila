@@ -198,5 +198,78 @@
   setTimeout(renderReviews,500);
 })();
 </script>
+<script>
+(() => {
+  const params=new URLSearchParams(location.search);
+  const view=params.get('view');
+  const clientId=params.get('client');
+  const prospectId=params.get('prospect');
+  if(!view)return;
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const hasClientOption=()=>clientId&&Array.from(document.getElementById('qb-client')?.options||[]).some(o=>o.value===clientId);
+  async function fetchProspect(){
+    if(!prospectId)return null;
+    const token=sessionStorage.getItem('bbd_token')||'';
+    const headers={'Content-Type':'application/json'};if(token)headers.Authorization=`Bearer ${token}`;
+    const r=await fetch('https://built-by-davila-backend.onrender.com/api/prospects',{headers});
+    if(!r.ok)return null;
+    const rows=await r.json();
+    return rows.find(x=>String(x.id)===String(prospectId))||null;
+  }
+  function recommendPackage(p){
+    const pages=Array.isArray(p?.pages)?p.pages.length:0;
+    const complex=String(p?.musthave||'').toLowerCase();
+    if(/e-?commerce|shop|portal|membership|automation|booking system|custom app/.test(complex)||pages>6)return{name:'Pro Website Package',price:5995};
+    if(pages>0&&pages<=3)return{name:'Starter Website Package',price:1995};
+    return{name:'Growth Website Package',price:3995};
+  }
+  function buildNotes(p){
+    const lines=['50% deposit due to begin work. Remaining balance due prior to launch. Scope changes may require a revised quote.',''];
+    if(p){
+      lines.push('PROJECT INTAKE SUMMARY');
+      if(p.goal)lines.push(`Goal: ${p.goal}`);
+      if(p.audience)lines.push(`Ideal customer: ${p.audience}`);
+      if(Array.isArray(p.pages)&&p.pages.length)lines.push(`Requested pages: ${p.pages.join(', ')}`);
+      if(p.services)lines.push(`Services / products: ${p.services}`);
+      if(p.style)lines.push(`Style: ${p.style}`);
+      if(p.colors)lines.push(`Colors: ${p.colors}`);
+      if(p.musthave)lines.push(`Must-have features: ${p.musthave}`);
+      if(p.timing)lines.push(`Timing: ${p.timing}`);
+      if(p.budget)lines.push(`Budget range: ${p.budget}`);
+      if(p.existing_website)lines.push(`Existing website: ${p.existing_website}`);
+      if(p.domain)lines.push(`Domain: ${p.domain}`);
+      if(p.notes)lines.push(`Additional notes: ${p.notes}`);
+    }
+    return lines.join('\n');
+  }
+  async function init(){
+    if(typeof nav==='function')nav(view);
+    for(let i=0;i<50;i++){
+      if(!clientId||hasClientOption())break;
+      await sleep(200);
+    }
+    if(view==='clients'&&clientId&&typeof openClient==='function'){
+      try{openClient(clientId)}catch{}
+      return;
+    }
+    if(view!=='quote-builder')return;
+    const qb=document.getElementById('qb-client');
+    if(clientId&&hasClientOption())qb.value=clientId;
+    const prospect=await fetchProspect();
+    if(prospect){
+      const pkg=recommendPackage(prospect);
+      lineItems=[{description:`Built by Davila — ${pkg.name}`,quantity:1,unit_price:pkg.price}];
+      document.getElementById('qb-deposit').value=50;
+      document.getElementById('qb-notes').value=buildNotes(prospect);
+      if(typeof renderLines==='function')renderLines();
+      if(typeof updatePreview==='function')updatePreview();
+      if(typeof toast==='function')toast(`${pkg.name} quote prefilled from prospect intake.`);
+    }else if(typeof updatePreview==='function'){
+      updatePreview();
+    }
+  }
+  setTimeout(init,250);
+})();
+</script>
 </body>
 </html>
