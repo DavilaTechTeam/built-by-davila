@@ -82,7 +82,7 @@
 
   <section class="view" id="portal-reviews">
     <div class="toolbar">
-      <div class="notice compact">Client-submitted website edits waiting for Built by Davila review.</div>
+      <div class="notice compact">Client-submitted website edits stored in the Built by Davila database.</div>
       <button class="btn secondary" id="refresh-portal-reviews">Refresh</button>
     </div>
     <div class="panel">
@@ -154,154 +154,47 @@
 </main>
 </div>
 
-<div class="login-note">Live PostgreSQL: Clients • Quotes • Invoices • Payments • Subscriptions</div>
+<div class="login-note">Live PostgreSQL: Clients • Quotes • Invoices • Payments • Subscriptions • Portal Reviews</div>
 
-<!-- Client modal -->
-<div class="modal-backdrop" id="client-modal" aria-hidden="true">
-  <div class="client-modal">
-    <div class="modal-header"><div><div class="eyebrow">CLIENT RECORD</div><h2 id="client-modal-title">Add Client</h2><p>Create or update a live client record.</p></div><button class="modal-close" data-close="client-modal">×</button></div>
-    <form id="client-form">
-      <input type="hidden" id="cf-id">
-      <div class="form-grid two">
-        <label><span>Company Name *</span><input id="cf-company" required placeholder="Company name"></label>
-        <label><span>Status</span><select id="cf-status"><option>Lead</option><option selected>Active</option><option>Inactive</option></select></label>
-      </div>
-      <div class="form-grid two">
-        <label><span>First Name</span><input id="cf-first" placeholder="First name"></label>
-        <label><span>Last Name</span><input id="cf-last" placeholder="Last name"></label>
-      </div>
-      <div class="form-grid two">
-        <label><span>Email</span><input id="cf-email" type="email" placeholder="name@company.com"></label>
-        <label><span>Billing Email</span><input id="cf-billing-email" type="email" placeholder="billing@company.com"></label>
-      </div>
-      <div class="form-grid two">
-        <label><span>Phone</span><input id="cf-phone" placeholder="Phone"></label>
-        <label><span>Website</span><input id="cf-website" placeholder="https://company.com"></label>
-      </div>
-      <label><span>Notes</span><textarea id="cf-notes" rows="4" placeholder="Internal notes..."></textarea></label>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close="client-modal">Cancel</button><button class="btn primary" type="submit" id="save-client-btn">Save Client</button></div>
-      <div class="form-message" id="client-form-message"></div>
-    </form>
-  </div>
-</div>
+<div class="modal-backdrop" id="client-modal" aria-hidden="true"><div class="client-modal"><div class="modal-header"><div><div class="eyebrow">CLIENT RECORD</div><h2 id="client-modal-title">Add Client</h2><p>Create or update a live client record.</p></div><button class="modal-close" data-close="client-modal">×</button></div><form id="client-form"><input type="hidden" id="cf-id"><div class="form-grid two"><label><span>Company Name *</span><input id="cf-company" required placeholder="Company name"></label><label><span>Status</span><select id="cf-status"><option>Lead</option><option selected>Active</option><option>Inactive</option></select></label></div><div class="form-grid two"><label><span>First Name</span><input id="cf-first" placeholder="First name"></label><label><span>Last Name</span><input id="cf-last" placeholder="Last name"></label></div><div class="form-grid two"><label><span>Email</span><input id="cf-email" type="email" placeholder="name@company.com"></label><label><span>Billing Email</span><input id="cf-billing-email" type="email" placeholder="billing@company.com"></label></div><div class="form-grid two"><label><span>Phone</span><input id="cf-phone" placeholder="Phone"></label><label><span>Website</span><input id="cf-website" placeholder="https://company.com"></label></div><label><span>Notes</span><textarea id="cf-notes" rows="4" placeholder="Internal notes..."></textarea></label><div class="modal-actions"><button type="button" class="btn secondary" data-close="client-modal">Cancel</button><button class="btn primary" type="submit" id="save-client-btn">Save Client</button></div><div class="form-message" id="client-form-message"></div></form></div></div>
 
-<!-- Payment modal -->
-<div class="modal-backdrop" id="payment-modal" aria-hidden="true">
-  <div class="client-modal small-modal">
-    <div class="modal-header"><div><div class="eyebrow">PAYMENT</div><h2>Record Payment</h2><p>Record a payment received outside Stripe.</p></div><button class="modal-close" data-close="payment-modal">×</button></div>
-    <form id="payment-form">
-      <label><span>Invoice *</span><select id="pf-invoice" required></select></label>
-      <div class="form-grid two">
-        <label><span>Amount *</span><input id="pf-amount" type="number" step="0.01" min="0.01" required></label>
-        <label><span>Type</span><select id="pf-type"><option>Deposit</option><option>Balance</option><option selected>Manual</option><option>Subscription</option><option>Refund</option></select></label>
-      </div>
-      <div class="form-grid two">
-        <label><span>Method</span><select id="pf-method"><option>Card</option><option>ACH</option><option>Check</option><option>Cash</option><option>Zelle</option><option selected>Other</option></select></label>
-        <label><span>Reference</span><input id="pf-reference" placeholder="Check #, Zelle note, etc."></label>
-      </div>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close="payment-modal">Cancel</button><button class="btn primary" type="submit">Record Payment</button></div>
-      <div class="form-message" id="payment-form-message"></div>
-    </form>
-  </div>
-</div>
+<div class="modal-backdrop" id="payment-modal" aria-hidden="true"><div class="client-modal small-modal"><div class="modal-header"><div><div class="eyebrow">PAYMENT</div><h2>Record Payment</h2><p>Record a payment received outside Stripe.</p></div><button class="modal-close" data-close="payment-modal">×</button></div><form id="payment-form"><label><span>Invoice *</span><select id="pf-invoice" required></select></label><div class="form-grid two"><label><span>Amount *</span><input id="pf-amount" type="number" step="0.01" min="0.01" required></label><label><span>Type</span><select id="pf-type"><option>Deposit</option><option>Balance</option><option selected>Manual</option><option>Subscription</option><option>Refund</option></select></label></div><div class="form-grid two"><label><span>Method</span><select id="pf-method"><option>Card</option><option>ACH</option><option>Check</option><option>Cash</option><option>Zelle</option><option selected>Other</option></select></label><label><span>Reference</span><input id="pf-reference" placeholder="Check #, Zelle note, etc."></label></div><div class="modal-actions"><button type="button" class="btn secondary" data-close="payment-modal">Cancel</button><button class="btn primary" type="submit">Record Payment</button></div><div class="form-message" id="payment-form-message"></div></form></div></div>
 
-<!-- Subscription modal -->
-<div class="modal-backdrop" id="sub-modal" aria-hidden="true">
-  <div class="client-modal small-modal">
-    <div class="modal-header"><div><div class="eyebrow">RECURRING PLAN</div><h2>Add Subscription</h2><p>Create a recurring service record.</p></div><button class="modal-close" data-close="sub-modal">×</button></div>
-    <form id="sub-form">
-      <label><span>Client *</span><select id="sf-client" required></select></label>
-      <div class="form-grid two">
-        <label><span>Plan Name *</span><input id="sf-plan" required placeholder="Website Care Plan"></label>
-        <label><span>Monthly Amount *</span><input id="sf-amount" type="number" step="0.01" min="0" required></label>
-      </div>
-      <div class="form-grid two">
-        <label><span>Status</span><select id="sf-status"><option selected>Active</option><option>Paused</option><option>Canceled</option></select></label>
-        <label><span>Next Billing Date</span><input id="sf-next" type="date"></label>
-      </div>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close="sub-modal">Cancel</button><button class="btn primary" type="submit">Save Plan</button></div>
-      <div class="form-message" id="sub-form-message"></div>
-    </form>
-  </div>
-</div>
+<div class="modal-backdrop" id="sub-modal" aria-hidden="true"><div class="client-modal small-modal"><div class="modal-header"><div><div class="eyebrow">RECURRING PLAN</div><h2>Add Subscription</h2><p>Create a recurring service record.</p></div><button class="modal-close" data-close="sub-modal">×</button></div><form id="sub-form"><label><span>Client *</span><select id="sf-client" required></select></label><div class="form-grid two"><label><span>Plan Name *</span><input id="sf-plan" required placeholder="Website Care Plan"></label><label><span>Monthly Amount *</span><input id="sf-amount" type="number" step="0.01" min="0" required></label></div><div class="form-grid two"><label><span>Status</span><select id="sf-status"><option selected>Active</option><option>Paused</option><option>Canceled</option></select></label><label><span>Next Billing Date</span><input id="sf-next" type="date"></label></div><div class="modal-actions"><button type="button" class="btn secondary" data-close="sub-modal">Cancel</button><button class="btn primary" type="submit">Save Plan</button></div><div class="form-message" id="sub-form-message"></div></form></div></div>
 
 <div class="toast-stack" id="toast-stack"></div>
 
-<div class="modal-backdrop" id="confirm-modal" aria-hidden="true">
-  <div class="client-modal small-modal confirm-card">
-    <div class="modal-header">
-      <div>
-        <div class="eyebrow">CONFIRM ACTION</div>
-        <h2 id="confirm-title">Are you sure?</h2>
-        <p id="confirm-message"></p>
-      </div>
-      <button class="modal-close" data-close="confirm-modal">×</button>
-    </div>
-    <div class="modal-actions">
-      <button type="button" class="btn secondary" id="confirm-cancel">Cancel</button>
-      <button type="button" class="btn primary" id="confirm-ok">Continue</button>
-    </div>
-  </div>
-</div>
+<div class="modal-backdrop" id="confirm-modal" aria-hidden="true"><div class="client-modal small-modal confirm-card"><div class="modal-header"><div><div class="eyebrow">CONFIRM ACTION</div><h2 id="confirm-title">Are you sure?</h2><p id="confirm-message"></p></div><button class="modal-close" data-close="confirm-modal">×</button></div><div class="modal-actions"><button type="button" class="btn secondary" id="confirm-cancel">Cancel</button><button type="button" class="btn primary" id="confirm-ok">Continue</button></div></div></div>
 
-<!-- Quote detail modal -->
-<div class="modal-backdrop" id="quote-detail-modal" aria-hidden="true">
-  <div class="client-modal detail-modal">
-    <div class="modal-header">
-      <div><div class="eyebrow">QUOTE DETAILS</div><h2 id="qd-title">Quote</h2><p id="qd-subtitle"></p></div>
-      <button class="modal-close" data-close="quote-detail-modal">×</button>
-    </div>
-    <div id="qd-content"></div>
-    <div class="modal-actions detail-actions" id="qd-actions"></div>
-  </div>
-</div>
+<div class="modal-backdrop" id="quote-detail-modal" aria-hidden="true"><div class="client-modal detail-modal"><div class="modal-header"><div><div class="eyebrow">QUOTE DETAILS</div><h2 id="qd-title">Quote</h2><p id="qd-subtitle"></p></div><button class="modal-close" data-close="quote-detail-modal">×</button></div><div id="qd-content"></div><div class="modal-actions detail-actions" id="qd-actions"></div></div></div>
 
-<!-- Invoice detail modal -->
-<div class="modal-backdrop" id="invoice-detail-modal" aria-hidden="true">
-  <div class="client-modal detail-modal">
-    <div class="modal-header">
-      <div><div class="eyebrow">INVOICE DETAILS</div><h2 id="id-title">Invoice</h2><p id="id-subtitle"></p></div>
-      <button class="modal-close" data-close="invoice-detail-modal">×</button>
-    </div>
-    <div id="id-content"></div>
-    <div class="modal-actions detail-actions" id="id-actions"></div>
-  </div>
-</div>
+<div class="modal-backdrop" id="invoice-detail-modal" aria-hidden="true"><div class="client-modal detail-modal"><div class="modal-header"><div><div class="eyebrow">INVOICE DETAILS</div><h2 id="id-title">Invoice</h2><p id="id-subtitle"></p></div><button class="modal-close" data-close="invoice-detail-modal">×</button></div><div id="id-content"></div><div class="modal-actions detail-actions" id="id-actions"></div></div></div>
 
 <script src="studio.js"></script>
 <script>
 (() => {
-  const STORAGE='bbd_portal_reviews_v1';
+  const API_BASE='https://built-by-davila-backend.onrender.com';
   const escLocal=(v='')=>String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const listEl=document.getElementById('portal-review-list');
   const navBtn=document.getElementById('portal-reviews-nav');
-  function getReviews(){try{return JSON.parse(localStorage.getItem(STORAGE)||'[]')}catch{return []}}
-  function setReviews(v){localStorage.setItem(STORAGE,JSON.stringify(v));renderReviews()}
-  function statusBadge(s){const map={'Pending Review':'#fff1cc','Approved':'#dcfce7','Changes Requested':'#fee2e2'};return `<span style="display:inline-block;padding:5px 9px;border-radius:999px;background:${map[s]||'#eee'};font-size:11px;font-weight:800">${escLocal(s)}</span>`}
-  function renderReviews(){
-    const reviews=getReviews();
-    const pending=reviews.filter(r=>r.status==='Pending Review').length;
-    navBtn.textContent=pending?`Portal Reviews (${pending})`:'Portal Reviews';
-    if(!reviews.length){listEl.innerHTML='<div class="empty-state">No client website changes have been submitted yet.</div>';return;}
-    listEl.innerHTML=`<div style="display:grid;gap:12px">${reviews.map(r=>`<div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px;background:#fff">
-      <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
-        <div><div class="eyebrow">${escLocal(r.id)}</div><h3 style="margin:4px 0">${escLocal(r.client)}</h3><div style="font-size:12px;color:#667085">Submitted ${new Date(r.submittedAt).toLocaleString()} • ${r.patches?.length||0} change${(r.patches?.length||0)===1?'':'s'}</div></div>
-        <div>${statusBadge(r.status)}</div>
-      </div>
-      <div style="margin-top:14px;display:grid;gap:7px">${(r.patches||[]).map((p,i)=>`<div style="padding:10px 12px;border-radius:10px;background:#f7f7f5;font-size:12px"><strong>${i+1}. ${escLocal(p.label||p.type)}</strong><div style="margin-top:3px;color:#667085">${p.type==='text'?escLocal(p.value):'Replacement image submitted'}</div></div>`).join('')}</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-        <a class="btn secondary" href="client-portal.html">Open Client Editor</a>
-        ${r.status==='Pending Review'?`<button class="btn primary portal-approve" data-id="${escLocal(r.id)}">Approve</button><button class="btn secondary portal-changes" data-id="${escLocal(r.id)}">Request Changes</button>`:''}
-      </div>
-      ${r.status==='Approved'?'<div class="notice compact" style="margin-top:12px">Approved. Publishing to the live website is the next controlled step.</div>':''}
-    </div>`).join('')}</div>`;
-    document.querySelectorAll('.portal-approve').forEach(b=>b.onclick=()=>updateStatus(b.dataset.id,'Approved'));
-    document.querySelectorAll('.portal-changes').forEach(b=>b.onclick=()=>updateStatus(b.dataset.id,'Changes Requested'));
+  function statusBadge(s){const map={'Submitted':'#fff1cc','Approved':'#dcfce7','Changes Requested':'#fee2e2'};return `<span style="display:inline-block;padding:5px 9px;border-radius:999px;background:${map[s]||'#eee'};font-size:11px;font-weight:800">${escLocal(s)}</span>`}
+  async function portalApi(path,options={}){const token=sessionStorage.getItem('bbd_token')||'';const headers={'Content-Type':'application/json',...(options.headers||{})};if(token)headers.Authorization=`Bearer ${token}`;const r=await fetch(API_BASE+path,{...options,headers});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`HTTP ${r.status}`);return data;}
+  async function renderReviews(){
+    listEl.innerHTML='<div class="empty-state">Loading portal reviews…</div>';
+    try{
+      const reviews=await portalApi('/api/portal-reviews');
+      const pending=reviews.filter(r=>r.status==='Submitted').length;
+      navBtn.textContent=pending?`Portal Reviews (${pending})`:'Portal Reviews';
+      if(!reviews.length){listEl.innerHTML='<div class="empty-state">No client website changes have been submitted yet.</div>';return;}
+      listEl.innerHTML=`<div style="display:grid;gap:12px">${reviews.map(r=>{const changes=Array.isArray(r.changes)?r.changes:[];return `<div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px;background:#fff"><div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap"><div><div class="eyebrow">${escLocal(String(r.id).slice(0,8).toUpperCase())}</div><h3 style="margin:4px 0">${escLocal(r.client_name)}</h3><div style="font-size:12px;color:#667085">Submitted ${new Date(r.submitted_at).toLocaleString()} • ${changes.length} change${changes.length===1?'':'s'}</div></div><div>${statusBadge(r.status)}</div></div><div style="margin-top:14px;display:grid;gap:7px">${changes.map((p,i)=>`<div style="padding:10px 12px;border-radius:10px;background:#f7f7f5;font-size:12px"><strong>${i+1}. ${escLocal(p.label||p.type)}</strong><div style="margin-top:3px;color:#667085">${p.type==='text'?escLocal(p.value):'Replacement image submitted'}</div></div>`).join('')}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><a class="btn secondary" href="client-portal.html">Open Client Editor</a>${r.status==='Submitted'?`<button class="btn primary portal-approve" data-id="${r.id}">Approve</button><button class="btn secondary portal-changes" data-id="${r.id}">Request Changes</button>`:''}</div>${r.status==='Approved'?'<div class="notice compact" style="margin-top:12px">Approved. Publishing to the live website remains a separate controlled step.</div>':''}${r.status==='Changes Requested'?'<div class="notice compact" style="margin-top:12px">Changes requested from the client.</div>':''}</div>`}).join('')}</div>`;
+      document.querySelectorAll('.portal-approve').forEach(b=>b.onclick=()=>updateStatus(b.dataset.id,'Approved'));
+      document.querySelectorAll('.portal-changes').forEach(b=>b.onclick=()=>updateStatus(b.dataset.id,'Changes Requested'));
+    }catch(e){listEl.innerHTML=`<div class="empty-state">${escLocal(e.message)}</div>`;}
   }
-  function updateStatus(id,status){const reviews=getReviews();const item=reviews.find(r=>r.id===id);if(!item)return;item.status=status;item.reviewedAt=new Date().toISOString();setReviews(reviews);}
+  async function updateStatus(id,status){try{await portalApi('/api/portal-reviews/'+id,{method:'PATCH',body:JSON.stringify({status})});await renderReviews();}catch(e){alert(e.message)}}
   document.getElementById('refresh-portal-reviews').onclick=renderReviews;
-  window.addEventListener('storage',e=>{if(e.key===STORAGE)renderReviews()});
-  renderReviews();
+  navBtn.addEventListener('click',renderReviews);
+  setTimeout(renderReviews,500);
 })();
 </script>
 </body>
