@@ -3,102 +3,162 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>KPLAY USA Client Portal | Built by Davila</title>
+  <title>KPLAY USA Visual Editor | Built by Davila</title>
   <link rel="stylesheet" href="studio.css">
   <style>
-    .portal-wrap{max-width:1180px;margin:0 auto;padding:36px 24px 70px}.client-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:22px}.client-title{display:flex;gap:16px;align-items:center}.client-logo{width:58px;height:58px;border-radius:16px;background:#111;color:#fff;display:grid;place-items:center;font-weight:800;font-size:22px}.client-meta h2{margin:0 0 4px;font-size:28px}.muted{color:#6b7280}.portal-actions{display:flex;gap:10px;flex-wrap:wrap}.portal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}.portal-card{border:1px solid #e5e7eb;border-radius:18px;padding:20px;background:#fff;cursor:pointer;transition:.18s}.portal-card:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,.06)}.portal-card span{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#737987;font-weight:700;margin-bottom:8px}.portal-card strong{font-size:23px}.status-row{display:flex;gap:10px;align-items:center;margin-top:8px}.dot{width:9px;height:9px;border-radius:50%;background:#1aa260}.portal-section{display:none;margin-top:20px}.portal-section.active{display:block}.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.edit-grid .full{grid-column:1/-1}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:7px;color:#555}.field input,.field textarea{width:100%;box-sizing:border-box;padding:12px 13px;border:1px solid #dcdfe4;border-radius:12px;font:inherit}.field textarea{min-height:120px;resize:vertical}.preview-frame{width:100%;height:620px;border:1px solid #ddd;border-radius:16px;background:#fff}.photo-box{border:1px dashed #c9cdd4;border-radius:16px;padding:28px;text-align:center}.photo-preview{max-width:100%;max-height:300px;border-radius:14px;margin-top:16px;display:none}.review-list{display:grid;gap:10px;margin-top:14px}.review-item{padding:14px 16px;border:1px solid #e4e6ea;border-radius:12px;background:#fafafa}.save-note{margin-top:14px}.btn-link{text-decoration:none}.hidden{display:none!important}@media(max-width:850px){.portal-grid{grid-template-columns:1fr 1fr}.edit-grid{grid-template-columns:1fr}.edit-grid .full{grid-column:auto}.client-head{flex-direction:column}}@media(max-width:520px){.portal-grid{grid-template-columns:1fr}}
+    :root{--editor-bg:#f4f4f1;--border:#dedede;--accent:#ff4f38}
+    body{background:var(--editor-bg)}
+    .editor-shell{max-width:1450px;margin:0 auto;padding:24px}
+    .editor-top{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:18px}
+    .editor-title{display:flex;align-items:center;gap:14px}.client-logo{width:48px;height:48px;border-radius:14px;background:#111;color:#fff;display:grid;place-items:center;font-weight:800}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tool-btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 12px;font:inherit;font-weight:700;cursor:pointer}.tool-btn.active{border-color:#111;background:#111;color:#fff}.tool-btn.primary{background:#111;color:#fff}.tool-btn.danger{color:#b42318}
+    .editor-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}.canvas-wrap{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;min-height:760px;box-shadow:0 10px 30px rgba(0,0,0,.04)}
+    .canvas-bar{height:50px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 14px}.canvas-meta{font-size:12px;color:#667085}.device-buttons{display:flex;gap:6px}.device-buttons button{border:0;background:#f3f4f6;border-radius:8px;padding:7px 10px;cursor:pointer}.device-buttons button.active{background:#111;color:#fff}
+    .frame-stage{height:720px;display:flex;justify-content:center;align-items:flex-start;background:#e9e9e5;padding:18px;overflow:auto}.frame-holder{width:100%;height:100%;transition:.2s}.frame-holder.tablet{width:820px}.frame-holder.mobile{width:390px}.site-frame{width:100%;height:100%;border:0;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+    .inspector{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px;align-self:start;position:sticky;top:18px}.inspector h3{margin:0 0 8px}.hint{font-size:13px;color:#667085;line-height:1.45}.selection{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:14px 0 8px}.field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.field textarea,.field input{width:100%;box-sizing:border-box;border:1px solid #d9dce1;border-radius:10px;padding:10px 11px;font:inherit}.field textarea{min-height:150px;resize:vertical}.inspector-actions{display:flex;gap:8px}.inspector-actions button{flex:1}.empty-inspector{padding:26px 8px;text-align:center;color:#667085}.change-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:999px;background:#111;color:#fff;font-size:11px;padding:0 6px}.status{font-size:12px;color:#667085}.status strong{color:#111}.image-preview{width:100%;max-height:180px;object-fit:cover;border-radius:10px;border:1px solid #eee;margin-top:8px}.divider{height:1px;background:#eee;margin:16px 0}.review-list{display:grid;gap:8px}.review-item{border:1px solid #eee;border-radius:10px;padding:10px;font-size:12px}.review-item strong{display:block;margin-bottom:4px}.hidden{display:none!important}
+    @media(max-width:1000px){.editor-grid{grid-template-columns:1fr}.inspector{position:static}.frame-stage{height:650px}.editor-top{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
-  <main class="portal-wrap">
-    <div class="topbar">
-      <div>
-        <div class="eyebrow">BUILT BY DAVILA</div>
-        <h1>Client Portal</h1>
-        <div class="studio-welcome">Review and manage approved website content.</div>
+  <main class="editor-shell">
+    <div class="editor-top">
+      <div class="editor-title">
+        <div class="client-logo">K</div>
+        <div><div class="eyebrow">BUILT BY DAVILA • VISUAL EDITOR</div><h1 style="margin:2px 0 0">KPLAY USA</h1><div class="studio-welcome">Click text or images directly on the website to edit them.</div></div>
       </div>
-      <div class="top-actions"><a class="btn secondary" href="studio.html">Back to Studio</a></div>
+      <div class="toolbar">
+        <span class="status">Draft changes: <span class="change-count" id="change-count">0</span></span>
+        <button class="tool-btn" id="toggle-edit">Editing On</button>
+        <button class="tool-btn" id="review-btn">Review</button>
+        <button class="tool-btn danger" id="clear-btn">Clear Draft</button>
+        <button class="tool-btn primary" id="save-btn">Save Draft</button>
+        <a class="tool-btn" href="studio.html" style="text-decoration:none">Back to Studio</a>
+      </div>
     </div>
 
-    <section class="panel">
-      <div class="client-head">
-        <div class="client-title">
-          <div class="client-logo">K</div>
-          <div class="client-meta">
-            <div class="eyebrow">TEST CLIENT</div>
-            <h2>KPLAY USA</h2>
-            <div class="muted">Custom retail displays, fixtures and branded environments</div>
-            <div class="status-row"><span class="dot"></span><strong style="font-size:14px">Website Live</strong></div>
+    <div class="editor-grid">
+      <section class="canvas-wrap">
+        <div class="canvas-bar">
+          <div class="canvas-meta">Live KPLAY site • safe draft mode</div>
+          <div class="device-buttons">
+            <button class="active" data-device="desktop">Desktop</button>
+            <button data-device="tablet">Tablet</button>
+            <button data-device="mobile">Mobile</button>
           </div>
         </div>
-        <div class="portal-actions">
-          <a class="btn secondary btn-link" href="https://davilatechteam.github.io/kplay-usa/" target="_blank" rel="noopener">Open Live Site</a>
-        </div>
-      </div>
-
-      <div class="portal-grid">
-        <button class="portal-card" type="button" data-open="preview"><span>Website</span><strong>Preview</strong></button>
-        <button class="portal-card" type="button" data-open="edit"><span>Content</span><strong>Edit Text</strong></button>
-        <button class="portal-card" type="button" data-open="photos"><span>Media</span><strong>Change Photos</strong></button>
-        <button class="portal-card" type="button" data-open="review"><span>Changes</span><strong>Save & Review</strong></button>
-      </div>
-
-      <div class="notice compact">KPLAY USA is the first test client. Changes on this page are saved as a portal draft and do not alter the live website yet.</div>
-
-      <section class="portal-section" id="preview">
-        <div class="panel-heading"><div><div class="eyebrow">WEBSITE</div><h3>Live Preview</h3></div></div>
-        <iframe class="preview-frame" src="https://davilatechteam.github.io/kplay-usa/" title="KPLAY USA website preview"></iframe>
-      </section>
-
-      <section class="portal-section" id="edit">
-        <div class="panel-heading"><div><div class="eyebrow">CONTENT</div><h3>Edit Approved Text</h3></div></div>
-        <div class="edit-grid">
-          <div class="field"><label>Hero Headline</label><input id="hero-title" value="Custom Retail Displays Built to Stand Out"></div>
-          <div class="field"><label>Hero Button</label><input id="hero-button" value="Request a Consultation"></div>
-          <div class="field full"><label>Hero Description</label><textarea id="hero-copy">KPLAY USA designs, fabricates and installs custom retail displays, fixtures and branded environments.</textarea></div>
-          <div class="field full"><label>About Text</label><textarea id="about-copy">Established in 2023, KPLAY USA creates custom retail environments from concept through fabrication and installation.</textarea></div>
-        </div>
-        <div class="builder-actions" style="margin-top:18px"><button class="btn primary" type="button" id="save-text">Save Draft</button></div>
-        <div class="form-message" id="text-message"></div>
-      </section>
-
-      <section class="portal-section" id="photos">
-        <div class="panel-heading"><div><div class="eyebrow">MEDIA</div><h3>Change Hero Photo</h3></div></div>
-        <div class="photo-box">
-          <p><strong>Choose a replacement image</strong></p>
-          <p class="muted">This creates a draft preview only. Built by Davila will control the final layout and crop.</p>
-          <input type="file" id="photo-input" accept="image/*">
-          <img id="photo-preview" class="photo-preview" alt="Selected preview">
+        <div class="frame-stage">
+          <div class="frame-holder" id="frame-holder">
+            <iframe id="site-frame" class="site-frame" src="https://davilatechteam.github.io/kplay-usa/" title="KPLAY USA visual editor"></iframe>
+          </div>
         </div>
       </section>
 
-      <section class="portal-section" id="review">
-        <div class="panel-heading"><div><div class="eyebrow">CHANGES</div><h3>Review Draft</h3></div></div>
-        <div class="review-list" id="review-list"></div>
-        <div class="builder-actions" style="margin-top:18px">
-          <button class="btn primary" type="button" id="submit-review">Submit for Review</button>
-          <button class="btn secondary" type="button" id="clear-draft">Clear Draft</button>
+      <aside class="inspector">
+        <div id="empty-inspector" class="empty-inspector">
+          <h3>Select something to edit</h3>
+          <p class="hint">Click a headline, paragraph, button, image, or section background inside the website preview.</p>
         </div>
-        <div class="form-message" id="review-message"></div>
-      </section>
-    </section>
+
+        <div id="text-inspector" class="hidden">
+          <div class="selection">Text selected</div>
+          <h3 id="text-label">Edit text</h3>
+          <p class="hint" id="text-path"></p>
+          <div class="field"><label>Text</label><textarea id="text-value"></textarea></div>
+          <div class="inspector-actions"><button class="tool-btn" id="cancel-text">Cancel</button><button class="tool-btn primary" id="apply-text">Apply</button></div>
+        </div>
+
+        <div id="image-inspector" class="hidden">
+          <div class="selection">Image selected</div>
+          <h3>Replace image</h3>
+          <p class="hint" id="image-path"></p>
+          <img id="selected-image-preview" class="image-preview" alt="Selected image preview">
+          <div class="field" style="margin-top:12px"><label>Choose replacement</label><input type="file" id="image-file" accept="image/*"></div>
+          <div class="inspector-actions"><button class="tool-btn" id="cancel-image">Cancel</button><button class="tool-btn primary" id="apply-image">Apply</button></div>
+        </div>
+
+        <div id="review-inspector" class="hidden">
+          <div class="selection">Draft review</div>
+          <h3>Changes</h3>
+          <div class="review-list" id="review-list"></div>
+          <div class="divider"></div>
+          <p class="hint">These changes are saved only as a draft in this browser. Publishing to the live KPLAY site will be added next.</p>
+        </div>
+      </aside>
+    </div>
   </main>
 
 <script>
-const sections=[...document.querySelectorAll('.portal-section')];
-const keys=['hero-title','hero-button','hero-copy','about-copy'];
-const defaults={}; keys.forEach(k=>defaults[k]=document.getElementById(k).value);
-function openSection(id){sections.forEach(s=>s.classList.toggle('active',s.id===id));if(id==='review')renderReview();document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});}
-document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openSection(b.dataset.open)));
-function loadDraft(){keys.forEach(k=>{const v=localStorage.getItem('kplay_'+k);if(v!==null)document.getElementById(k).value=v;});}
-function saveDraft(){keys.forEach(k=>localStorage.setItem('kplay_'+k,document.getElementById(k).value));document.getElementById('text-message').textContent='Draft saved.';document.getElementById('text-message').className='form-message success';}
-function renderReview(){const list=document.getElementById('review-list');const labels={'hero-title':'Hero Headline','hero-button':'Hero Button','hero-copy':'Hero Description','about-copy':'About Text'};const changes=keys.filter(k=>document.getElementById(k).value!==defaults[k]);list.innerHTML=changes.length?changes.map(k=>`<div class="review-item"><strong>${labels[k]}</strong><div class="muted" style="margin-top:6px">${escapeHtml(document.getElementById(k).value)}</div></div>`).join(''):'<div class="review-item">No text changes in this draft yet.</div>';}
-function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
-document.getElementById('save-text').addEventListener('click',saveDraft);
-document.getElementById('photo-input').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const img=document.getElementById('photo-preview');img.src=URL.createObjectURL(f);img.style.display='inline-block';localStorage.setItem('kplay_photo_name',f.name);});
-document.getElementById('submit-review').addEventListener('click',()=>{saveDraft();document.getElementById('review-message').textContent='Draft submitted for Built by Davila review.';document.getElementById('review-message').className='form-message success';});
-document.getElementById('clear-draft').addEventListener('click',()=>{keys.forEach(k=>{localStorage.removeItem('kplay_'+k);document.getElementById(k).value=defaults[k];});localStorage.removeItem('kplay_photo_name');document.getElementById('photo-input').value='';document.getElementById('photo-preview').style.display='none';renderReview();document.getElementById('review-message').textContent='Draft cleared.';});
-loadDraft();
+const frame=document.getElementById('site-frame');
+const holder=document.getElementById('frame-holder');
+const empty=document.getElementById('empty-inspector');
+const textInspector=document.getElementById('text-inspector');
+const imageInspector=document.getElementById('image-inspector');
+const reviewInspector=document.getElementById('review-inspector');
+const changeCount=document.getElementById('change-count');
+let editing=true, selected=null, selectedType=null, pendingImageData=null;
+const STORAGE='bbd_kplay_visual_draft_v1';
+let patches=JSON.parse(localStorage.getItem(STORAGE)||'[]');
+
+function allPanelsOff(){empty.classList.add('hidden');textInspector.classList.add('hidden');imageInspector.classList.add('hidden');reviewInspector.classList.add('hidden')}
+function showEmpty(){allPanelsOff();empty.classList.remove('hidden')}
+function savePatches(){localStorage.setItem(STORAGE,JSON.stringify(patches));changeCount.textContent=patches.length}
+function cssEscape(v){return window.CSS&&CSS.escape?CSS.escape(v):String(v).replace(/[^a-zA-Z0-9_-]/g,'\\$&')}
+function selectorFor(el){
+  if(el.id)return '#'+cssEscape(el.id);
+  const parts=[];let cur=el;
+  while(cur&&cur.nodeType===1&&cur.tagName.toLowerCase()!=='html'){
+    let part=cur.tagName.toLowerCase();
+    if(cur.classList&&cur.classList.length)part+='.'+[...cur.classList].slice(0,2).map(cssEscape).join('.');
+    const parent=cur.parentElement;
+    if(parent){const same=[...parent.children].filter(x=>x.tagName===cur.tagName);if(same.length>1)part+=`:nth-of-type(${same.indexOf(cur)+1})`;}
+    parts.unshift(part);cur=parent;
+    if(parts.length>=5)break;
+  }
+  return parts.join(' > ');
+}
+function upsertPatch(patch){const i=patches.findIndex(p=>p.selector===patch.selector&&p.type===patch.type);if(i>=0)patches[i]=patch;else patches.push(patch);savePatches()}
+function applyPatches(doc){patches.forEach(p=>{try{const el=doc.querySelector(p.selector);if(!el)return;if(p.type==='text')el.textContent=p.value;if(p.type==='image')el.src=p.value;if(p.type==='background')el.style.backgroundImage=`url("${p.value}")`;}catch{}})}
+function clearOutline(doc){doc.querySelectorAll('[data-bbd-selected]').forEach(el=>{el.style.outline='';el.style.outlineOffset='';el.removeAttribute('data-bbd-selected')})}
+function markSelected(el){const doc=frame.contentDocument;clearOutline(doc);el.setAttribute('data-bbd-selected','1');el.style.outline='3px solid #ff4f38';el.style.outlineOffset='3px'}
+function isTextElement(el){return /^(H1|H2|H3|H4|H5|H6|P|A|BUTTON|SPAN|LI|LABEL|STRONG|EM)$/.test(el.tagName)&&el.textContent.trim().length>0}
+function findEditable(target){
+  let el=target;
+  for(let i=0;i<4&&el&&el!==frame.contentDocument.body;i++,el=el.parentElement){
+    if(el.tagName==='IMG')return {el,type:'image'};
+    if(isTextElement(el))return {el,type:'text'};
+    const bg=getComputedStyle(el).backgroundImage;if(bg&&bg!=='none'&&bg.includes('url('))return {el,type:'background'};
+  }
+  return null;
+}
+function openText(el){selected=el;selectedType='text';markSelected(el);allPanelsOff();textInspector.classList.remove('hidden');document.getElementById('text-value').value=el.textContent.trim();document.getElementById('text-label').textContent=el.tagName.toLowerCase();document.getElementById('text-path').textContent=selectorFor(el)}
+function currentImageValue(el,type){if(type==='image')return el.src;const bg=getComputedStyle(el).backgroundImage;const m=bg.match(/url\(["']?(.*?)["']?\)/);return m?m[1]:''}
+function openImage(el,type){selected=el;selectedType=type;pendingImageData=null;markSelected(el);allPanelsOff();imageInspector.classList.remove('hidden');document.getElementById('image-path').textContent=selectorFor(el);document.getElementById('selected-image-preview').src=currentImageValue(el,type)}
+function bindFrame(){
+  const doc=frame.contentDocument;if(!doc)return;
+  applyPatches(doc);
+  doc.addEventListener('click',e=>{
+    if(!editing)return;
+    const found=findEditable(e.target);if(!found)return;
+    e.preventDefault();e.stopPropagation();
+    if(found.type==='text')openText(found.el);else openImage(found.el,found.type);
+  },true);
+  doc.addEventListener('mouseover',e=>{if(!editing)return;const f=findEditable(e.target);if(f&&!f.el.hasAttribute('data-bbd-selected')){f.el.dataset.bbdHover='1';f.el.style.outline='2px dashed #ff4f38';f.el.style.outlineOffset='2px'}},true);
+  doc.addEventListener('mouseout',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.bbdHover){delete el.dataset.bbdHover;if(!el.hasAttribute('data-bbd-selected')){el.style.outline='';el.style.outlineOffset=''}}},true);
+}
+frame.addEventListener('load',bindFrame);
+
+document.getElementById('apply-text').onclick=()=>{if(!selected)return;const value=document.getElementById('text-value').value;selected.textContent=value;upsertPatch({type:'text',selector:selectorFor(selected),value});showEmpty()};
+document.getElementById('cancel-text').onclick=showEmpty;
+document.getElementById('image-file').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{pendingImageData=reader.result;document.getElementById('selected-image-preview').src=pendingImageData};reader.readAsDataURL(file)});
+document.getElementById('apply-image').onclick=()=>{if(!selected||!pendingImageData)return;const selector=selectorFor(selected);if(selectedType==='image'){selected.src=pendingImageData;upsertPatch({type:'image',selector,value:pendingImageData})}else{selected.style.backgroundImage=`url("${pendingImageData}")`;upsertPatch({type:'background',selector,value:pendingImageData})}pendingImageData=null;showEmpty()};
+document.getElementById('cancel-image').onclick=showEmpty;
+
+document.querySelectorAll('[data-device]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-device]').forEach(x=>x.classList.toggle('active',x===b));holder.className='frame-holder '+(b.dataset.device==='desktop'?'':b.dataset.device)});
+document.getElementById('toggle-edit').onclick=e=>{editing=!editing;e.target.textContent=editing?'Editing On':'Editing Off';e.target.classList.toggle('active',!editing);showEmpty()};
+document.getElementById('save-btn').onclick=()=>{savePatches();alert('Draft saved. Your live website has not been changed.')};
+document.getElementById('clear-btn').onclick=()=>{if(!confirm('Clear all draft changes?'))return;patches=[];savePatches();frame.contentWindow.location.reload();showEmpty()};
+document.getElementById('review-btn').onclick=()=>{allPanelsOff();reviewInspector.classList.remove('hidden');const list=document.getElementById('review-list');list.innerHTML=patches.length?patches.map((p,i)=>`<div class="review-item"><strong>${i+1}. ${p.type.toUpperCase()}</strong><div>${p.selector}</div></div>`).join(''):'<div class="review-item">No draft changes yet.</div>'};
+savePatches();
 </script>
 </body>
 </html>
