@@ -31,6 +31,7 @@
     <button class="active" data-view="dashboard">Dashboard</button>
     <button data-view="clients">Clients</button>
     <button type="button" onclick="window.location.href='client-portal.html'">Client Portal</button>
+    <button data-view="portal-reviews" id="portal-reviews-nav">Portal Reviews</button>
     <button data-view="quotes">Quotes</button>
     <button data-view="invoices">Invoices</button>
     <button data-view="payments">Payments</button>
@@ -77,6 +78,17 @@
       <thead><tr><th>Company</th><th>Contact</th><th>Email</th><th>Phone</th><th>Status</th><th></th></tr></thead>
       <tbody id="client-body"></tbody>
     </table></div></div>
+  </section>
+
+  <section class="view" id="portal-reviews">
+    <div class="toolbar">
+      <div class="notice compact">Client-submitted website edits waiting for Built by Davila review.</div>
+      <button class="btn secondary" id="refresh-portal-reviews">Refresh</button>
+    </div>
+    <div class="panel">
+      <div class="panel-heading"><div><div class="eyebrow">CLIENT PORTAL</div><h3>Website Change Reviews</h3></div></div>
+      <div id="portal-review-list"></div>
+    </div>
   </section>
 
   <section class="view" id="quotes">
@@ -257,5 +269,40 @@
 </div>
 
 <script src="studio.js"></script>
+<script>
+(() => {
+  const STORAGE='bbd_portal_reviews_v1';
+  const escLocal=(v='')=>String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const listEl=document.getElementById('portal-review-list');
+  const navBtn=document.getElementById('portal-reviews-nav');
+  function getReviews(){try{return JSON.parse(localStorage.getItem(STORAGE)||'[]')}catch{return []}}
+  function setReviews(v){localStorage.setItem(STORAGE,JSON.stringify(v));renderReviews()}
+  function statusBadge(s){const map={'Pending Review':'#fff1cc','Approved':'#dcfce7','Changes Requested':'#fee2e2'};return `<span style="display:inline-block;padding:5px 9px;border-radius:999px;background:${map[s]||'#eee'};font-size:11px;font-weight:800">${escLocal(s)}</span>`}
+  function renderReviews(){
+    const reviews=getReviews();
+    const pending=reviews.filter(r=>r.status==='Pending Review').length;
+    navBtn.textContent=pending?`Portal Reviews (${pending})`:'Portal Reviews';
+    if(!reviews.length){listEl.innerHTML='<div class="empty-state">No client website changes have been submitted yet.</div>';return;}
+    listEl.innerHTML=`<div style="display:grid;gap:12px">${reviews.map(r=>`<div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px;background:#fff">
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
+        <div><div class="eyebrow">${escLocal(r.id)}</div><h3 style="margin:4px 0">${escLocal(r.client)}</h3><div style="font-size:12px;color:#667085">Submitted ${new Date(r.submittedAt).toLocaleString()} • ${r.patches?.length||0} change${(r.patches?.length||0)===1?'':'s'}</div></div>
+        <div>${statusBadge(r.status)}</div>
+      </div>
+      <div style="margin-top:14px;display:grid;gap:7px">${(r.patches||[]).map((p,i)=>`<div style="padding:10px 12px;border-radius:10px;background:#f7f7f5;font-size:12px"><strong>${i+1}. ${escLocal(p.label||p.type)}</strong><div style="margin-top:3px;color:#667085">${p.type==='text'?escLocal(p.value):'Replacement image submitted'}</div></div>`).join('')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        <a class="btn secondary" href="client-portal.html">Open Client Editor</a>
+        ${r.status==='Pending Review'?`<button class="btn primary portal-approve" data-id="${escLocal(r.id)}">Approve</button><button class="btn secondary portal-changes" data-id="${escLocal(r.id)}">Request Changes</button>`:''}
+      </div>
+      ${r.status==='Approved'?'<div class="notice compact" style="margin-top:12px">Approved. Publishing to the live website is the next controlled step.</div>':''}
+    </div>`).join('')}</div>`;
+    document.querySelectorAll('.portal-approve').forEach(b=>b.onclick=()=>updateStatus(b.dataset.id,'Approved'));
+    document.querySelectorAll('.portal-changes').forEach(b=>b.onclick=()=>updateStatus(b.dataset.id,'Changes Requested'));
+  }
+  function updateStatus(id,status){const reviews=getReviews();const item=reviews.find(r=>r.id===id);if(!item)return;item.status=status;item.reviewedAt=new Date().toISOString();setReviews(reviews);}
+  document.getElementById('refresh-portal-reviews').onclick=renderReviews;
+  window.addEventListener('storage',e=>{if(e.key===STORAGE)renderReviews()});
+  renderReviews();
+})();
+</script>
 </body>
 </html>
