@@ -78,3 +78,7 @@ footer{background:#0c0e11;color:#fff;padding:58px 0 24px}.footer-grid{display:gr
     margin-top:0 !important;
   }
 }
+
+/* Let the existing logo sit directly on the light header surface. */
+.site-header .brand-mark-img{background:transparent;border-radius:0}
+.site-header .brand-mark-img img{mix-blend-mode:multiply}
