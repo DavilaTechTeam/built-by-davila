@@ -10,7 +10,7 @@
     .client-hub-head strong{font-size:15px}.client-hub-sub{font-size:11px;color:#667085;margin-top:3px}
     .client-snapshot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
     .client-snapshot-card{background:#111;color:#fff;border-radius:11px;padding:10px 12px;min-height:58px;display:flex;flex-direction:column;justify-content:center}
-    .client-snapshot-card span{font-size:9px;color:#bdbdbd;text-transform:uppercase;letter-spacing:.06em;font-weight:800}.client-snapshot-card strong{font-size:15px;margin-top:3px;line-height:1.2}.client-snapshot-card small{font-size:9px;color:#cfcfcf;margin-top:2px}
+    .client-snapshot-card span{font-size:9px;color:#bdbdbd;text-transform:uppercase;letter-spacing:.06em;font-weight:800}.client-snapshot-card strong{font-size:15px;margin-top:3px;line-height:1.2}.client-snapshot-card small{font-size:9px;color:#cfcfcf;margin-top:2px;line-height:1.35}
     .client-hub-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     .client-hub-link,.client-hub-btn{display:flex;flex-direction:column;gap:3px;align-items:flex-start;justify-content:center;min-height:58px;padding:10px 12px;border:1px solid #deded9;border-radius:11px;background:#fff;color:#111;text-decoration:none;font:inherit;cursor:pointer}
     .client-hub-link:hover,.client-hub-btn:hover{border-color:#ff543b}.client-hub-link b,.client-hub-btn b{font-size:12px}.client-hub-link small,.client-hub-btn small{font-size:10px;color:#667085}
@@ -30,13 +30,20 @@
 
   const escHub=(v='')=>String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const fmt=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(n||0));
+  const fmtDate=v=>{
+    if(!v)return 'Launch not set';
+    const d=new Date(String(v).includes('T')?v:`${v}T12:00:00`);
+    return Number.isNaN(d.getTime())?'Launch not set':`Launch ${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+  };
   const getToken=()=>sessionStorage.getItem('bbd_token')||'';
-  async function fetchJson(path){
-    const headers={'Content-Type':'application/json'};const t=getToken();if(t)headers.Authorization=`Bearer ${t}`;
-    const r=await fetch('https://built-by-davila-backend.onrender.com'+path,{headers});
-    if(!r.ok)throw new Error('Could not load linked records.');
-    return r.json();
+  async function requestJson(path,options={}){
+    const headers={'Content-Type':'application/json',...(options.headers||{})};const t=getToken();if(t)headers.Authorization=`Bearer ${t}`;
+    const r=await fetch('https://built-by-davila-backend.onrender.com'+path,{...options,headers});
+    const body=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(body.error||'Could not load linked records.');
+    return body;
   }
+  const fetchJson=path=>requestJson(path);
   function related(id){
     try{
       const quotes=(store?.quotes||[]).filter(x=>String(x.client_id)===String(id));
@@ -46,8 +53,17 @@
       return{quotes,invoices,payments,subscriptions};
     }catch{return{quotes:[],invoices:[],payments:[],subscriptions:[]}}
   }
-  function goStudio(view,id){
-    location.href=`studio.html?view=${encodeURIComponent(view)}&client=${encodeURIComponent(id)}`;
+  async function activateConvertedClient(id,prospect){
+    if(!prospect)return;
+    const client=(store?.clients||[]).find(c=>String(c.id)===String(id));
+    const currentStatus=client?.status||document.getElementById('cf-status')?.value||'';
+    if(currentStatus!=='Lead')return;
+    try{
+      const updated=await requestJson(`/api/clients/${encodeURIComponent(id)}`,{method:'PATCH',body:JSON.stringify({status:'Active'})});
+      if(client)Object.assign(client,updated);
+      const select=document.getElementById('cf-status');if(select)select.value='Active';
+      if(typeof renderClients==='function')renderClients();
+    }catch(e){console.warn('Could not auto-activate converted client:',e.message)}
   }
   async function renderHub(){
     const id=document.getElementById('cf-id')?.value||'';
@@ -82,9 +98,19 @@
       const linkedProjects=(projects||[]).filter(p=>String(p.client_id)===String(id));
       const activeProject=linkedProjects.find(p=>!['Live','Completed','Canceled','On Hold'].includes(String(p.status)))||linkedProjects[0];
       const pc=document.getElementById('hub-project-count');if(pc)pc.textContent=`${linkedProjects.length} project${linkedProjects.length===1?'':'s'}`;
-      const ps1=document.getElementById('hub-project-stage');if(ps1)ps1.textContent=activeProject?.status||'No project';
-      const ps2=document.getElementById('hub-project-progress');if(ps2)ps2.textContent=activeProject?`${Number(activeProject.progress||activeProject.progress_percent||0)}% complete`:'Create a project to start';
+      const ps1=document.getElementById('hub-project-stage');
+      const ps2=document.getElementById('hub-project-progress');
+      if(activeProject){
+        const projectName=activeProject.project_name||activeProject.name||'Website Project';
+        const progress=Number(activeProject.progress||activeProject.progress_percent||0);
+        if(ps1)ps1.textContent=projectName;
+        if(ps2)ps2.textContent=`${activeProject.status||'Planning'} • ${progress}% • ${fmtDate(activeProject.target_launch||activeProject.target_launch_date)}`;
+      }else{
+        if(ps1)ps1.textContent='No project';
+        if(ps2)ps2.textContent='Create a project to start';
+      }
       const prospect=(prospects||[]).find(p=>String(p.converted_client_id)===String(id));
+      await activateConvertedClient(id,prospect);
       const ps=document.getElementById('hub-prospect-status');if(ps)ps.textContent=prospect?'View intake':'No linked intake';
       const pb=document.getElementById('hub-prospect');
       if(pb)pb.onclick=()=>{
