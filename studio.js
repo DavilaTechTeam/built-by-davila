@@ -268,16 +268,16 @@ function renderLines(){
     <input class="line-price" data-price="${i}" type="number" min="0" step="0.01" value="${l.unit_price}">
     <button class="btn secondary line-delete" data-del="${i}" type="button">×</button>
   </div>`).join('');
-  $('[data-package]').forEach(el=>el.onchange=e=>{
+  $$('[data-package]').forEach(el=>el.onchange=e=>{
     const index=Number(e.target.dataset.package),key=e.target.value,item=lineItems[index],pkg=quotePackages[key];
     item.package_key=key;
     if(pkg){
-      item.description=pkg.description;item.unit_price=pkg.price;
+      item.description=pkg.description;item.quantity=1;item.unit_price=pkg.price;
       if(index===0){$('#qb-deposit').value=pkg.deposit;$('#qb-notes').value=pkg.terms;}
     }
     renderLines();updatePreview();
   });
-  $('[data-desc]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.desc].description=e.target.value;updatePreview()});
+  $$('[data-desc]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.desc].description=e.target.value;updatePreview()});
   $$('[data-qty]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.qty].quantity=Number(e.target.value);updatePreview()});
   $$('[data-price]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.price].unit_price=Number(e.target.value);updatePreview()});
   $$('[data-del]').forEach(el=>el.onclick=e=>{if(lineItems.length>1){lineItems.splice(+e.target.dataset.del,1);renderLines();updatePreview()}});
