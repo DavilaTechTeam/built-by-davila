@@ -318,3 +318,7 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08
 @media(max-width:700px){
   .detail-summary,.detail-summary.four{grid-template-columns:1fr 1fr}
 }
+
+/* Package text uses form typography, rather than the small label font. */
+#quote-builder select[data-package]{font-family:Inter,Arial,sans-serif;font-size:16px;font-weight:400;line-height:1.4;color:var(--text);min-height:44px;}
+#quote-builder select[data-package] option{font-size:16px;font-weight:400;}
