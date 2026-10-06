@@ -182,7 +182,24 @@ function renderDashboard(){
   const active=d.active_subscriptions||store.subscriptions.filter(s=>s.status==='Active').slice(0,5);
   $('#dash-subs').innerHTML=active.map(s=>`<div class="subscription-card"><div><strong>${esc(s.company_name)}</strong><div class="sub-name">${esc(s.plan_name)}</div></div><div class="sub-right"><strong>${money(s.amount)}/mo</strong>${badge(s.status)}</div></div>`).join('')||`<div class="empty-state">No active recurring plans.</div>`;
 }
-function renderAll(){renderClients();renderQuotes();renderInvoices();renderPayments();renderSubs();renderDashboard();updatePreview()}
+function renderAll(){renderClients();renderQuotes();renderInvoices();renderPayments();renderSubs();renderDashboard();updatePreview();renderStripeReceipts()}
+
+async function renderStripeReceipts(){
+ const statusEl=$('#stripe-status');if(!statusEl)return;
+ let panel=$('#stripe-receipts');
+ if(!panel){panel=document.createElement('div');panel.id='stripe-receipts';panel.className='panel';$('#payments').append(panel);}
+ try{
+  const [status,receipts]=await Promise.all([api('/api/stripe/status'),api('/api/stripe/receipts')]);
+  statusEl.textContent=status.configured?`Stripe webhook configured (${status.mode}). Refresh after payment to see the latest records.`:'Stripe webhook awaits activation. Manual payment recording remains available.';
+  panel.innerHTML='<h3>Stripe payments needing review</h3>'+ (receipts.length?receipts.map(r=>`<div class="detail-line"><div><strong>${money(Number(r.amount_cents)/100)} ${esc(r.currency.toUpperCase())}</strong><small>${esc(r.customer_email||'No email')} • ${esc(r.session_id)}</small><select data-receipt="${esc(r.session_id)}"><option value="">Choose invoice after verifying the customer</option>${store.invoices.filter(i=>!['Void','Draft','Paid'].includes(i.status)&&Number(i.balance_due)>=Number(r.amount_cents)/100).map(i=>`<option value="${esc(i.id)}">${esc(i.invoice_number)} — ${esc(i.company_name)}</option>`).join('')}</select></div><button class="btn secondary" data-assign="${esc(r.session_id)}">Assign payment</button></div>`).join(''):'<p>No unassigned Stripe payments.</p>');
+  panel.querySelectorAll('[data-assign]').forEach(b=>b.onclick=async()=>{
+   const select=Array.from(panel.querySelectorAll('[data-receipt]')).find(s=>s.dataset.receipt===b.dataset.assign);
+   if(!select.value)return toast('Choose an invoice first.','error');
+   if(!await studioConfirm({title:'Assign Stripe payment',message:'Confirm that this Stripe receipt belongs to the selected customer and invoice.',confirmText:'Assign payment'}))return;
+   try{await api('/api/stripe/receipts/'+encodeURIComponent(b.dataset.assign)+'/assign',{method:'POST',body:JSON.stringify({invoice_id:select.value})});await loadAll();toast('Stripe payment assigned.');}catch(e){toast(e.message,'error')}
+  });
+ }catch(e){statusEl.textContent=e.message;panel.textContent='Stripe receipts unavailable.';}
+}
 
 /* Client modal */
 function openClient(id=''){
@@ -423,9 +440,18 @@ async function openInvoiceDetail(id){
         ${(i.payments||[]).length?(i.payments||[]).map(p=>`<div class="detail-line"><div><strong>${esc(p.type)} • ${esc(p.method)}</strong><small>${dateFmt(p.paid_at||p.created_at)}${p.reference?` • ${esc(p.reference)}`:''}</small></div><strong>${money(p.amount)}</strong></div>`).join(''):'<p>No payments recorded.</p>'}
       </div>`;
     $('#id-actions').innerHTML=`
+      ${Number(i.balance_due)===1995&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Get Starter Payment Link</button>`:''}
       ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn primary" id="id-payment">Record Payment</button>`:''}
       ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
     if($('#id-payment')) $('#id-payment').onclick=()=>{hideModal('invoice-detail-modal');openPayment(i.id)};
+    if($('#id-stripe-link')) $('#id-stripe-link').onclick=async()=>{
+      try{
+        const result=await api('/api/invoices/'+i.id+'/stripe-link',{method:'POST'});
+        const field=document.createElement('input');field.readOnly=true;field.value=result.url;
+        field.style.width='100%';$('#id-content').append(field);field.select();
+        try{await navigator.clipboard.writeText(result.url);toast('Invoice payment link copied.');}catch{toast('Copy the payment link shown below.');}
+      }catch(e){toast(e.message,'error')}
+    };
     if($('#id-void')) $('#id-void').onclick=()=>voidInvoice(i.id,i.invoice_number);
     showModal('invoice-detail-modal');
   }catch(e){toast(e.message,'error')}
