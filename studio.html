@@ -132,7 +132,7 @@
         <div class="form-grid">
           <div class="field"><label>Client *</label><select id="qb-client"><option value="">Select a client</option></select></div>
           <div class="field"><label>Deposit %</label><input id="qb-deposit" type="number" min="0" max="100" value="50"></div>
-          <div class="field full"><label>Line items</label><div id="line-items"></div><button class="btn secondary" id="add-line" type="button">+ Add Line Item</button></div>
+          <div class="field full"><label>Line items</label><p style="font-size:13px;margin:0 0 12px">Choose a package or enter a custom item. Descriptions and prices stay editable. The first package sets payment terms; review them when combining services.</p><div id="line-items"></div><button class="btn secondary" id="add-line" type="button">+ Add Line Item</button></div>
           <div class="field"><label for="qb-discount-type">Discount type</label><select id="qb-discount-type"><option value="none">No discount</option><option value="percent">Percentage (%)</option><option value="fixed">Dollar amount ($)</option></select></div>
 <div class="field"><label for="qb-discount-value">Discount value</label><input id="qb-discount-value" type="number" min="0" step="0.01" value="0"></div>
 <div class="field full"><label for="qb-discount-label">Discount description</label><input id="qb-discount-label" value="Discount" maxlength="120"></div>
@@ -176,7 +176,7 @@
 
 <div class="modal-backdrop" id="invoice-detail-modal" aria-hidden="true"><div class="client-modal detail-modal"><div class="modal-header"><div><div class="eyebrow">INVOICE DETAILS</div><h2 id="id-title">Invoice</h2><p id="id-subtitle"></p></div><button class="modal-close" data-close="invoice-detail-modal">×</button></div><div id="id-content"></div><div class="modal-actions detail-actions" id="id-actions"></div></div></div>
 
-<script src="studio.js"></script>
+<script src="studio.js?v=20261006-packages"></script>
 <script>
 (() => {
   const API_BASE='https://built-by-davila-backend.onrender.com';

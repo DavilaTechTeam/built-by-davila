@@ -6,7 +6,12 @@ const esc=(v='')=>String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':
 let token=sessionStorage.getItem('bbd_token')||'';
 
 const store={clients:[],quotes:[],invoices:[],payments:[],subscriptions:[],dashboard:null};
-let lineItems=[{description:'Website Design & Development',quantity:1,unit_price:3995}];
+const quotePackages={
+  starter:{label:'Starter Website — $1,995',description:'Starter Website — up to 5 custom pages, mobile-first design, contact form, basic SEO setup, and 2 rounds of revisions.',price:1995,deposit:100,terms:'Full one-time build payment due before work begins. Final scope is agreed before work starts. Monthly care, domain registration, and paid software are separate unless included in the proposal.'},
+  growth:{label:'Growth / Business Website — $3,995',description:'Business Website — up to 10 custom pages, custom visual direction, portfolio showcase, conversion-focused structure, analytics, and scoped integrations.',price:3995,deposit:50,terms:'50% deposit due to begin work. Remaining balance due prior to launch. Final scope and integrations are agreed before work starts. Monthly care and paid software are separate unless included in the proposal.'},
+  premium:{label:'Premium Website — $5,995',description:'Premium Website — up to 20 custom pages, advanced forms, scoped CRM/calendar integrations, automation workflows, and advanced tracking.',price:5995,deposit:50,terms:'50% deposit due to begin work. Remaining balance due prior to launch. Final scope and workflows are agreed before work starts. Monthly care and paid software are separate unless included in the proposal.'}
+};
+let lineItems=[{package_key:'custom',description:'',quantity:1,unit_price:0}];
 
 function setStatus(text,kind='ok'){const el=$('#api-status');if(!el)return;el.textContent=text;el.className='db-status '+kind;}
 function showModal(id){const el=$('#'+id);if(!el)return;el.classList.add('show');el.setAttribute('aria-hidden','false');}
@@ -252,12 +257,27 @@ async function deleteClient(id){
 /* Quote Builder */
 function renderLines(){
   $('#line-items').innerHTML=lineItems.map((l,i)=>`<div class="line-row rich-line">
+    <label style="grid-column:1 / -1">Service / Package
+      <select data-package="${i}" style="width:100%;margin-top:6px" aria-label="Service or package for line ${i+1}">
+        <option value="custom" ${!quotePackages[l.package_key]?'selected':''}>Custom Item — enter description and price</option>
+        ${Object.entries(quotePackages).map(([key,p])=>`<option value="${key}" ${l.package_key===key?'selected':''}>${esc(p.label)}</option>`).join('')}
+      </select>
+    </label>
     <input class="line-desc" data-desc="${i}" value="${esc(l.description)}" placeholder="Service description">
     <input class="line-qty" data-qty="${i}" type="number" min="0.01" step="0.01" value="${l.quantity}">
     <input class="line-price" data-price="${i}" type="number" min="0" step="0.01" value="${l.unit_price}">
     <button class="btn secondary line-delete" data-del="${i}" type="button">×</button>
   </div>`).join('');
-  $$('[data-desc]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.desc].description=e.target.value;updatePreview()});
+  $('[data-package]').forEach(el=>el.onchange=e=>{
+    const index=Number(e.target.dataset.package),key=e.target.value,item=lineItems[index],pkg=quotePackages[key];
+    item.package_key=key;
+    if(pkg){
+      item.description=pkg.description;item.unit_price=pkg.price;
+      if(index===0){$('#qb-deposit').value=pkg.deposit;$('#qb-notes').value=pkg.terms;}
+    }
+    renderLines();updatePreview();
+  });
+  $('[data-desc]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.desc].description=e.target.value;updatePreview()});
   $$('[data-qty]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.qty].quantity=Number(e.target.value);updatePreview()});
   $$('[data-price]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.price].unit_price=Number(e.target.value);updatePreview()});
   $$('[data-del]').forEach(el=>el.onclick=e=>{if(lineItems.length>1){lineItems.splice(+e.target.dataset.del,1);renderLines();updatePreview()}});
@@ -272,7 +292,7 @@ function proposalTotals(){
 }
 function proposalItems(){
   const totals=proposalTotals();
-  const items=lineItems.map(i=>({...i}));
+  const items=lineItems.map(({description,quantity,unit_price})=>({description,quantity,unit_price}));
   if(totals.discount>0)items.push({description:($('#qb-discount-label').value.trim()||'Discount')+(totals.type==='percent'?' ('+totals.value+'%)':''),quantity:1,unit_price:-totals.discount});
   return items;
 }
@@ -283,12 +303,13 @@ function updatePreview(){
   $('#pv-lines').innerHTML=lineItems.map(l=>`<div class="preview-line"><span>${esc(l.description)} × ${Number(l.quantity||0)}</span><strong>${money(Number(l.quantity||0)*Number(l.unit_price||0))}</strong></div>`).join('');
   $('#pv-total').textContent=money(total);$('#pv-deposit').textContent=money(total*dep/100);$('#pv-balance').textContent=money(total-total*dep/100);
 }
-$('#add-line').onclick=()=>{lineItems.push({description:'New Service',quantity:1,unit_price:0});renderLines();updatePreview()};
+$('#add-line').onclick=()=>{lineItems.push({package_key:'custom',description:'',quantity:1,unit_price:0});renderLines();updatePreview()};
 $('#qb-client').onchange=updatePreview;$('#qb-deposit').oninput=updatePreview;['qb-discount-type','qb-discount-value','qb-discount-label'].forEach(id=>$('#'+id).addEventListener('input',updatePreview));
-$('#clear-quote').onclick=()=>{lineItems=[{description:'Website Design & Development',quantity:1,unit_price:3995}];$('#qb-client').value='';$('#qb-deposit').value=50;$('#qb-discount-type').value='none';$('#qb-discount-value').value=0;$('#qb-discount-label').value='Discount';renderLines();updatePreview()};
+$('#clear-quote').onclick=()=>{lineItems=[{package_key:'custom',description:'',quantity:1,unit_price:0}];$('#qb-notes').value='50% deposit due to begin work. Remaining balance due prior to launch. Scope changes may require a revised quote.';$('#qb-client').value='';$('#qb-deposit').value=50;$('#qb-discount-type').value='none';$('#qb-discount-value').value=0;$('#qb-discount-label').value='Discount';renderLines();updatePreview()};
 async function saveQuote(status){
   const client_id=$('#qb-client').value;if(!client_id)return toast('Select a client first.','error');
   if(!lineItems.length)return toast('Add at least one line item.','error');
+  if(lineItems.some(item=>!item.description.trim()))return toast('Enter a description for every line item.','error');
   try{
     const q=await api('/api/quotes',{method:'POST',body:JSON.stringify({client_id,status,deposit_percent:Number($('#qb-deposit').value||0),notes:$('#qb-notes').value,items:proposalItems()})});
     await reload('quotes');toast(`${q.quote_number} saved to the live database.`);nav('quotes');$('#clear-quote').click();
