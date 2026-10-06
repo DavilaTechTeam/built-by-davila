@@ -71,20 +71,26 @@ async function api(path,options={}){
 }
 
 async function initAuth(){
+  showAuth();
+  if(!token)return false;
   try{
-    const r=await rawFetch('/api/auth/status');
+    const r=await rawFetch('/api/auth/session');
     const data=await r.json();
-    if(data.authRequired && !token){showAuth();return false;}
-    return true;
-  }catch{setStatus('Waking server…','loading');return true;}
+    if(!r.ok || data.authenticated!==true || data.role!=='admin'){
+      if(r.status===401){token='';sessionStorage.removeItem('bbd_token');}
+      $('#login-message').textContent=data.error||'Please sign in again.';
+      return false;
+    }
+    hideAuth();return true;
+  }catch{$('#login-message').textContent='Unable to verify your session. Please try again.';return false;}
 }
-function showAuth(){$('#auth-screen').classList.remove('hidden');$('#login-password').focus();}
-function hideAuth(){$('#auth-screen').classList.add('hidden');}
+function showAuth(){$('.app').style.display='none';$('#auth-screen').classList.remove('hidden');$('#login-password').focus();}
+function hideAuth(){$('#auth-screen').classList.add('hidden');$('.app').style.display='';}
 $('#login-form').addEventListener('submit',async e=>{
   e.preventDefault();const msg=$('#login-message');msg.textContent='Signing in…';
   try{
     const data=await rawFetch('/api/auth/login',{method:'POST',body:JSON.stringify({password:$('#login-password').value})}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Login failed');return d});
-    if(data.token){token=data.token;sessionStorage.setItem('bbd_token',token)}
+    if(!data.token)throw new Error('Administrator login is unavailable.');token=data.token;sessionStorage.setItem('bbd_token',token)
     hideAuth();msg.textContent='';await loadAll();
   }catch(err){msg.textContent=err.message;msg.className='form-message error'}
 });
@@ -239,21 +245,35 @@ function renderLines(){
   $$('[data-price]').forEach(el=>el.oninput=e=>{lineItems[+e.target.dataset.price].unit_price=Number(e.target.value);updatePreview()});
   $$('[data-del]').forEach(el=>el.onclick=e=>{if(lineItems.length>1){lineItems.splice(+e.target.dataset.del,1);renderLines();updatePreview()}});
 }
+function proposalTotals(){
+  const subtotal=Math.round(lineItems.reduce((sum,item)=>sum+Math.round(Number(item.quantity)*Number(item.unit_price)*100)/100,0)*100)/100;
+  const type=$('#qb-discount-type').value,value=Number($('#qb-discount-value').value);
+  if(!Number.isFinite(subtotal)||subtotal<0||lineItems.some(i=>!Number.isFinite(Number(i.quantity))||Number(i.quantity)<=0||!Number.isFinite(Number(i.unit_price))||Number(i.unit_price)<0))throw new Error('Enter valid quantities and nonnegative service prices.');
+  if(type!=='none'&&(!Number.isFinite(value)||value<0||(type==='percent'&&value>100)||(type==='fixed'&&value>subtotal)))throw new Error('Discount must be between zero and the subtotal (or 0–100%).');
+  const discount=Math.round((type==='percent'?subtotal*value/100:type==='fixed'?value:0)*100)/100;
+  return {subtotal,discount,total:Math.round((subtotal-discount)*100)/100,type,value};
+}
+function proposalItems(){
+  const totals=proposalTotals();
+  const items=lineItems.map(i=>({...i}));
+  if(totals.discount>0)items.push({description:($('#qb-discount-label').value.trim()||'Discount')+(totals.type==='percent'?' ('+totals.value+'%)':''),quantity:1,unit_price:-totals.discount});
+  return items;
+}
 function updatePreview(){
   const c=store.clients.find(x=>x.id===$('#qb-client').value);
   $('#pv-client').textContent=c?.company_name||'Select a client';
-  const total=lineItems.reduce((s,l)=>s+Number(l.quantity||0)*Number(l.unit_price||0),0), dep=Number($('#qb-deposit').value||0);
+  let totals;try{totals=proposalTotals()}catch(e){$('#pv-total').textContent=e.message;return;}const total=totals.total,dep=Number($('#qb-deposit').value||0);$('#pv-subtotal').textContent=money(totals.subtotal);$('#pv-discount').textContent='−'+money(totals.discount);
   $('#pv-lines').innerHTML=lineItems.map(l=>`<div class="preview-line"><span>${esc(l.description)} × ${Number(l.quantity||0)}</span><strong>${money(Number(l.quantity||0)*Number(l.unit_price||0))}</strong></div>`).join('');
   $('#pv-total').textContent=money(total);$('#pv-deposit').textContent=money(total*dep/100);$('#pv-balance').textContent=money(total-total*dep/100);
 }
 $('#add-line').onclick=()=>{lineItems.push({description:'New Service',quantity:1,unit_price:0});renderLines();updatePreview()};
-$('#qb-client').onchange=updatePreview;$('#qb-deposit').oninput=updatePreview;
-$('#clear-quote').onclick=()=>{lineItems=[{description:'Website Design & Development',quantity:1,unit_price:3995}];$('#qb-client').value='';$('#qb-deposit').value=50;renderLines();updatePreview()};
+$('#qb-client').onchange=updatePreview;$('#qb-deposit').oninput=updatePreview;['qb-discount-type','qb-discount-value','qb-discount-label'].forEach(id=>$('#'+id).addEventListener('input',updatePreview));
+$('#clear-quote').onclick=()=>{lineItems=[{description:'Website Design & Development',quantity:1,unit_price:3995}];$('#qb-client').value='';$('#qb-deposit').value=50;$('#qb-discount-type').value='none';$('#qb-discount-value').value=0;$('#qb-discount-label').value='Discount';renderLines();updatePreview()};
 async function saveQuote(status){
   const client_id=$('#qb-client').value;if(!client_id)return toast('Select a client first.','error');
   if(!lineItems.length)return toast('Add at least one line item.','error');
   try{
-    const q=await api('/api/quotes',{method:'POST',body:JSON.stringify({client_id,status,deposit_percent:Number($('#qb-deposit').value||0),notes:$('#qb-notes').value,items:lineItems})});
+    const q=await api('/api/quotes',{method:'POST',body:JSON.stringify({client_id,status,deposit_percent:Number($('#qb-deposit').value||0),notes:$('#qb-notes').value,items:proposalItems()})});
     await reload('quotes');toast(`${q.quote_number} saved to the live database.`);nav('quotes');$('#clear-quote').click();
   }catch(e){toast(e.message,'error')}
 }

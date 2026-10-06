@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+<style id="admin-lock">body{visibility:hidden}</style>
+<script src="admin-access.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prospects | Built by Davila</title>
@@ -17,7 +19,7 @@ body{background:#f5f5f2}.wrap{max-width:1250px;margin:0 auto;padding:34px}.top,.
   <div class="drawer" id="drawer"></div>
 </main>
 <div class="confirm-backdrop" id="confirm-backdrop"><div class="confirm-card"><div class="confirm-top"><div class="eyebrow">PROSPECT CONVERSION</div><h2>Convert prospect to client?</h2><p class="muted">This creates the Client record and keeps the original prospect linked for history.</p><div class="confirm-company" id="confirm-company"></div></div><div class="confirm-actions"><button class="btn secondary" id="confirm-cancel">Keep as Prospect</button><button class="btn confirm-primary" id="confirm-ok">Convert to Client</button></div></div></div>
-<script>
+<script type="text/plain" data-admin-script>
 const API='https://built-by-davila-backend.onrender.com';
 const token=sessionStorage.getItem('bbd_token')||'';
 let data=[],editorId=null,editorProspect=null,editorDraft=null,dirty=false,confirmResolver=null;

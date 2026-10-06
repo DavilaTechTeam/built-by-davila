@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<div class="auth-screen hidden" id="auth-screen">
+<div class="auth-screen" id="auth-screen">
   <div class="auth-card">
     <img src="assets/built-by-davila-mark.png" alt="Built by Davila">
     <div class="eyebrow">STUDIO BACK OFFICE</div>
@@ -22,7 +22,7 @@
   </div>
 </div>
 
-<div class="app">
+<div class="app" style="display:none">
 <aside class="side">
   <div class="side-logo"><img src="assets/built-by-davila-mark.png" alt="Built by Davila"></div>
   <div class="studio-brand-name">BUILT BY DAVILA</div>
@@ -133,7 +133,10 @@
           <div class="field"><label>Client *</label><select id="qb-client"><option value="">Select a client</option></select></div>
           <div class="field"><label>Deposit %</label><input id="qb-deposit" type="number" min="0" max="100" value="50"></div>
           <div class="field full"><label>Line items</label><div id="line-items"></div><button class="btn secondary" id="add-line" type="button">+ Add Line Item</button></div>
-          <div class="field full"><label>Terms / Notes</label><textarea id="qb-notes" rows="5">50% deposit due to begin work. Remaining balance due prior to launch. Scope changes may require a revised quote.</textarea></div>
+          <div class="field"><label for="qb-discount-type">Discount type</label><select id="qb-discount-type"><option value="none">No discount</option><option value="percent">Percentage (%)</option><option value="fixed">Dollar amount ($)</option></select></div>
+<div class="field"><label for="qb-discount-value">Discount value</label><input id="qb-discount-value" type="number" min="0" step="0.01" value="0"></div>
+<div class="field full"><label for="qb-discount-label">Discount description</label><input id="qb-discount-label" value="Discount" maxlength="120"></div>
+<div class="field full"><label>Terms / Notes</label><textarea id="qb-notes" rows="5">50% deposit due to begin work. Remaining balance due prior to launch. Scope changes may require a revised quote.</textarea></div>
         </div>
         <div class="builder-actions">
           <button class="btn secondary" id="clear-quote" type="button">Clear</button>
@@ -147,7 +150,7 @@
         <div class="preview-meta">Prepared for <strong id="pv-client">Select a client</strong></div>
         <hr><div id="pv-lines"></div><hr>
         <div class="totalbox">
-          <div><span>Total project</span><strong id="pv-total">$0</strong></div>
+          <div><span>Subtotal</span><strong id="pv-subtotal">$0</strong></div><div><span>Discount</span><strong id="pv-discount">$0</strong></div><div><span>Total project</span><strong id="pv-total">$0</strong></div>
           <div><span>Initial payment</span><strong id="pv-deposit">$0</strong></div>
           <div class="grand"><span>Remaining balance</span><strong id="pv-balance">$0</strong></div>
         </div>
