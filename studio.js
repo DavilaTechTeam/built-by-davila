@@ -316,6 +316,58 @@ async function convertQuote(id){
 }
 
 
+
+/* Proposal message composer */
+function quoteMessage(q,c){
+  const total=Number(q.total),deposit=Math.round(total*Number(q.deposit_percent||0))/100;
+  const name=c.contact_first_name||c.company_name||q.company_name||'there';
+  return [
+    'Hi '+name+',',
+    '',
+    'Here is our website proposal for '+q.company_name+' ('+q.quote_number+'):',
+    '',
+    ...(q.items||[]).map(it=>it.description+': '+money(it.amount)),
+    '',
+    'Total project: '+money(total),
+    'Initial payment ('+Number(q.deposit_percent||0)+'%): '+money(deposit),
+    'Remaining balance: '+money(total-deposit),
+    '',
+    q.notes||'',
+    '',
+    'Please let me know if you have any questions or would like to move forward.',
+    '',
+    'Joaquin Davila',
+    'Built by Davila',
+    'https://builtbydavila.com'
+  ].join('\n');
+}
+function whatsappURL(phone,message){
+  const digits=String(phone).replace(/[^0-9]/g,'');
+  if(digits.length<8||digits.length>15)throw new Error('Enter the client phone number with its country code (for example, 1 followed by the US number).');
+  return 'https://wa.me/'+digits+'?text='+encodeURIComponent(message);
+}
+function attachQuoteComposer(q){
+  const c=store.clients.find(c=>c.id===q.client_id)||{};
+  const section=document.createElement('div');section.className='detail-section';
+  section.innerHTML=`<h4>Proposal message</h4>
+    <label for="qm-phone">WhatsApp number (include country code)</label>
+    <input id="qm-phone" type="tel" style="width:100%;margin:8px 0 16px" value="${esc(c.phone||'')}" placeholder="1 + US phone number">
+    <label for="qm-message">Message — edit before sharing</label>
+    <textarea id="qm-message" rows="12" style="width:100%;margin:8px 0 16px"></textarea>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn secondary" id="qm-copy">Copy Message</button><button class="btn primary" id="qm-whatsapp">Open in WhatsApp</button></div>
+    <p style="font-size:13px">Review the recipient and tap Send in WhatsApp. Opening a chat does not mark this quote as sent. Message edits stay here until you close this quote.</p>`;
+  $('#qd-content').appendChild(section);
+  $('#qm-message').value=quoteMessage(q,c);
+  $('#qm-copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#qm-message').value);toast('Message copied.')}catch{toast('Select the message and copy it manually.','error')}};
+  $('#qm-whatsapp').onclick=()=>{
+    try{
+      const message=$('#qm-message').value.trim();if(!message)throw new Error('Enter a message first.');
+      const url=whatsappURL($('#qm-phone').value,message);
+      window.open(url,'_blank','noopener,noreferrer');
+    }catch(e){toast(e.message,'error')}
+  };
+}
+
 async function openQuoteDetail(id){
   try{
     const q=await api('/api/quotes/'+id);
@@ -337,6 +389,7 @@ async function openQuoteDetail(id){
     if($('#qd-delete')) $('#qd-delete').onclick=()=>deleteQuote(q.id,q.quote_number);
     if($('#qd-sent')) $('#qd-sent').onclick=async()=>{try{await api('/api/quotes/'+q.id,{method:'PATCH',body:JSON.stringify({status:'Sent'})});hideModal('quote-detail-modal');await reload('quotes');toast('Quote marked Sent.')}catch(e){toast(e.message,'error')}};
     if($('#qd-convert')) $('#qd-convert').onclick=()=>{hideModal('quote-detail-modal');convertQuote(q.id)};
+    attachQuoteComposer(q);
     showModal('quote-detail-modal');
   }catch(e){toast(e.message,'error')}
 }
