@@ -2,8 +2,8 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Your invoices | Built By Davila</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f5f3ef;color:#17191c;font:16px Inter,Arial,sans-serif}header{background:#111418;color:white;padding:25px max(24px,calc((100vw - 1050px)/2))}header strong{letter-spacing:.08em}main{max-width:1050px;margin:auto;padding:36px 24px}h1{font-size:32px;margin:0 0 10px}p{line-height:1.6;color:#60646b}.card{background:white;border:1px solid #e7e3dc;border-radius:18px;padding:24px;margin:22px 0}.head{display:flex;justify-content:space-between;gap:16px;align-items:center}.numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}.numbers div{padding:16px;background:#f8f7f4;border-radius:12px}.numbers small{display:block;color:#646871;margin-bottom:8px}.numbers strong{font-size:23px}button{font:inherit;font-weight:700;border-radius:30px;padding:12px 20px;border:1px solid #e1dfdb;background:white;cursor:pointer}button.primary{background:#ff5a36;border-color:#ff5a36;color:white}button:disabled{opacity:.6;cursor:wait}.history{border-top:1px solid #eee;margin-top:20px;padding-top:16px}.history p{margin:8px 0}.badge{background:#f1f3f5;padding:7px 12px;border-radius:20px;font-size:13px}.backdrop{position:fixed;inset:0;background:#0007;backdrop-filter:blur(5px);display:none;padding:20px;overflow:auto;z-index:10}.backdrop.open{display:flex;align-items:flex-start;justify-content:center}.popup{background:#f5f3ef;border-radius:22px;max-width:850px;width:100%;margin:30px 0;padding:24px}.popup h2{margin:10px 0}.error{color:#b42318}#message{min-height:24px}@media(max-width:600px){.numbers{grid-template-columns:1fr}.head{align-items:flex-start}.popup{padding:16px}.numbers strong{font-size:21px}}
-</style></head><body><header><strong>BUILT BY DAVILA</strong><div style="margin-top:8px;color:#ccc">Your client portal</div></header>
-<main><div class="head"><div><h1 id="company">Invoices & payments</h1><p>Review your invoices and securely pay your deposit or remaining balance.</p></div><button id="refresh">Refresh</button></div><p id="message" role="status">Loading your invoices…</p><div id="invoices"></div></main>
+#website-fields label{display:block;font-weight:700;margin:20px 0 8px}#website-fields textarea{display:block;width:100%;margin-top:8px;min-height:90px;padding:14px;border:1px solid #dedbd4;border-radius:12px;background:#faf9f6;color:#17191c;font:400 16px/1.5 Inter,Arial,sans-serif;resize:vertical}#website-actions{margin-top:24px}#website-actions[hidden]{display:none}#website-reviews:empty{display:none}</style></head><body><header><strong>BUILT BY DAVILA</strong><div style="margin-top:8px;color:#ccc">Your client portal</div></header>
+<main><div class="head"><div><h1 id="company">Invoices & payments</h1><p>Review your invoices and securely pay your deposit or remaining balance.</p></div><button id="refresh">Refresh</button></div><p id="message" role="status">Loading your invoices…</p><div id="invoices"></div><section class="card" id="website-edits"><div class="head"><h2>Website edits</h2><button id="load-website">Edit wording</button></div><p>Update your website wording and submit it for Built By Davila to review before it goes live.</p><p id="website-message" role="status"></p><div id="website-fields"></div><div id="website-actions" hidden><button id="save-wording">Save draft</button> <button class="primary" id="submit-wording">Submit for approval</button></div><div id="website-reviews" class="history"></div></section></main>
 <div class="backdrop" id="checkout" role="dialog" aria-modal="true" aria-labelledby="checkout-title"><div class="popup"><div class="head"><div><small style="color:#ff5a36;font-weight:700">BUILT BY DAVILA · SECURE CHECKOUT</small><h2 id="checkout-title">Invoice payment</h2></div><button id="close" aria-label="Close checkout">×</button></div><p id="checkout-status" role="status"></p><div id="mount"></div></div></div>
 <script src="https://js.stripe.com/endive/stripe.js"></script>
 <script>
@@ -52,5 +52,28 @@ async function pay(button){
   checkout=instance;el('checkout-status').textContent='';checkout.mount('#mount');
  }catch(e){if(run===generation)el('checkout-status').textContent=e.message;}
 }
+
+let wordingFields=[],draftKey='';
+const draftChanges=()=>wordingFields.map(f=>({id:f.id,value:el(f.id).value})).filter((c,i)=>c.value.trim()!==wordingFields[i].value);
+el('load-website').onclick=async()=>{
+ el('load-website').disabled=true;el('website-message').textContent='Loading website wording…';
+ try{
+  const d=await api('/customer-api/website');
+  if(!d.available){el('website-message').textContent='Website editing setup is pending. Please contact Built By Davila.';return;}
+  wordingFields=d.fields;draftKey='bbd_wording_'+access;
+  let draft=[];try{draft=JSON.parse(localStorage.getItem(draftKey)||'[]')}catch{}
+  el('website-fields').innerHTML=d.fields.map(f=>'<label for="'+f.id+'">'+esc(f.label)+'<textarea id="'+f.id+'" maxlength="4000">'+esc(draft.find(c=>c.id===f.id)?.value??f.value)+'</textarea></label>').join('');
+  el('website-actions').hidden=false;
+  el('website-reviews').innerHTML='<strong>Review history</strong>'+d.reviews.map(r=>'<p>'+esc(r.status)+' · '+new Date(r.submitted_at).toLocaleDateString()+(r.published_at?' · Published':'')+(r.review_note?' · '+esc(r.review_note):'')+'</p>').join('');
+  el('website-message').textContent=draft.length?'Your saved draft is restored.':'Edit the fields below. Your website layout stays protected.';
+ }catch(e){el('website-message').textContent=e.message;}
+ finally{el('load-website').disabled=false;}
+};
+el('save-wording').onclick=()=>{try{localStorage.setItem(draftKey,JSON.stringify(draftChanges()));el('website-message').textContent='Draft saved in this browser.';}catch{el('website-message').textContent='Unable to save a draft in this browser. You can still submit for approval.';}};
+el('submit-wording').onclick=async()=>{
+ const button=el('submit-wording');button.disabled=true;
+ try{await api('/customer-api/website/reviews',{method:'POST',body:JSON.stringify({changes:draftChanges()})});try{localStorage.removeItem(draftKey)}catch{}await el('load-website').onclick();el('website-message').textContent='Submitted for approval. Built By Davila will review your changes before publishing.';}
+ catch(e){el('website-message').textContent=e.message;}finally{button.disabled=false;}
+};
 el('refresh').onclick=load;load();
 </script><script src="language.js?v=1" defer></script></body></html>
