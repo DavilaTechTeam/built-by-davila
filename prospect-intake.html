@@ -30,4 +30,5 @@ async function submitIntake(){if(submitting)return;submitting=true;const pages=[
 $('next').onclick=async()=>{if(submitting||!valid())return;if(i<panels.length-1){i++;show();return;}await submitIntake()};
 $('prev').onclick=()=>{if(!submitting&&i>0){i--;show()}};
 </script>
+<script src="language.js?v=1" defer></script>
 </body></html>

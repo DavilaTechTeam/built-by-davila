@@ -60,4 +60,5 @@ $('project-form').onsubmit=async e=>{e.preventDefault();const id=$('p-id').value
 async function load(){try{[projects,clients,portalReviews]=await Promise.all([api('/api/projects'),api('/api/clients'),api('/api/portal-reviews')]);populateClients();const params=new URLSearchParams(location.search);const client=params.get('client');if(client&&clients.some(c=>String(c.id)===String(client)))$('filter-client').value=client;render();if(params.get('new')==='1'){openModal();if(client){$('p-client').value=client;syncStatusLock(null)}}}catch(err){$('board').innerHTML=`<div class="empty">${esc(err.message)}</div>`}}
 load();
 </script>
+<script src="language.js?v=1" defer></script>
 </body></html>

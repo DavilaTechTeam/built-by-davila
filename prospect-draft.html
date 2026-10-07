@@ -38,4 +38,5 @@ async function save(){const btn=document.getElementById('save');btn.disabled=tru
 document.getElementById('save').onclick=save;window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
 (async()=>{if(!id){document.body.innerHTML='<div style="padding:40px">Missing prospect ID.</div>';return}try{prospect=await api('/api/prospects/'+id);draft=defaults(prospect);document.getElementById('back-link').href='prospects.html';render()}catch(e){document.body.innerHTML=`<div style="padding:40px">${esc(e.message)}</div>`}})();
 </script>
+<script src="language.js?v=1" defer></script>
 </body></html>

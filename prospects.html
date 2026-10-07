@@ -53,5 +53,6 @@ function showConvertConfirm(x){$('confirm-company').textContent=x.company;$('con
 window.convertProspect=async id=>{const x=data.find(p=>p.id===id);if(!x||x.convertedClientId)return;if(!await showConvertConfirm(x))return;const result=await api('/api/prospects/'+id+'/convert',{method:'POST',body:'{}'});data[data.findIndex(p=>p.id===id)]=normalize(result.prospect);render();openProspect(id)}
 async function load(){$('list').innerHTML='<div class="loading">Loading prospects…</div>';try{data=(await api('/api/prospects')).map(normalize);render()}catch(e){$('list').innerHTML=`<div class="empty">${esc(e.message)}</div>`}}$('refresh').onclick=load;window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});load();
 </script>
+<script src="language.js?v=1" defer></script>
 </body>
 </html>

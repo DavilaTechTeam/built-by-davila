@@ -42,5 +42,6 @@ function handleDeepLink(){if(deepHandled||!deepClientId)return;const c=clients.f
 async function load(){list.innerHTML='<tr><td colspan="5" class="empty-state">Loading clients…</td></tr>';try{const headers={};if(token)headers.Authorization=`Bearer ${token}`;const r=await fetch(API_BASE+'/api/clients',{headers});if(r.status===401){list.innerHTML='<tr><td colspan="5" class="empty-state">Your Studio session has expired. <a href="studio.html">Return to Studio and sign in again.</a></td></tr>';return;}if(!r.ok)throw new Error('Unable to load clients');clients=await r.json();render();handleDeepLink()}catch(e){list.innerHTML='<tr><td colspan="5" class="empty-state">Could not load clients from the backend.</td></tr>'}}
 search.addEventListener('input',render);document.getElementById('refresh-btn').onclick=load;document.getElementById('setup-cancel').onclick=closeSetup;document.getElementById('setup-save').onclick=saveSetup;document.getElementById('setup-modal').addEventListener('click',e=>{if(e.target.id==='setup-modal')closeSetup()});load();
 </script>
+<script src="language.js?v=1" defer></script>
 </body>
 </html>

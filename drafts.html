@@ -19,4 +19,5 @@ function editKey(key){selected=key;const val=key==='about'?draft.copy.about:key=
 function editService(i){document.getElementById('edit-title').textContent=`Service ${i+1}`;document.getElementById('edit-fields').innerHTML=`<input id="edit-value" value="${esc(draft.services[i]||'')}"><button class="btn primary" style="width:100%;margin-top:10px" id="apply">Apply</button>`;document.getElementById('apply').onclick=()=>{draft.services[i]=document.getElementById('edit-value').value;markDirty();renderEditor();editService(i)}}
 async function saveDraft(){const btn=document.getElementById('save');btn.disabled=true;btn.textContent='Saving…';try{const updated=await api('/api/prospects/'+editId,{method:'PATCH',body:JSON.stringify({draft,draft_generated:true,status:prospect.status==='Converted to Client'?'Converted to Client':'Draft Generated'})});prospect=updated;draft=defaults(updated);dirty=false;renderEditor();document.getElementById('state').textContent='Saved to Built by Davila database.'}catch(e){document.getElementById('state').textContent=e.message}finally{btn.disabled=false;btn.textContent='Save Draft'}}
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});if(editId)editorPage();else listPage();
-</script></body></html>
+</script><script src="language.js?v=1" defer></script>
+</body></html>
