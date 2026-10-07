@@ -152,8 +152,14 @@ function renderQuotes(){
   $$('.quote-status').forEach(b=>b.onclick=async()=>{try{await api('/api/quotes/'+b.dataset.id,{method:'PATCH',body:JSON.stringify({status:b.dataset.status})});await reload('quotes');toast('Quote updated.')}catch(e){toast(e.message,'error')}});
   $$('.convert-quote').forEach(b=>b.onclick=()=>convertQuote(b.dataset.id));
 }
+function invoiceDisplay(i){
+  const cents=Number(i.sandbox_paid_cents || i.sandbox_payments?.[0]?.amount_cents || 0);
+  if(i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'||cents<=0||i.status==='Void')return i;
+  const paid=Math.min(Number(i.total),cents/100);
+  return {...i,amount_paid:paid,balance_due:Math.max(0,Number(i.total)-paid),status:paid>=Number(i.total)?'Paid (Test)':'Partially Paid (Test)'};
+}
 function renderInvoices(){
-  $('#invoice-body').innerHTML=store.invoices.length?store.invoices.map(i=>`<tr>
+  $('#invoice-body').innerHTML=store.invoices.length?store.invoices.map(invoiceDisplay).map(i=>`<tr>
     <td><strong>${esc(i.invoice_number)}</strong></td><td>${esc(i.company_name)}</td><td>${money(i.total)}</td><td>${money(i.amount_paid)}</td><td>${money(i.balance_due)}</td><td>${badge(i.status)}</td><td>${dateFmt(i.due_date)}</td>
     <td class="actions-cell">
       <button class="mini-btn view-invoice" data-id="${i.id}">View</button>
@@ -444,7 +450,7 @@ async function deleteQuote(id,number){
 
 async function openInvoiceDetail(id){
   try{
-    const i=await api('/api/invoices/'+id);
+    const i=invoiceDisplay(await api('/api/invoices/'+id));
     $('#id-title').textContent=i.invoice_number;
     $('#id-subtitle').textContent=`${i.company_name} • ${i.status} • Due ${dateFmt(i.due_date)}`;
     $('#id-content').innerHTML=`
@@ -463,7 +469,12 @@ async function openInvoiceDetail(id){
     if(i.client_id==='9756cec8-8fbb-4614-b259-6853df83581a'){
       const testPaid=(i.sandbox_payments||[]).length>0;
       $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Sandbox payment test</h4><p>${testPaid?'Test payment received — '+money(i.sandbox_payments[0].amount_cents/100):'No test payment received yet.'}</p><p>Simulated payments do not change your real invoice balance or revenue.</p><button class="btn secondary" id="id-test-link">Open Test Checkout</button><button class="btn secondary" id="id-test-refresh">Refresh Test Result</button></div>`);
-      $('#id-test-refresh').onclick=()=>openInvoiceDetail(i.id);
+      $('#id-test-refresh').onclick=async()=>{
+        $('#id-test-refresh').textContent='Checking…';
+        await openInvoiceDetail(i.id);
+        await reload('invoices');
+        toast('Test payment status refreshed.');
+      };
       $('#id-test-link').onclick=async()=>{
         const tab=window.open('about:blank','_blank');
         try{
