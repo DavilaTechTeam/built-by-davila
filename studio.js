@@ -163,12 +163,16 @@ function renderInvoices(){
     <td><strong>${esc(i.invoice_number)}</strong></td><td>${esc(i.company_name)}</td><td>${money(i.total)}</td><td>${money(i.amount_paid)}</td><td>${money(i.balance_due)}</td><td>${badge(i.status)}</td><td>${dateFmt(i.due_date)}</td>
     <td class="actions-cell">
       <button class="mini-btn view-invoice" data-id="${i.id}">View</button>
-      ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="mini-btn primary-mini pay-invoice" data-id="${i.id}">Record Payment</button>`:''}
+      ${checkoutAvailable(i)?`<button class="mini-btn primary-mini checkout-invoice" data-id="${i.id}">${esc(checkoutLabel(i))}</button>`:''}
     </td>
   </tr>`).join(''):`<tr><td colspan="8">No invoices yet.</td></tr>`;
   $$('.view-invoice').forEach(b=>b.onclick=()=>openInvoiceDetail(b.dataset.id));
-  $$('.pay-invoice').forEach(b=>b.onclick=()=>openPayment(b.dataset.id));
+  $$('.checkout-invoice').forEach(b=>b.onclick=async()=>{try{const i=invoiceDisplay(await api('/api/invoices/'+b.dataset.id));await openStudioCheckout(i,isTestInvoice(i),depositDue(i)>=0.5?'deposit':'balance')}catch(e){toast(e.message,'error')}});
 }
+function isTestInvoice(i){return i.client_id==='9756cec8-8fbb-4614-b259-6853df83581a'}
+function depositDue(i){return Math.min(Number(i.balance_due),Math.max(0,Math.round(Number(i.total)*Number(i.deposit_percent||0))/100-Number(i.amount_paid)))}
+function checkoutAvailable(i){return Number(i.balance_due)>=0.5&&!['Void','Draft','Paid','Paid (Test)'].includes(i.status)}
+function checkoutLabel(i){const deposit=depositDue(i);return (isTestInvoice(i)?'Test: ':'')+(deposit>=0.5?'Pay Deposit ':'Pay Balance ')+money(deposit>=0.5?deposit:i.balance_due)}
 function renderPayments(){
   $('#payment-body').innerHTML=store.payments.length?store.payments.map(p=>`<tr>
     <td>${dateFmt(p.paid_at||p.created_at)}</td><td>${esc(p.company_name)}</td><td>${esc(p.invoice_number||'—')}</td><td>${esc(p.type)}</td><td>${esc(p.method)}</td><td>${money(p.amount)}</td><td>${badge(p.status)}</td>
@@ -336,13 +340,6 @@ async function convertQuote(id){
   const q=store.quotes.find(x=>x.id===id);
   if(!q)return;
 
-  const confirmed=await studioConfirm({
-    title:'Create Invoice',
-    message:`Create an invoice from ${q.quote_number} for ${q.company_name}?`,
-    confirmText:'Create Invoice'
-  });
-  if(!confirmed)return;
-
   const due=new Date();
   due.setDate(due.getDate()+14);
 
@@ -362,6 +359,8 @@ async function convertQuote(id){
     renderAll();
     toast(`${inv.invoice_number} created successfully.`);
     nav('invoices');
+    hideModal('quote-detail-modal');
+    await openInvoiceDetail(inv.id);
   }catch(e){
     console.error(e);
     toast(e.message,'error');
@@ -475,35 +474,19 @@ async function openInvoiceDetail(id){
       <div class="detail-section"><h4>Payment History</h4>
         ${(i.payments||[]).length?(i.payments||[]).map(p=>`<div class="detail-line"><div><strong>${esc(p.type)} • ${esc(p.method)}</strong><small>${dateFmt(p.paid_at||p.created_at)}${p.reference?` • ${esc(p.reference)}`:''}</small></div><strong>${money(p.amount)}</strong></div>`).join(''):'<p>No payments recorded.</p>'}
       </div>`;
-    if(i.client_id==='9756cec8-8fbb-4614-b259-6853df83581a'){
-      const testPaid=(i.sandbox_payments||[]).length>0;
-      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Sandbox payment test</h4><p>${testPaid?'Test payment received — '+money(i.sandbox_payments.reduce((sum,p)=>sum+Number(p.amount_cents),0)/100):'No test payment received yet.'}</p><p>Simulated payments do not change your real invoice balance or revenue.</p><button class="btn secondary" id="id-test-link">Open Test Checkout</button><button class="btn secondary" id="id-test-refresh">Refresh Test Result</button></div>`);
-      const testDeposit=Math.min(Number(i.balance_due),Math.max(0,Math.round(Number(i.total)*Number(i.deposit_percent||0))/100-Number(i.amount_paid)));
-      const select=document.createElement('select');select.id='id-test-kind';
-      select.innerHTML=(testDeposit>=0.5?'<option value="deposit">Initial payment — '+money(testDeposit)+'</option>':'')+'<option value="balance">Remaining balance — '+money(i.balance_due)+'</option>';
-      $('#id-test-link').before(select);
-      $('#id-test-link').disabled=Number(i.balance_due)<0.5||i.status==='Void';
-      $('#id-test-refresh').onclick=async()=>{
-        $('#id-test-refresh').textContent='Checking…';
-        await openInvoiceDetail(i.id);
-        await reload('invoices');
-        toast('Test payment status refreshed.');
-      };
-      $('#id-test-link').onclick=()=>openStudioCheckout(i,true,$('#id-test-kind').value);
+    const sandbox=isTestInvoice(i);
+    if(sandbox){
+      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Test payments</h4><p>No real money is charged. Test payments are separate from your revenue.</p><button class="btn secondary" id="id-test-refresh">Refresh Test Result</button></div>`);
+      $('#id-test-refresh').onclick=async()=>{await openInvoiceDetail(i.id);await reload('invoices');toast('Test payment status refreshed.')};
     }
+    const deposit=depositDue(i);
     $('#id-actions').innerHTML=`
-      ${i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'&&Number(i.balance_due)>0&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Open Stripe Checkout</button>`:''}
-      ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn primary" id="id-payment">Record Payment</button>`:''}
+      ${checkoutAvailable(i)?`<button class="btn primary" id="id-checkout">${esc(checkoutLabel(i))}</button>${deposit>=0.5&&deposit<Number(i.balance_due)?`<button class="btn secondary" id="id-pay-full">${sandbox?'Test: ':''}Pay Full Balance ${money(i.balance_due)}</button>`:''}`:''}
+      ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn secondary" id="id-payment">Record Manual Payment</button>`:''}
       ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
+    if($('#id-checkout')) $('#id-checkout').onclick=()=>openStudioCheckout(i,sandbox,deposit>=0.5?'deposit':'balance');
+    if($('#id-pay-full')) $('#id-pay-full').onclick=()=>openStudioCheckout(i,sandbox,'balance');
     if($('#id-payment')) $('#id-payment').onclick=()=>{hideModal('invoice-detail-modal');openPayment(i.id)};
-    if($('#id-stripe-link')){
-      const depositDue=Math.min(Number(i.balance_due),Math.max(0,Math.round(Number(i.total)*Number(i.deposit_percent||0))/100-Number(i.amount_paid)));
-      const section=document.createElement('div');section.className='detail-section';
-      section.innerHTML='<h4>Online payment</h4><p>Deposit: '+Number(i.deposit_percent||0)+'% of the total after discounts.</p><select id="id-checkout-kind">'+(depositDue>=0.5?'<option value="deposit">Initial payment — '+money(depositDue)+'</option>':'')+'<option value="balance">Remaining balance — '+money(i.balance_due)+'</option></select>';
-      $('#id-content').append(section);
-      $('#id-stripe-link').onclick=()=>openStudioCheckout(i,false,$('#id-checkout-kind').value);
-
-    }
     if($('#id-void')) $('#id-void').onclick=()=>voidInvoice(i.id,i.invoice_number);
     showModal('invoice-detail-modal');
   }catch(e){toast(e.message,'error')}
