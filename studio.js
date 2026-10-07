@@ -15,7 +15,7 @@ let lineItems=[{package_key:'custom',description:'',quantity:1,unit_price:0}];
 
 function setStatus(text,kind='ok'){const el=$('#api-status');if(!el)return;el.textContent=text;el.className='db-status '+kind;}
 function showModal(id){const el=$('#'+id);if(!el)return;el.classList.add('show');el.setAttribute('aria-hidden','false');}
-function hideModal(id){const el=$('#'+id);if(!el)return;el.classList.remove('show');el.setAttribute('aria-hidden','true');}
+function hideModal(id){if(id==='stripe-checkout-modal'){studioCheckoutGeneration++;if(studioCheckout){studioCheckout.destroy();studioCheckout=null;}}const el=$('#'+id);if(!el)return;el.classList.remove('show');el.setAttribute('aria-hidden','true');}
 $$('[data-close]').forEach(b=>b.addEventListener('click',()=>hideModal(b.dataset.close)));
 $$('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)hideModal(m.id)}));
 
@@ -489,14 +489,7 @@ async function openInvoiceDetail(id){
         await reload('invoices');
         toast('Test payment status refreshed.');
       };
-      $('#id-test-link').onclick=async()=>{
-        const tab=window.open('about:blank','BuiltByDavilaStripe','popup=yes,width=560,height=780,resizable=yes,scrollbars=yes');
-        try{
-          const result=await api('/api/invoices/'+i.id+'/stripe-test-link',{method:'POST',body:JSON.stringify({kind:$('#id-test-kind').value})});
-          if(tab){tab.opener=null;tab.location.href=result.url;}
-          else{const field=document.createElement('input');field.readOnly=true;field.value=result.url;field.style.width='100%';$('#id-content').append(field);field.select();toast('Copy the test checkout link shown below.');}
-        }catch(e){if(tab)tab.close();toast(e.message,'error')}
-      };
+      $('#id-test-link').onclick=()=>openStudioCheckout(i,true,$('#id-test-kind').value);
     }
     $('#id-actions').innerHTML=`
       ${i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'&&Number(i.balance_due)>0&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Open Stripe Checkout</button>`:''}
@@ -508,20 +501,8 @@ async function openInvoiceDetail(id){
       const section=document.createElement('div');section.className='detail-section';
       section.innerHTML='<h4>Online payment</h4><p>Deposit: '+Number(i.deposit_percent||0)+'% of the total after discounts.</p><select id="id-checkout-kind">'+(depositDue>=0.5?'<option value="deposit">Initial payment — '+money(depositDue)+'</option>':'')+'<option value="balance">Remaining balance — '+money(i.balance_due)+'</option></select>';
       $('#id-content').append(section);
-      $('#id-stripe-link').onclick=async()=>{
-      const button=$('#id-stripe-link');
-      const tab=window.open('about:blank','BuiltByDavilaStripe','popup=yes,width=560,height=780,resizable=yes,scrollbars=yes');
-      button.disabled=true;button.textContent='Opening…';
-      try{
-        const result=await api('/api/invoices/'+i.id+'/stripe-checkout',{method:'POST',body:JSON.stringify({kind:$('#id-checkout-kind').value})});
-        if(tab){tab.opener=null;tab.location.href=result.url;}
-        else{
-          const link=document.createElement('a');link.href=result.url;link.target='_blank';link.rel='noopener';link.className='btn primary';link.textContent='Open Stripe Checkout';
-          $('#id-content').append(link);toast('Your browser blocked the popup. Click Open Stripe Checkout below.');
-        }
-      }catch(e){if(tab)tab.close();toast(e.message,'error')}
-      finally{button.disabled=false;button.textContent='Open Stripe Checkout';}
-    };
+      $('#id-stripe-link').onclick=()=>openStudioCheckout(i,false,$('#id-checkout-kind').value);
+
     }
     if($('#id-void')) $('#id-void').onclick=()=>voidInvoice(i.id,i.invoice_number);
     showModal('invoice-detail-modal');
@@ -536,6 +517,32 @@ async function voidInvoice(id,number){
     await reload('invoices');
     toast(`${number} voided.`);
   }catch(e){toast(e.message,'error')}
+}
+
+
+let studioCheckout=null,studioCheckoutGeneration=0;
+async function openStudioCheckout(invoice,sandbox,kind){
+ const generation=++studioCheckoutGeneration;
+ if(studioCheckout){studioCheckout.destroy();studioCheckout=null;}
+ $('#checkout-title').textContent=sandbox?'Test Payment':'Invoice Payment';
+ $('#checkout-subtitle').textContent=invoice.invoice_number+' — Built By Davila'+(sandbox?' — Sandbox':'');
+ $('#checkout-mount').innerHTML='<p style="padding:24px">Loading secure payment form…</p>';
+ hideModal('invoice-detail-modal');showModal('stripe-checkout-modal');
+ try{
+  if(typeof Stripe!=='function')throw new Error('Stripe could not load. Refresh Studio and try again.');
+  const result=await api('/api/invoices/'+invoice.id+(sandbox?'/stripe-test-link':'/stripe-checkout'),{method:'POST',body:JSON.stringify({kind,embedded:true})});
+  if(generation!==studioCheckoutGeneration)return;
+  const checkout=await Stripe(result.publishableKey).createEmbeddedCheckoutPage({
+   fetchClientSecret:async()=>result.clientSecret,
+   onComplete:async()=>{
+    toast('Payment submitted. Checking Stripe confirmation…');
+    hideModal('stripe-checkout-modal');
+    await reload('invoices');await openInvoiceDetail(invoice.id);
+   }
+  });
+  if(generation!==studioCheckoutGeneration){checkout.destroy();return;}
+  studioCheckout=checkout;$('#checkout-mount').innerHTML='';checkout.mount('#checkout-mount');
+ }catch(e){if(generation===studioCheckoutGeneration){$('#checkout-mount').textContent=e.message;toast(e.message,'error');}}
 }
 
 /* Payments */
