@@ -133,9 +133,10 @@ function clientOptions(selected=''){return `<option value="">Select a client</op
 function renderClients(list=store.clients){
   $('#client-body').innerHTML=list.length?list.map(c=>`<tr>
     <td><strong>${esc(c.company_name)}</strong></td><td>${esc(contactName(c))}</td><td>${esc(c.email||'—')}</td><td>${esc(c.phone||'—')}</td><td>${badge(c.status)}</td>
-    <td class="actions-cell"><button class="mini-btn edit-client" data-id="${c.id}">Edit</button>${c.id!=='9756cec8-8fbb-4614-b259-6853df83581a'?` <button class="mini-btn primary-mini open-client-portal" data-id="${c.id}">Open Customer Portal</button> <button class="mini-btn copy-client-portal" data-id="${c.id}">Copy Portal Link</button><span class="client-portal-link" data-id="${c.id}"></span>`:''} </td>
+    <td class="actions-cell"><button class="mini-btn edit-client" data-id="${c.id}">Edit</button> <button class="mini-btn client-materials" data-id="${c.id}">Project Details & Files</button>${c.id!=='9756cec8-8fbb-4614-b259-6853df83581a'?` <button class="mini-btn primary-mini open-client-portal" data-id="${c.id}">Open Customer Portal</button> <button class="mini-btn copy-client-portal" data-id="${c.id}">Copy Portal Link</button><span class="client-portal-link" data-id="${c.id}"></span>`:''} </td>
   </tr>`).join(''):`<tr><td colspan="6">No clients yet.</td></tr>`;
   $$('.edit-client').forEach(b=>b.onclick=()=>openClient(b.dataset.id));
+  $$('.client-materials').forEach(b=>b.onclick=()=>openClientMaterials(b.dataset.id));
   $$('.open-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,true));
   $$('.copy-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,false));
   $('#qb-client').innerHTML=clientOptions($('#qb-client').value);
@@ -150,12 +151,29 @@ async function clientPortal(button,open){
   const r=await api('/api/clients/'+button.dataset.id+'/portal-link',{method:'POST',body:'{}'});
   const url=new URL(r.url);
   if(url.origin!==location.origin||url.pathname!=='/client-portal.html')throw new Error('Invalid customer portal link.');
-  const holder=$$('.client-portal-link').find(el=>el.dataset.id===button.dataset.id);
+  const holder=[...$$('.client-portal-link')].find(el=>el.dataset.id===button.dataset.id);
   if(holder){holder.innerHTML='';const link=document.createElement('a');link.className='mini-btn';link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open portal ↗';holder.append(link);}
   if(open){if(tab)tab.location.replace(url.href);else toast('Use the Open portal link in this client row.');}
   else{try{await navigator.clipboard.writeText(url.href);toast('Customer portal link copied. Valid for 7 days.');}catch{toast('Right-click Open portal and choose Copy Link Address.');}}
  }catch(e){if(tab)tab.close();toast(e.message,'error');}
  finally{button.disabled=false;}
+}
+
+
+async function openClientMaterials(id){
+ const client=store.clients.find(c=>c.id===id);if(!client)return;
+ let modal=$('#client-materials-modal');
+ if(!modal){modal=document.createElement('div');modal.id='client-materials-modal';modal.className='modal-backdrop';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','materials-title');modal.innerHTML='<div class="client-modal detail-modal"><div class="modal-header"><h2 id="materials-title"></h2><button type="button" class="close-modal" aria-label="Close project materials">×</button></div><div id="materials-content"></div></div>';document.body.append(modal);modal.querySelector('.close-modal').onclick=()=>hideModal('client-materials-modal');modal.onclick=e=>{if(e.target===modal)hideModal('client-materials-modal')};}
+ $('#materials-title').textContent=client.company_name+' — Project details & files';$('#materials-content').textContent='Loading…';showModal('client-materials-modal');
+ try{
+  const d=await api('/api/clients/'+id+'/project-materials');
+  $('#materials-content').innerHTML='<div class="detail-section"><h4>Project questionnaire</h4>'+(d.intake?Object.entries(d.intake.answers).filter(([,v])=>v).map(([k,v])=>'<p><strong>'+esc(k.replaceAll('_',' '))+'</strong><br>'+esc(v).replaceAll('\n','<br>')+'</p>').join('')||'<p>No answers entered yet.</p>':'<p>The customer has not saved their project details yet.</p>')+'</div><div class="detail-section"><h4>Customer uploads</h4>'+(d.uploads.map(f=>'<p><strong>'+esc(f.filename)+'</strong> · '+esc(f.category)+' · '+(Number(f.size_bytes)/1024/1024).toFixed(2)+' MB <button class="mini-btn" data-material-file="'+esc(f.id)+'" data-name="'+esc(f.filename)+'">Download</button></p>').join('')||'<p>No files uploaded yet.</p>')+'</div>';
+  $$('#materials-content [data-material-file]').forEach(button=>button.onclick=async()=>{
+   button.disabled=true;
+   try{const response=await fetch(API_BASE+'/api/client-uploads/'+button.dataset.materialFile,{headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(75000)});if(!response.ok)throw Error('Unable to download file.');const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');a.href=url;a.download=button.dataset.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+   catch(e){toast(e.message,'error')}finally{button.disabled=false;}
+  });
+ }catch(e){$('#materials-content').textContent=e.message;}
 }
 
 function renderQuotes(){
@@ -237,7 +255,7 @@ async function renderStripeReceipts(){
 
 /* Client modal */
 function openClient(id=''){
-  $('#client-form').reset();$('#cf-id').value='';$('#cf-status').value='Active';$('#client-form-message').textContent='';
+  $('#client-form').reset();$('#cf-id').value='';$('#cf-status').value='Lead';$('#client-form-message').textContent='';
   $('#client-modal-title').textContent=id?'Edit Client':'Add Client';
   if(id){
     const c=store.clients.find(x=>x.id===id);if(!c)return;
@@ -612,4 +630,5 @@ async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{meth
 
 renderLines();
 (async()=>{const ok=await initAuth();if(ok)await loadAll()})();
+
 
