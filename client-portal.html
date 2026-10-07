@@ -1,2 +1,56 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Client access | Built by Davila</title><link rel="stylesheet" href="styles.css"></head><body><main class="container" style="padding:64px 24px"><h1>Client access</h1><p>Please contact Built by Davila for access to your project.</p><a href="index.html">Return to website</a></main><script src="language.js?v=1" defer></script>
-</body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Your invoices | Built By Davila</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f3ef;color:#17191c;font:16px Inter,Arial,sans-serif}header{background:#111418;color:white;padding:25px max(24px,calc((100vw - 1050px)/2))}header strong{letter-spacing:.08em}main{max-width:1050px;margin:auto;padding:36px 24px}h1{font-size:32px;margin:0 0 10px}p{line-height:1.6;color:#60646b}.card{background:white;border:1px solid #e7e3dc;border-radius:18px;padding:24px;margin:22px 0}.head{display:flex;justify-content:space-between;gap:16px;align-items:center}.numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}.numbers div{padding:16px;background:#f8f7f4;border-radius:12px}.numbers small{display:block;color:#646871;margin-bottom:8px}.numbers strong{font-size:23px}button{font:inherit;font-weight:700;border-radius:30px;padding:12px 20px;border:1px solid #e1dfdb;background:white;cursor:pointer}button.primary{background:#ff5a36;border-color:#ff5a36;color:white}button:disabled{opacity:.6;cursor:wait}.history{border-top:1px solid #eee;margin-top:20px;padding-top:16px}.history p{margin:8px 0}.badge{background:#f1f3f5;padding:7px 12px;border-radius:20px;font-size:13px}.backdrop{position:fixed;inset:0;background:#0007;backdrop-filter:blur(5px);display:none;padding:20px;overflow:auto;z-index:10}.backdrop.open{display:flex;align-items:flex-start;justify-content:center}.popup{background:#f5f3ef;border-radius:22px;max-width:850px;width:100%;margin:30px 0;padding:24px}.popup h2{margin:10px 0}.error{color:#b42318}#message{min-height:24px}@media(max-width:600px){.numbers{grid-template-columns:1fr}.head{align-items:flex-start}.popup{padding:16px}.numbers strong{font-size:21px}}
+</style></head><body><header><strong>BUILT BY DAVILA</strong><div style="margin-top:8px;color:#ccc">Your client portal</div></header>
+<main><div class="head"><div><h1 id="company">Invoices & payments</h1><p>Review your invoices and securely pay your deposit or remaining balance.</p></div><button id="refresh">Refresh</button></div><p id="message" role="status">Loading your invoices…</p><div id="invoices"></div></main>
+<div class="backdrop" id="checkout" role="dialog" aria-modal="true" aria-labelledby="checkout-title"><div class="popup"><div class="head"><div><small style="color:#ff5a36;font-weight:700">BUILT BY DAVILA · SECURE CHECKOUT</small><h2 id="checkout-title">Invoice payment</h2></div><button id="close" aria-label="Close checkout">×</button></div><p id="checkout-status" role="status"></p><div id="mount"></div></div></div>
+<script src="https://js.stripe.com/endive/stripe.js"></script>
+<script>
+const base='https://built-by-davila-backend.onrender.com',el=id=>document.getElementById(id);
+const access=new URLSearchParams(location.hash.slice(1)).get('access')||sessionStorage.getItem('bbd_customer_access')||'';
+if(access){sessionStorage.setItem('bbd_customer_access',access);history.replaceState(null,'',location.pathname);}
+const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n||0));
+const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let checkout=null,generation=0,lastFocus=null;
+async function api(path,options={}){
+ const r=await fetch(base+path,{...options,headers:{'Content-Type':'application/json',Authorization:'Bearer '+access},signal:AbortSignal.timeout(75000)});
+ const data=await r.json();if(!r.ok)throw new Error(data.error||'Unable to complete this request.');return data;
+}
+function closeCheckout(){generation++;if(checkout){checkout.destroy();checkout=null;}el('checkout').classList.remove('open');lastFocus?.focus();}
+el('close').onclick=closeCheckout;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCheckout()});
+async function load(){
+ if(!access){el('message').textContent='Please use the private portal link provided by Built By Davila.';return;}
+ el('refresh').disabled=true;
+ try{
+  const d=await api('/customer-api/invoices');el('company').textContent=d.company;
+  el('invoices').innerHTML=d.invoices.map(i=>{
+   const deposit=Math.min(Number(i.balance_due),Math.max(0,Math.round(Number(i.total)*Number(i.deposit_percent)/100*100)/100-Number(i.amount_paid)));
+   const payable=Number(i.balance_due)>=.5&&!['Void','Draft','Paid'].includes(i.status);
+   const kind=deposit>=.5?'deposit':'balance',amount=kind==='deposit'?deposit:i.balance_due;
+   return '<section class="card"><div class="head"><h2>'+esc(i.invoice_number)+'</h2><span class="badge">'+esc(i.status)+'</span></div><div class="numbers"><div><small>Project total</small><strong>'+money(i.total)+'</strong></div><div><small>Paid</small><strong>'+money(i.amount_paid)+'</strong></div><div><small>Remaining balance</small><strong>'+money(i.balance_due)+'</strong></div></div><p>'+esc(i.notes)+'</p>'+(payable?'<button class="primary pay" data-id="'+esc(i.id)+'" data-kind="'+kind+'">Pay '+(kind==='deposit'?'Deposit ':'Balance ')+money(amount)+'</button>':'')+'<div class="history"><strong>Payment history</strong>'+((d.payments.filter(p=>p.invoice_id===i.id)).map(p=>'<p>'+esc(p.type)+' · '+money(p.amount)+' · '+esc(p.status)+'</p>').join('')||'<p>No payments received yet.</p>')+'</div></section>';
+  }).join('')||'<section class="card">No invoices yet.</section>';
+  document.querySelectorAll('.pay').forEach(button=>button.onclick=()=>pay(button));
+  el('message').textContent='';
+ }catch(e){el('message').textContent=e.message;el('message').className='error';}
+ finally{el('refresh').disabled=false;}
+}
+async function pay(button){
+ lastFocus=button;const run=++generation;el('checkout').classList.add('open');el('close').focus();el('checkout-status').textContent='Loading secure payment form…';el('mount').innerHTML='';
+ try{
+  if(typeof Stripe!=='function')throw new Error('Payment form could not load. Refresh and try again.');
+  const r=await api('/customer-api/invoices/'+button.dataset.id+'/stripe-checkout',{method:'POST',body:JSON.stringify({kind:button.dataset.kind,embedded:true})});
+  if(run!==generation)return;
+  const stripe=Stripe(r.publishableKey),create=r.uiMode==='embedded_page'?stripe.createEmbeddedCheckoutPage.bind(stripe):stripe.initEmbeddedCheckout.bind(stripe);
+  const instance=await create({fetchClientSecret:async()=>r.clientSecret,onComplete:async()=>{
+   closeCheckout();el('message').textContent='Payment submitted. Waiting for Stripe confirmation…';
+   await load();
+   let attempts=0;const poll=setInterval(async()=>{attempts++;await load();if(attempts>=6)clearInterval(poll)},3000);
+  }});
+  if(run!==generation){instance.destroy();return;}
+  checkout=instance;el('checkout-status').textContent='';checkout.mount('#mount');
+ }catch(e){if(run===generation)el('checkout-status').textContent=e.message;}
+}
+el('refresh').onclick=load;load();
+</script><script src="language.js?v=1" defer></script></body></html>
