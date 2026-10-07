@@ -485,7 +485,17 @@ async function openInvoiceDetail(id){
       ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn secondary" id="id-payment">Record Manual Payment</button>`:''}
       ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
     if(!sandbox&&checkoutAvailable(i)){
-      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Customer payment link</h4><p>Payment due: ${money(deposit>=0.5?deposit:i.balance_due)}. Generate a secure link to share with your customer.</p><button class="btn secondary" id="id-get-link">Get Payment Link</button><div id="id-link-result"></div></div>`);
+      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Customer payment link</h4><button class="btn secondary" id="id-get-portal">Get Customer Portal Link</button><p>Payment due: ${money(deposit>=0.5?deposit:i.balance_due)}. Generate a secure link to share with your customer.</p><button class="btn secondary" id="id-get-link">Get Payment Link</button><div id="id-link-result"></div></div>`);
+      $('#id-get-portal').onclick=async()=>{
+       const button=$('#id-get-portal');button.disabled=true;
+       try{
+        const r=await api('/api/clients/'+i.client_id+'/portal-link',{method:'POST',body:'{}'});
+        $('#id-link-result').innerHTML='<label for="id-portal-url" style="display:block;margin-top:16px">Private customer portal link — expires in 7 days</label><input id="id-portal-url" readonly style="width:100%;margin:8px 0"><button class="btn secondary" id="id-copy-portal">Copy Portal Link</button>';
+        $('#id-portal-url').value=r.url;
+        $('#id-portal-url').onclick=e=>e.target.select();
+        $('#id-copy-portal').onclick=async()=>{try{await navigator.clipboard.writeText(r.url);toast('Customer portal link copied.')}catch{$('#id-portal-url').focus();$('#id-portal-url').select();toast('Press Command+C to copy the selected link.')}};
+       }catch(e){toast(e.message,'error')}finally{button.disabled=false}
+      };
       $('#id-get-link').onclick=()=>getCustomerPaymentLink(i,deposit>=0.5?'deposit':'balance');
     }
     if($('#id-checkout')) $('#id-checkout').onclick=()=>openStudioCheckout(i,sandbox,deposit>=0.5?'deposit':'balance');
