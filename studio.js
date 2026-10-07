@@ -302,7 +302,16 @@ function proposalItems(){
   if(totals.discount>0)items.push({description:($('#qb-discount-label').value.trim()||'Discount')+(totals.type==='percent'?' ('+totals.value+'%)':''),quantity:1,unit_price:-totals.discount});
   return items;
 }
+function syncPaymentTerms(){
+  const field=$('#qb-notes'),percent=Number($('#qb-deposit').value);
+  if(!Number.isFinite(percent)||percent<0||percent>100)return;
+  const opening=/^(?:\d+(?:\.\d+)?% deposit due to begin work\. Remaining balance due prior to launch\.|Full one-time build payment due before work begins\.|No deposit required\. Full payment due prior to launch\.)/;
+  const text=percent===100?'Full one-time build payment due before work begins.':percent===0?'No deposit required. Full payment due prior to launch.':percent+'% deposit due to begin work. Remaining balance due prior to launch.';
+  if(opening.test(field.value))field.value=field.value.replace(opening,text);
+}
+
 function updatePreview(){
+  syncPaymentTerms();
   const c=store.clients.find(x=>x.id===$('#qb-client').value);
   $('#pv-client').textContent=c?.company_name||'Select a client';
   let totals;try{totals=proposalTotals()}catch(e){$('#pv-total').textContent=e.message;return;}const total=totals.total,dep=Number($('#qb-deposit').value||0);$('#pv-subtotal').textContent=money(totals.subtotal);$('#pv-discount').textContent='−'+money(totals.discount);
