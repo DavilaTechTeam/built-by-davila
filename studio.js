@@ -485,18 +485,24 @@ async function openInvoiceDetail(id){
       };
     }
     $('#id-actions').innerHTML=`
-      ${i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'&&Number(i.balance_due)===1995&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Get Starter Payment Link</button>`:''}
+      ${i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'&&Number(i.balance_due)>0&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Get Stripe Checkout</button>`:''}
       ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn primary" id="id-payment">Record Payment</button>`:''}
       ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
     if($('#id-payment')) $('#id-payment').onclick=()=>{hideModal('invoice-detail-modal');openPayment(i.id)};
-    if($('#id-stripe-link')) $('#id-stripe-link').onclick=async()=>{
+    if($('#id-stripe-link')){
+      const depositDue=Math.min(Number(i.balance_due),Math.max(0,Math.round(Number(i.total)*Number(i.deposit_percent||0))/100-Number(i.amount_paid)));
+      const section=document.createElement('div');section.className='detail-section';
+      section.innerHTML='<h4>Online payment</h4><p>Deposit: '+Number(i.deposit_percent||0)+'% of the total after discounts.</p><select id="id-checkout-kind">'+(depositDue>=0.5?'<option value="deposit">Initial payment — '+money(depositDue)+'</option>':'')+'<option value="balance">Remaining balance — '+money(i.balance_due)+'</option></select>';
+      $('#id-content').append(section);
+      $('#id-stripe-link').onclick=async()=>{
       try{
-        const result=await api('/api/invoices/'+i.id+'/stripe-link',{method:'POST'});
+        const result=await api('/api/invoices/'+i.id+'/stripe-checkout',{method:'POST',body:JSON.stringify({kind:$('#id-checkout-kind').value})});
         const field=document.createElement('input');field.readOnly=true;field.value=result.url;
         field.style.width='100%';$('#id-content').append(field);field.select();
         try{await navigator.clipboard.writeText(result.url);toast('Invoice payment link copied.');}catch{toast('Copy the payment link shown below.');}
       }catch(e){toast(e.message,'error')}
     };
+    }
     if($('#id-void')) $('#id-void').onclick=()=>voidInvoice(i.id,i.invoice_number);
     showModal('invoice-detail-modal');
   }catch(e){toast(e.message,'error')}
