@@ -532,7 +532,9 @@ async function openStudioCheckout(invoice,sandbox,kind){
   if(typeof Stripe!=='function')throw new Error('Stripe could not load. Refresh Studio and try again.');
   const result=await api('/api/invoices/'+invoice.id+(sandbox?'/stripe-test-link':'/stripe-checkout'),{method:'POST',body:JSON.stringify({kind,embedded:true})});
   if(generation!==studioCheckoutGeneration)return;
-  const checkout=await Stripe(result.publishableKey).initEmbeddedCheckout({
+  const stripe=Stripe(result.publishableKey);
+  const createCheckout=result.uiMode==='embedded_page'?stripe.createEmbeddedCheckoutPage.bind(stripe):stripe.initEmbeddedCheckout.bind(stripe);
+  const checkout=await createCheckout({
    fetchClientSecret:async()=>result.clientSecret,
    onComplete:async()=>{
     toast('Payment submitted. Checking Stripe confirmation…');
