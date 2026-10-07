@@ -133,12 +133,31 @@ function clientOptions(selected=''){return `<option value="">Select a client</op
 function renderClients(list=store.clients){
   $('#client-body').innerHTML=list.length?list.map(c=>`<tr>
     <td><strong>${esc(c.company_name)}</strong></td><td>${esc(contactName(c))}</td><td>${esc(c.email||'—')}</td><td>${esc(c.phone||'—')}</td><td>${badge(c.status)}</td>
-    <td class="actions-cell"><button class="mini-btn edit-client" data-id="${c.id}">Edit</button></td>
+    <td class="actions-cell"><button class="mini-btn edit-client" data-id="${c.id}">Edit</button>${c.id!=='9756cec8-8fbb-4614-b259-6853df83581a'?` <button class="mini-btn primary-mini open-client-portal" data-id="${c.id}">Open Customer Portal</button> <button class="mini-btn copy-client-portal" data-id="${c.id}">Copy Portal Link</button><span class="client-portal-link" data-id="${c.id}"></span>`:''} </td>
   </tr>`).join(''):`<tr><td colspan="6">No clients yet.</td></tr>`;
   $$('.edit-client').forEach(b=>b.onclick=()=>openClient(b.dataset.id));
+  $('.open-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,true));
+  $('.copy-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,false));
   $('#qb-client').innerHTML=clientOptions($('#qb-client').value);
   $('#sf-client').innerHTML=clientOptions();
 }
+
+async function clientPortal(button,open){
+ const tab=open?window.open('about:blank','_blank'):null;
+ if(tab)tab.opener=null;
+ button.disabled=true;
+ try{
+  const r=await api('/api/clients/'+button.dataset.id+'/portal-link',{method:'POST',body:'{}'});
+  const url=new URL(r.url);
+  if(url.origin!==location.origin||url.pathname!=='/client-portal.html')throw new Error('Invalid customer portal link.');
+  const holder=$('.client-portal-link').find(el=>el.dataset.id===button.dataset.id);
+  if(holder){holder.innerHTML='';const link=document.createElement('a');link.className='mini-btn';link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open portal ↗';holder.append(link);}
+  if(open){if(tab)tab.location.replace(url.href);else toast('Use the Open portal link in this client row.');}
+  else{try{await navigator.clipboard.writeText(url.href);toast('Customer portal link copied. Valid for 7 days.');}catch{toast('Right-click Open portal and choose Copy Link Address.');}}
+ }catch(e){if(tab)tab.close();toast(e.message,'error');}
+ finally{button.disabled=false;}
+}
+
 function renderQuotes(){
   $('#quote-body').innerHTML=store.quotes.length?store.quotes.map(q=>`<tr>
     <td><strong>${esc(q.quote_number)}</strong></td><td>${esc(q.company_name)}</td><td>${money(q.total)}</td><td>${Number(q.deposit_percent||0)}%</td><td>${badge(q.status)}</td><td>${dateFmt(q.created_at)}</td>
@@ -490,8 +509,9 @@ async function openInvoiceDetail(id){
        const button=$('#id-get-portal');button.disabled=true;
        try{
         const r=await api('/api/clients/'+i.client_id+'/portal-link',{method:'POST',body:'{}'});
-        $('#id-link-result').innerHTML='<label for="id-portal-url" style="display:block;margin-top:16px">Private customer portal link — expires in 7 days</label><input id="id-portal-url" readonly style="width:100%;margin:8px 0"><button class="btn secondary" id="id-copy-portal">Copy Portal Link</button>';
+        $('#id-link-result').innerHTML='<label for="id-portal-url" style="display:block;margin-top:16px">Private customer portal link — expires in 7 days</label><input id="id-portal-url" readonly style="width:100%;margin:8px 0"><a class="btn secondary" id="id-open-portal" target="_blank" rel="noopener noreferrer">Open Customer Portal ↗</a> <button class="btn secondary" id="id-copy-portal">Copy Portal Link</button>';
         $('#id-portal-url').value=r.url;
+        $('#id-open-portal').href=r.url;
         $('#id-portal-url').onclick=e=>e.target.select();
         $('#id-copy-portal').onclick=async()=>{try{await navigator.clipboard.writeText(r.url);toast('Customer portal link copied.')}catch{$('#id-portal-url').focus();$('#id-portal-url').select();toast('Press Command+C to copy the selected link.')}};
        }catch(e){toast(e.message,'error')}finally{button.disabled=false}
