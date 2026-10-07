@@ -485,7 +485,7 @@ async function openInvoiceDetail(id){
         toast('Test payment status refreshed.');
       };
       $('#id-test-link').onclick=async()=>{
-        const tab=window.open('about:blank','_blank');
+        const tab=window.open('about:blank','BuiltByDavilaStripe','popup=yes,width=560,height=780,resizable=yes,scrollbars=yes');
         try{
           const result=await api('/api/invoices/'+i.id+'/stripe-test-link',{method:'POST'});
           if(tab){tab.opener=null;tab.location.href=result.url;}
@@ -494,7 +494,7 @@ async function openInvoiceDetail(id){
       };
     }
     $('#id-actions').innerHTML=`
-      ${i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'&&Number(i.balance_due)>0&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Get Stripe Checkout</button>`:''}
+      ${i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'&&Number(i.balance_due)>0&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Open Stripe Checkout</button>`:''}
       ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn primary" id="id-payment">Record Payment</button>`:''}
       ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
     if($('#id-payment')) $('#id-payment').onclick=()=>{hideModal('invoice-detail-modal');openPayment(i.id)};
@@ -504,12 +504,18 @@ async function openInvoiceDetail(id){
       section.innerHTML='<h4>Online payment</h4><p>Deposit: '+Number(i.deposit_percent||0)+'% of the total after discounts.</p><select id="id-checkout-kind">'+(depositDue>=0.5?'<option value="deposit">Initial payment — '+money(depositDue)+'</option>':'')+'<option value="balance">Remaining balance — '+money(i.balance_due)+'</option></select>';
       $('#id-content').append(section);
       $('#id-stripe-link').onclick=async()=>{
+      const button=$('#id-stripe-link');
+      const tab=window.open('about:blank','BuiltByDavilaStripe','popup=yes,width=560,height=780,resizable=yes,scrollbars=yes');
+      button.disabled=true;button.textContent='Opening…';
       try{
         const result=await api('/api/invoices/'+i.id+'/stripe-checkout',{method:'POST',body:JSON.stringify({kind:$('#id-checkout-kind').value})});
-        const field=document.createElement('input');field.readOnly=true;field.value=result.url;
-        field.style.width='100%';$('#id-content').append(field);field.select();
-        try{await navigator.clipboard.writeText(result.url);toast('Invoice payment link copied.');}catch{toast('Copy the payment link shown below.');}
-      }catch(e){toast(e.message,'error')}
+        if(tab){tab.opener=null;tab.location.href=result.url;}
+        else{
+          const link=document.createElement('a');link.href=result.url;link.target='_blank';link.rel='noopener';link.className='btn primary';link.textContent='Open Stripe Checkout';
+          $('#id-content').append(link);toast('Your browser blocked the popup. Click Open Stripe Checkout below.');
+        }
+      }catch(e){if(tab)tab.close();toast(e.message,'error')}
+      finally{button.disabled=false;button.textContent='Open Stripe Checkout';}
     };
     }
     if($('#id-void')) $('#id-void').onclick=()=>voidInvoice(i.id,i.invoice_number);
