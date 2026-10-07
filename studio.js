@@ -153,7 +153,7 @@ function renderQuotes(){
   $$('.convert-quote').forEach(b=>b.onclick=()=>convertQuote(b.dataset.id));
 }
 function invoiceDisplay(i){
-  const cents=Number(i.sandbox_paid_cents || i.sandbox_payments?.[0]?.amount_cents || 0);
+  const cents=Number(i.sandbox_paid_cents || i.sandbox_payments?.reduce((sum,p)=>sum+Number(p.amount_cents),0) || 0);
   if(i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'||cents<=0||i.status==='Void')return i;
   const paid=Math.min(Number(i.total),cents/100);
   return {...i,amount_paid:paid,balance_due:Math.max(0,Number(i.total)-paid),status:paid>=Number(i.total)?'Paid (Test)':'Partially Paid (Test)'};
@@ -477,7 +477,12 @@ async function openInvoiceDetail(id){
       </div>`;
     if(i.client_id==='9756cec8-8fbb-4614-b259-6853df83581a'){
       const testPaid=(i.sandbox_payments||[]).length>0;
-      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Sandbox payment test</h4><p>${testPaid?'Test payment received — '+money(i.sandbox_payments[0].amount_cents/100):'No test payment received yet.'}</p><p>Simulated payments do not change your real invoice balance or revenue.</p><button class="btn secondary" id="id-test-link">Open Test Checkout</button><button class="btn secondary" id="id-test-refresh">Refresh Test Result</button></div>`);
+      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Sandbox payment test</h4><p>${testPaid?'Test payment received — '+money(i.sandbox_payments.reduce((sum,p)=>sum+Number(p.amount_cents),0)/100):'No test payment received yet.'}</p><p>Simulated payments do not change your real invoice balance or revenue.</p><button class="btn secondary" id="id-test-link">Open Test Checkout</button><button class="btn secondary" id="id-test-refresh">Refresh Test Result</button></div>`);
+      const testDeposit=Math.min(Number(i.balance_due),Math.max(0,Math.round(Number(i.total)*Number(i.deposit_percent||0))/100-Number(i.amount_paid)));
+      const select=document.createElement('select');select.id='id-test-kind';
+      select.innerHTML=(testDeposit>=0.5?'<option value="deposit">Initial payment — '+money(testDeposit)+'</option>':'')+'<option value="balance">Remaining balance — '+money(i.balance_due)+'</option>';
+      $('#id-test-link').before(select);
+      $('#id-test-link').disabled=Number(i.balance_due)<0.5||i.status==='Void';
       $('#id-test-refresh').onclick=async()=>{
         $('#id-test-refresh').textContent='Checking…';
         await openInvoiceDetail(i.id);
@@ -487,7 +492,7 @@ async function openInvoiceDetail(id){
       $('#id-test-link').onclick=async()=>{
         const tab=window.open('about:blank','BuiltByDavilaStripe','popup=yes,width=560,height=780,resizable=yes,scrollbars=yes');
         try{
-          const result=await api('/api/invoices/'+i.id+'/stripe-test-link',{method:'POST'});
+          const result=await api('/api/invoices/'+i.id+'/stripe-test-link',{method:'POST',body:JSON.stringify({kind:$('#id-test-kind').value})});
           if(tab){tab.opener=null;tab.location.href=result.url;}
           else{const field=document.createElement('input');field.readOnly=true;field.value=result.url;field.style.width='100%';$('#id-content').append(field);field.select();toast('Copy the test checkout link shown below.');}
         }catch(e){if(tab)tab.close();toast(e.message,'error')}
