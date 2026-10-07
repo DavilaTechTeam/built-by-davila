@@ -460,8 +460,21 @@ async function openInvoiceDetail(id){
       <div class="detail-section"><h4>Payment History</h4>
         ${(i.payments||[]).length?(i.payments||[]).map(p=>`<div class="detail-line"><div><strong>${esc(p.type)} • ${esc(p.method)}</strong><small>${dateFmt(p.paid_at||p.created_at)}${p.reference?` • ${esc(p.reference)}`:''}</small></div><strong>${money(p.amount)}</strong></div>`).join(''):'<p>No payments recorded.</p>'}
       </div>`;
+    if(i.client_id==='9756cec8-8fbb-4614-b259-6853df83581a'){
+      const testPaid=(i.sandbox_payments||[]).length>0;
+      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Sandbox payment test</h4><p>${testPaid?'Test payment received — '+money(i.sandbox_payments[0].amount_cents/100):'No test payment received yet.'}</p><p>Simulated payments do not change your real invoice balance or revenue.</p><button class="btn secondary" id="id-test-link">Open Test Checkout</button><button class="btn secondary" id="id-test-refresh">Refresh Test Result</button></div>`);
+      $('#id-test-refresh').onclick=()=>openInvoiceDetail(i.id);
+      $('#id-test-link').onclick=async()=>{
+        const tab=window.open('about:blank','_blank');
+        try{
+          const result=await api('/api/invoices/'+i.id+'/stripe-test-link',{method:'POST'});
+          if(tab){tab.opener=null;tab.location.href=result.url;}
+          else{const field=document.createElement('input');field.readOnly=true;field.value=result.url;field.style.width='100%';$('#id-content').append(field);field.select();toast('Copy the test checkout link shown below.');}
+        }catch(e){if(tab)tab.close();toast(e.message,'error')}
+      };
+    }
     $('#id-actions').innerHTML=`
-      ${Number(i.balance_due)===1995&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Get Starter Payment Link</button>`:''}
+      ${i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'&&Number(i.balance_due)===1995&&!['Void','Draft','Paid'].includes(i.status)?`<button class="btn secondary" id="id-stripe-link">Get Starter Payment Link</button>`:''}
       ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn primary" id="id-payment">Record Payment</button>`:''}
       ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
     if($('#id-payment')) $('#id-payment').onclick=()=>{hideModal('invoice-detail-modal');openPayment(i.id)};
