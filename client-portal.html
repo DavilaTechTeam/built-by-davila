@@ -54,7 +54,7 @@ async function pay(button){
 }
 
 let wordingFields=[],draftKey='';
-const draftChanges=()=>wordingFields.map(f=>({id:f.id,value:el(f.id).value})).filter((c,i)=>c.value.trim()!==wordingFields[i].value);
+const draftChanges=()=>wordingFields.map(f=>({id:f.id,value:el(f.id).value,original:f.value})).filter((c,i)=>c.value.trim()!==wordingFields[i].value);
 el('load-website').onclick=async()=>{
  el('load-website').disabled=true;el('website-message').textContent='Loading website wording…';
  try{
