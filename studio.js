@@ -484,6 +484,10 @@ async function openInvoiceDetail(id){
       ${checkoutAvailable(i)?`<button class="btn primary" id="id-checkout">${esc(checkoutLabel(i))}</button>${deposit>=0.5&&deposit<Number(i.balance_due)?`<button class="btn secondary" id="id-pay-full">${sandbox?'Test: ':''}Pay Full Balance ${money(i.balance_due)}</button>`:''}`:''}
       ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn secondary" id="id-payment">Record Manual Payment</button>`:''}
       ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
+    if(!sandbox&&checkoutAvailable(i)){
+      $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Customer payment link</h4><p>Payment due: ${money(deposit>=0.5?deposit:i.balance_due)}. Generate a secure link to share with your customer.</p><button class="btn secondary" id="id-get-link">Get Payment Link</button><div id="id-link-result"></div></div>`);
+      $('#id-get-link').onclick=()=>getCustomerPaymentLink(i,deposit>=0.5?'deposit':'balance');
+    }
     if($('#id-checkout')) $('#id-checkout').onclick=()=>openStudioCheckout(i,sandbox,deposit>=0.5?'deposit':'balance');
     if($('#id-pay-full')) $('#id-pay-full').onclick=()=>openStudioCheckout(i,sandbox,'balance');
     if($('#id-payment')) $('#id-payment').onclick=()=>{hideModal('invoice-detail-modal');openPayment(i.id)};
@@ -491,6 +495,23 @@ async function openInvoiceDetail(id){
     showModal('invoice-detail-modal');
   }catch(e){toast(e.message,'error')}
 }
+
+async function getCustomerPaymentLink(invoice,kind){
+ const button=$('#id-get-link'),resultBox=$('#id-link-result');
+ button.disabled=true;button.textContent='Creating payment link…';
+ try{
+  const result=await api('/api/invoices/'+invoice.id+'/stripe-checkout',{method:'POST',body:JSON.stringify({kind,embedded:false})});
+  const url=new URL(result.url);
+  if(url.protocol!=='https:'||url.hostname!=='checkout.stripe.com')throw new Error('Stripe did not return a valid customer payment link.');
+  if(!resultBox.isConnected)return;
+  resultBox.innerHTML=`<label for="id-customer-link" style="display:block;margin-top:16px">Customer pays ${money(result.amount)}</label><input id="id-customer-link" readonly style="width:100%;margin:8px 0" aria-label="Customer payment link"><button class="btn secondary" id="id-copy-link">Copy Payment Link</button><p style="font-size:13px">This link expires. Generate it again if your customer needs a fresh link. Payment is recorded after Stripe confirms it.</p>`;
+  $('#id-customer-link').value=url.href;
+  $('#id-customer-link').onclick=e=>e.target.select();
+  $('#id-copy-link').onclick=async()=>{try{await navigator.clipboard.writeText(url.href);toast('Payment link copied.')}catch{$('#id-customer-link').focus();$('#id-customer-link').select();toast('Press Command+C to copy the selected link.')}};
+ }catch(e){if(resultBox.isConnected)resultBox.textContent=e.message;toast(e.message,'error')}
+ finally{button.disabled=false;button.textContent='Get Payment Link'}
+}
+
 async function voidInvoice(id,number){
   const ok=await studioConfirm({title:'Void Invoice',message:`Void ${number}? This keeps the accounting record but removes it from open balances.`,confirmText:'Void Invoice'});
   if(!ok)return;
