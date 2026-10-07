@@ -136,8 +136,8 @@ function renderClients(list=store.clients){
     <td class="actions-cell"><button class="mini-btn edit-client" data-id="${c.id}">Edit</button>${c.id!=='9756cec8-8fbb-4614-b259-6853df83581a'?` <button class="mini-btn primary-mini open-client-portal" data-id="${c.id}">Open Customer Portal</button> <button class="mini-btn copy-client-portal" data-id="${c.id}">Copy Portal Link</button><span class="client-portal-link" data-id="${c.id}"></span>`:''} </td>
   </tr>`).join(''):`<tr><td colspan="6">No clients yet.</td></tr>`;
   $$('.edit-client').forEach(b=>b.onclick=()=>openClient(b.dataset.id));
-  $('.open-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,true));
-  $('.copy-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,false));
+  $$('.open-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,true));
+  $$('.copy-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,false));
   $('#qb-client').innerHTML=clientOptions($('#qb-client').value);
   $('#sf-client').innerHTML=clientOptions();
 }
@@ -150,7 +150,7 @@ async function clientPortal(button,open){
   const r=await api('/api/clients/'+button.dataset.id+'/portal-link',{method:'POST',body:'{}'});
   const url=new URL(r.url);
   if(url.origin!==location.origin||url.pathname!=='/client-portal.html')throw new Error('Invalid customer portal link.');
-  const holder=$('.client-portal-link').find(el=>el.dataset.id===button.dataset.id);
+  const holder=$$('.client-portal-link').find(el=>el.dataset.id===button.dataset.id);
   if(holder){holder.innerHTML='';const link=document.createElement('a');link.className='mini-btn';link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open portal ↗';holder.append(link);}
   if(open){if(tab)tab.location.replace(url.href);else toast('Use the Open portal link in this client row.');}
   else{try{await navigator.clipboard.writeText(url.href);toast('Customer portal link copied. Valid for 7 days.');}catch{toast('Right-click Open portal and choose Copy Link Address.');}}
@@ -612,3 +612,4 @@ async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{meth
 
 renderLines();
 (async()=>{const ok=await initAuth();if(ok)await loadAll()})();
+
