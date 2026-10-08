@@ -322,3 +322,34 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08
 /* Package text uses form typography, rather than the small label font. */
 #quote-builder select[data-package]{font-family:Inter,Arial,sans-serif;font-size:16px;font-weight:400;line-height:1.4;color:var(--text);min-height:44px;}
 #quote-builder select[data-package] option{font-size:16px;font-weight:400;}
+
+/* Document workspace */
+#invoice-detail-modal,#quote-detail-modal{background:rgba(20,29,40,.32);backdrop-filter:blur(3px)}
+#invoice-detail-modal .detail-modal,#quote-detail-modal .detail-modal{width:min(1160px,96vw);max-height:94vh;padding:30px 36px;border-radius:18px;background:#fff;color:#263442}
+#invoice-detail-modal .modal-header,#quote-detail-modal .modal-header{padding-bottom:20px;margin-bottom:0;border-bottom:1px solid #e6ebef}
+.billing-tabs{display:flex;gap:24px;border-bottom:1px solid #e6ebef;margin:0 0 24px;padding-top:12px}
+.billing-tabs button{background:none;border:0;padding:14px 2px;color:#73808c;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+.billing-tabs button.active{color:#263442;border-bottom-color:#ff5a36}
+#id-content [hidden],#qd-content [hidden],.detail-actions[hidden]{display:none!important}
+#id-content>.detail-section:not(.billing-workspace),#qd-content>.detail-section:not(.billing-workspace){padding:22px 0;border-color:#e6ebef}
+#id-content .detail-line strong,#qd-content .detail-line strong{font-size:14px;font-weight:500;line-height:1.6}
+#id-content .detail-line>strong,#qd-content .detail-line>strong{font-weight:700;white-space:nowrap}
+#id-content .detail-line,#qd-content .detail-line{padding:18px 0;border-color:#edf0f3}
+.detail-summary>div{background:#f6f8fa;border-color:#e6ebef;border-radius:10px;padding:18px}
+.detail-summary strong{font-size:23px}
+.billing-workspace{display:grid;grid-template-columns:310px minmax(0,1fr);gap:30px;border:0;margin:0;padding:0;align-items:start}
+.billing-editor{background:#f6f8fa;border:1px solid #e6ebef;border-radius:12px;padding:24px;position:sticky;top:0}
+.billing-editor h4{font-size:22px;margin:8px 0 14px;color:#263442}
+.billing-editor p{font-size:13px;color:#73808c;margin-bottom:24px}
+.billing-editor label{display:block;font-size:12px;font-weight:700;color:#4e5d6b;margin-top:18px}
+.billing-editor input,.billing-editor textarea{display:block;width:100%;border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:12px;font-size:14px;line-height:1.5;outline:none;margin:8px 0 0!important;min-height:46px}
+.billing-editor input:focus,.billing-editor textarea:focus{border-color:#ff5a36;box-shadow:0 0 0 3px #ff5a3618}
+.billing-editor textarea{min-height:130px;resize:vertical}
+.billing-editor .btn{width:100%;margin-top:22px;border-radius:8px;padding:14px}
+.billing-preview{min-width:0}.billing-preview-empty{min-height:450px;background:#f6f8fa;border:1px dashed #d4dde5;border-radius:12px;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:60px;color:#73808c}.billing-preview-empty span{font-size:11px;letter-spacing:2px}.billing-preview-empty h3{font-size:25px;color:#263442;margin:16px 0 0}.billing-preview-empty p{font-size:14px;line-height:1.7}
+.billing-envelope{font-size:12px;line-height:1.9;padding:16px 20px;background:#f6f8fa;border:1px solid #e6ebef;border-radius:10px;margin-bottom:16px;color:#4e5d6b;overflow-wrap:anywhere}
+.billing-result{font-size:13px;background:#fff7ed;padding:14px 18px;border-radius:8px;color:#875527!important}
+.billing-send:disabled{opacity:.45;cursor:not-allowed}.billing-preview .btn{border-radius:8px;text-decoration:none;display:inline-block;font-size:13px}
+#invoice-detail-modal .detail-actions,#quote-detail-modal .detail-actions{border-top:1px solid #e6ebef;padding-top:20px}.detail-actions .btn{border-radius:8px;font-size:13px}
+#confirm-modal{z-index:1200}
+@media(max-width:800px){.billing-workspace{grid-template-columns:1fr}.billing-editor{position:static}.billing-preview-empty{min-height:240px;padding:30px}#invoice-detail-modal .detail-modal,#quote-detail-modal .detail-modal{padding:22px}.detail-summary strong{font-size:19px}}
