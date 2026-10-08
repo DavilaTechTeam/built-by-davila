@@ -8,7 +8,7 @@
 <section class="card" id="project-files"><h2>Project files</h2><p>Upload your logo, photos, brand guidelines, or website content. Files are private to your project and Built By Davila.</p><label for="file-category">What are these files?</label><select id="file-category"><option>Logo</option><option>Photos</option><option>Brand guidelines</option><option>Website content</option><option>Other</option></select><label for="project-upload">Choose files</label><input type="file" id="project-upload" multiple accept=".jpg,.jpeg,.png,.webp,.pdf,.docx,.xlsx,.zip,.txt,.csv"><small>Up to 10 MB per file · 30 files / 100 MB per project. JPG, PNG, WebP, PDF, DOCX, XLSX, ZIP, TXT, CSV.</small><p><button class="primary" id="upload-files">Upload files</button></p><p id="upload-message" role="status"></p><div id="project-file-list"></div></section>
 <section class="card" id="website-edits"><div class="head"><h2>Website edits</h2><button id="load-website">Open editor</button></div><p>Edit wording and replace photos using your project uploads. Preview your changes, then submit them for approval. Layout and styling stay protected.</p><p id="website-message" role="status"></p><div class="editor-grid"><div id="website-fields"></div><div id="website-preview-wrap" hidden><h3>Website preview</h3><iframe id="website-preview" title="Website preview" sandbox="" referrerpolicy="no-referrer"></iframe></div></div><div id="website-actions" hidden><button id="save-wording">Save draft</button> <button id="preview-wording">Preview changes</button> <button class="primary" id="submit-wording">Submit for approval</button></div><div id="website-reviews" class="history"></div></section></main>
 
-<script>
+<script src="project-file-preview.js?v=20261007"></script><script>
 const base='https://built-by-davila-backend.onrender.com',el=id=>document.getElementById(id);
 const access=new URLSearchParams(location.hash.slice(1)).get('access')||sessionStorage.getItem('bbd_customer_access')||'';
 if(access){sessionStorage.setItem('bbd_customer_access',access);history.replaceState(null,'',location.pathname+location.search);}
@@ -79,9 +79,12 @@ async function loadProject(){
  }catch(e){el('project-message').textContent=e.message;}
 }
 function renderProjectFiles(files){
- el('project-file-list').innerHTML=files.length?files.map(f=>'<div class="project-file"><div><strong>'+esc(f.filename)+'</strong><small>'+esc(f.category)+' · '+(Number(f.size_bytes)/1024/1024).toFixed(2)+' MB · '+new Date(f.created_at).toLocaleDateString()+'</small></div><button type="button" data-file="'+esc(f.id)+'">Download</button></div>').join(''):'<p>No files uploaded yet.</p>';
+ const images=f=>['image/jpeg','image/png','image/webp'].includes(f.content_type);
+ el('project-file-list').innerHTML=files.map(f=>'<div class="project-file"><div>'+(images(f)?'<button class="file-name-preview" data-preview="'+esc(f.id)+'"><strong>'+esc(f.filename)+'</strong></button>':'<strong>'+esc(f.filename)+'</strong>')+'<small>'+esc(f.category)+' · '+(Number(f.size_bytes)/1048576).toFixed(2)+' MB</small></div><div class="file-actions">'+(images(f)?'<button data-preview="'+esc(f.id)+'">View image</button> ':'')+'<button data-file="'+esc(f.id)+'" data-name="'+esc(f.filename)+'">Download</button></div></div>').join('')||'<p>No files uploaded yet.</p>';
  el('project-file-list').querySelectorAll('[data-file]').forEach(b=>b.onclick=()=>downloadProjectFile(b));
+ el('project-file-list').querySelectorAll('[data-preview]').forEach(b=>b.onclick=()=>{const f=files.find(f=>f.id===b.dataset.preview);if(f)window.bbdPreviewProjectFile({url:base+'/customer-api/uploads/'+encodeURIComponent(f.id),token:access,name:f.filename,type:f.content_type});});
 }
+
 async function downloadProjectFile(button){
  button.disabled=true;
  try{const r=await fetch(base+'/customer-api/uploads/'+button.dataset.file,{headers:{Authorization:'Bearer '+access},signal:AbortSignal.timeout(75000)});if(!r.ok)throw Error('Unable to download this file.');const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=button.closest('.project-file').querySelector('strong').textContent;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
