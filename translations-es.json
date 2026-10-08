@@ -810,5 +810,10 @@
   "Choose a smaller replacement photo.": "Seleccione una foto de menor tamaño.",
   "This browser could not prepare the photo. Try a smaller JPG or PNG.": "Este navegador no pudo preparar la foto. Pruebe un JPG o PNG más pequeño.",
   "Unable to prepare photo.": "No se pudo preparar la foto.",
-  "Photo ready. Preview your changes before submitting.": "Foto lista. Revise sus cambios antes de enviarlos."
+  "Photo ready. Preview your changes before submitting.": "Foto lista. Revise sus cambios antes de enviarlos.",
+  "View image": "Ver imagen",
+  "Loading image…": "Cargando imagen…",
+  "Close": "Cerrar",
+  "Unable to load this image.": "No se pudo cargar esta imagen.",
+  "This file cannot be previewed. Please download it.": "Este archivo no se puede previsualizar. Descárguelo."
 }
