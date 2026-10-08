@@ -20,7 +20,7 @@
 @media print{
  .paper>:not(.print-invoice){display:none!important}.print-invoice{display:block;position:relative;color:#172b3d;font:10pt/1.5 Arial,sans-serif}
  .pi-header{display:flex;align-items:flex-start;gap:18px;padding:10px 0 30px;border-bottom:2px solid #172b3d;break-inside:avoid}.pi-logo{width:100px;flex:0 0 100px}.pi-logo img{display:block;width:94px;height:94px;object-fit:contain;border-radius:8px}.pi-company{font-size:9.5pt;line-height:1.55;flex:1;padding-top:5px}.pi-company strong{font-size:12pt}.pi-header h1{font-size:19pt;white-space:nowrap;color:#172b3d;margin:4px 0 0;line-height:1.3;font-weight:600}
- .pi-billing{display:flex;align-items:flex-start;justify-content:space-between;padding:0 0 28px;margin-top:4px;gap:18px;break-inside:avoid}.pi-client{padding-top:10px;flex:1;font-size:11pt;line-height:1.6}.pi-label{font-size:8pt;font-weight:700;letter-spacing:.5pt}.pi-meta{width:55%;margin:0;table-layout:fixed;border-collapse:collapse}.pi-meta td{background:#f0f2f5;border:0;text-align:center;width:33.333%;padding:16px 4px;font-size:10pt;line-height:1.7}.pi-meta span{font-size:8pt}.pi-meta td.pi-pay{background:#172b3d;color:white}.pi-meta strong{font-size:13pt}.pi-meta td:last-child{width:33.333%;padding-left:4px}
+ .pi-billing{display:flex;align-items:flex-start;justify-content:space-between;padding:0 0 28px;margin-top:4px;gap:18px;break-inside:avoid}.pi-client{padding-top:10px;flex:1;font-size:11pt;line-height:1.6}.pi-label{font-size:8pt;font-weight:700;letter-spacing:.5pt}.pi-meta{width:55%;margin:0;table-layout:fixed;border-collapse:collapse}.pi-meta td{background:#f0f2f5;border:0;text-align:center;width:33.333%;padding:16px 4px;font-size:9.5pt;line-height:1.6}.pi-meta span{font-size:8pt}.pi-meta td.pi-pay{background:#172b3d;color:white}.pi-meta strong{font-size:13pt}.pi-meta td:last-child{width:33.333%;padding-left:4px}
  .pi-items{width:100%;table-layout:fixed;margin:10px 0 0;border-top:1px solid #afb7c0}.pi-items th{background:white;border-bottom:1px solid #afb7c0;color:#172b3d;padding:10px 6px;font-size:8pt;letter-spacing:0}.pi-items td{padding:14px 6px;font-size:9.5pt;line-height:1.6}.pi-items th:first-child,.pi-items td:first-child{width:7%;text-align:right}.pi-items th:nth-child(2),.pi-items td:nth-child(2){width:61%;text-align:left}.pi-items th:nth-child(3),.pi-items td:nth-child(3){width:15%;text-align:right;white-space:nowrap}.pi-items th:last-child,.pi-items td:last-child{width:17%;text-align:right;white-space:nowrap}
  .pi-bottom{display:flex;gap:24px;justify-content:space-between;padding-top:14px;break-inside:avoid}.pi-methods{width:45%;font-size:8.5pt}.pi-methods h2{font-size:16pt;font-weight:600;color:#172b3d;margin:0 0 8px}.pi-methods p{font-size:8.5pt;line-height:1.65;margin:8px 0 12px}.pi-link{display:inline-block;padding:11px 24px;border-radius:6px;background:#ff5a36;color:white;text-decoration:none;font-size:12pt;font-weight:500}.pi-totals{width:51%}.pi-totals>div{display:flex;justify-content:space-between;gap:14px;padding:10px 6px;border-bottom:1px solid #d3d9df;font-size:9pt}.pi-totals .pi-due{margin-top:8px;border-bottom:1px solid #172b3d;align-items:center}.pi-due strong{font-size:20pt;font-weight:500}.pi-totals p{text-align:right;font-size:8pt;color:#647587;margin:8px 0}.pi-totals p.pi-thanks{font-size:10pt;color:#172b3d;margin-top:12px}.pi-terms{margin-top:26px;border-top:1px solid #d3d9df;padding-top:14px;font-size:8pt;line-height:1.65;color:#536578}.pi-terms strong{font-size:9pt;color:#172b3d}.pi-terms p{margin:5px 0 0}.pi-footer{display:block;text-align:center;font-size:9pt;margin-top:24px;color:#172b3d}.pi-paid{position:absolute;top:250px;left:220px;transform:rotate(-35deg);font-size:50pt;color:#237b55;opacity:.4;font-weight:700;pointer-events:none}
 }
@@ -30,32 +30,32 @@ header>a{display:flex;align-items:center;gap:12px}header>a>span{margin-left:-12p
 
 /* Give short invoices a balanced full-page print layout. */
 @media print{
- .print-invoice{display:flex;flex-direction:column;min-height:9.35in;font:12pt/1.6 Arial,sans-serif}
- .pi-header{gap:24px;padding:8px 0 32px}
+ .print-invoice{display:block;min-height:0;font:12pt/1.6 Arial,sans-serif}
+ .pi-header{gap:24px;padding:8px 0 20px}
  .pi-logo{width:112px;flex-basis:112px}
  .pi-logo img{width:106px;height:88px}
  .pi-company{font-size:11pt;line-height:1.65}
  .pi-company strong{font-size:14pt}
  .pi-header h1{font-size:24pt}
- .pi-billing{padding-bottom:38px;margin-top:0;gap:24px}
+ .pi-billing{padding-bottom:14px;margin-top:0;gap:24px}
  .pi-client{font-size:12pt;padding-top:20px}
  .pi-label{font-size:10pt;margin-bottom:6px}
  .pi-meta td{padding:22px 5px;font-size:11pt}
  .pi-meta span{font-size:9pt}
  .pi-meta strong{font-size:16pt}
  .pi-items{margin:12px 0 0}
- .pi-items th{padding:15px 8px;font-size:10pt}
- .pi-items td{padding:24px 8px;font-size:11pt;line-height:1.75}
- .pi-bottom{padding-top:34px;gap:28px}
+ .pi-items th{padding:10px 8px;font-size:10pt}
+ .pi-items td{padding:12px 8px;font-size:11pt;line-height:1.55}
+ .pi-bottom{padding-top:18px;gap:28px}
  .pi-methods h2{font-size:20pt;margin-bottom:14px}
- .pi-methods p{font-size:10pt;line-height:1.75;margin:12px 0 18px}
+ .pi-methods p{font-size:10pt;line-height:1.75;margin:10px 0 12px}
  .pi-link{font-size:14pt;padding:14px 26px}
- .pi-totals>div{font-size:11pt;padding:15px 8px}
+ .pi-totals>div{font-size:11pt;padding:9px 8px}
  .pi-due strong{font-size:24pt}
  .pi-totals p{font-size:10pt;line-height:1.6;margin-top:12px}
- .pi-totals p.pi-thanks{font-size:12pt;margin-top:18px}
- .pi-terms{margin-top:auto;padding-top:20px;font-size:10pt;line-height:1.7}
+ .pi-totals p.pi-thanks{font-size:12pt;margin-top:10px}
+ .pi-terms{margin-top:20px;padding-top:20px;font-size:10pt;line-height:1.7}
  .pi-terms strong{font-size:11pt}
  .pi-terms p{margin-top:10px}
- .pi-footer{font-size:10pt;margin-top:20px}
+ .pi-footer{font-size:9pt;margin-top:8px}
 }
