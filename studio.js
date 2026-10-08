@@ -145,7 +145,7 @@ async function clientPortal(button,open){
   const holder=[...$$('.client-portal-link')].find(el=>el.dataset.id===button.dataset.id);
   if(holder){holder.innerHTML='';const link=document.createElement('a');link.className='mini-btn';link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open portal ↗';holder.append(link);}
   if(open){if(tab)tab.location.replace(url.href);else toast('Use the Open portal link in this client row.');}
-  else{try{await navigator.clipboard.writeText(url.href);toast('Customer portal link copied. Valid for 7 days.');}catch{toast('Right-click Open portal and choose Copy Link Address.');}}
+  else{try{await navigator.clipboard.writeText(url.href);toast('Customer invitation copied. Valid for 7 days.');}catch{toast('Right-click Open portal and choose Copy Link Address.');}}
  }catch(e){if(tab)tab.close();toast(e.message,'error');}
  finally{button.disabled=false;}
 }
@@ -518,11 +518,11 @@ async function openInvoiceDetail(id){
        const button=$('#id-get-portal');button.disabled=true;
        try{
         const r=await api('/api/clients/'+i.client_id+'/portal-link',{method:'POST',body:'{}'});
-        $('#id-link-result').innerHTML='<label for="id-portal-url" style="display:block;margin-top:16px">Private customer portal link — expires in 7 days</label><input id="id-portal-url" readonly style="width:100%;margin:8px 0"><a class="btn secondary" id="id-open-portal" target="_blank" rel="noopener noreferrer">Open Customer Portal ↗</a> <button class="btn secondary" id="id-copy-portal">Copy Portal Link</button>';
+        $('#id-link-result').innerHTML='<label for="id-portal-url" style="display:block;margin-top:16px">Customer setup/reset invitation — expires in 7 days</label><input id="id-portal-url" readonly style="width:100%;margin:8px 0"><a class="btn secondary" id="id-open-portal" target="_blank" rel="noopener noreferrer">Open Customer Portal ↗</a> <button class="btn secondary" id="id-copy-portal">Copy Portal Link</button>';
         $('#id-portal-url').value=r.url;
         $('#id-open-portal').href=r.url;
         $('#id-portal-url').onclick=e=>e.target.select();
-        $('#id-copy-portal').onclick=async()=>{try{await navigator.clipboard.writeText(r.url);toast('Customer portal link copied.')}catch{$('#id-portal-url').focus();$('#id-portal-url').select();toast('Press Command+C to copy the selected link.')}};
+        $('#id-copy-portal').onclick=async()=>{try{await navigator.clipboard.writeText(r.url);toast('Customer invitation copied.')}catch{$('#id-portal-url').focus();$('#id-portal-url').select();toast('Press Command+C to copy the selected link.')}};
        }catch(e){toast(e.message,'error')}finally{button.disabled=false}
       };
       $('#id-get-link').onclick=()=>getCustomerPaymentLink(i,deposit>=0.5?'deposit':'balance');
@@ -621,6 +621,7 @@ async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{meth
 
 renderLines();
 (async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';updatePreview();}}})();
+
 
 
 
