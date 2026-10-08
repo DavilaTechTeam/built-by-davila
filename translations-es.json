@@ -815,5 +815,10 @@
   "Loading image…": "Cargando imagen…",
   "Close": "Cerrar",
   "Unable to load this image.": "No se pudo cargar esta imagen.",
-  "This file cannot be previewed. Please download it.": "Este archivo no se puede previsualizar. Descárguelo."
+  "This file cannot be previewed. Please download it.": "Este archivo no se puede previsualizar. Descárguelo.",
+  "Full screen": "Pantalla completa",
+  "Exit full screen": "Salir de pantalla completa",
+  "← Back to project": "← Volver al proyecto",
+  "Open editor →": "Abrir editor →",
+  "Edit your wording and photos, then submit your changes for review.": "Edite los textos y las fotos, luego envíe sus cambios para revisión."
 }
