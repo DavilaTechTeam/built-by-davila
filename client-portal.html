@@ -2,70 +2,57 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Your project | Built By Davila</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f5f3ef;color:#17191c;font:16px Inter,Arial,sans-serif}header{background:#111418;color:white;padding:25px max(24px,calc((100vw - 1050px)/2))}header strong{letter-spacing:.08em}main{max-width:1050px;margin:auto;padding:36px 24px}h1{font-size:32px;margin:0 0 10px}p{line-height:1.6;color:#60646b}.card{background:white;border:1px solid #e7e3dc;border-radius:18px;padding:24px;margin:22px 0}.head{display:flex;justify-content:space-between;gap:16px;align-items:center}.numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}.numbers div{padding:16px;background:#f8f7f4;border-radius:12px}.numbers small{display:block;color:#646871;margin-bottom:8px}.numbers strong{font-size:23px}button{font:inherit;font-weight:700;border-radius:30px;padding:12px 20px;border:1px solid #e1dfdb;background:white;cursor:pointer}button.primary{background:#ff5a36;border-color:#ff5a36;color:white}button:disabled{opacity:.6;cursor:wait}.history{border-top:1px solid #eee;margin-top:20px;padding-top:16px}.history p{margin:8px 0}.badge{background:#f1f3f5;padding:7px 12px;border-radius:20px;font-size:13px}.backdrop{position:fixed;inset:0;background:#0007;backdrop-filter:blur(5px);display:none;padding:20px;overflow:auto;z-index:10}.backdrop.open{display:flex;align-items:flex-start;justify-content:center}.popup{background:#f5f3ef;border-radius:22px;max-width:850px;width:100%;margin:30px 0;padding:24px}.popup h2{margin:10px 0}.error{color:#b42318}#message{min-height:24px}@media(max-width:600px){.numbers{grid-template-columns:1fr}.head{align-items:flex-start}.popup{padding:16px}.numbers strong{font-size:21px}}
-#website-fields label{display:block;font-weight:700;margin:20px 0 8px}#website-fields textarea{display:block;width:100%;margin-top:8px;min-height:90px;padding:14px;border:1px solid #dedbd4;border-radius:12px;background:#faf9f6;color:#17191c;font:400 16px/1.5 Inter,Arial,sans-serif;resize:vertical}#website-actions{margin-top:24px}#website-actions[hidden]{display:none}#website-reviews:empty{display:none}.portal-nav{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.portal-nav a{padding:10px 16px;border:1px solid #dedbd4;border-radius:30px;text-decoration:none;color:#17191c;font-size:14px;font-weight:700;background:#fff}.portal-nav a:hover{border-color:#ff5a36;color:#d33c19}.project-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0}.project-grid label,#project-files label{display:block;font-weight:700;font-size:14px}.project-grid textarea,.project-grid input,#file-category{display:block;width:100%;padding:12px;margin-top:8px;border:1px solid #dedbd4;border-radius:10px;background:#faf9f6;font:400 16px/1.5 Inter,Arial,sans-serif;color:#17191c}.project-grid textarea{min-height:95px;resize:vertical}#file-category{max-width:320px;margin-bottom:20px}#project-upload{display:block;margin:12px 0;width:100%}#project-files small{display:block;color:#60646b;line-height:1.5}.project-file{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-top:1px solid #eee}.project-file strong{overflow-wrap:anywhere}.project-file small{margin-top:5px}.project-file button{flex-shrink:0;font-size:14px;padding:9px 14px}.card,section{scroll-margin-top:24px}@media(max-width:600px){.project-grid{grid-template-columns:1fr}.portal-nav a{padding:9px 12px}.project-file{align-items:flex-start}}</style></head><body><header><strong>BUILT BY DAVILA</strong><div style="margin-top:8px;color:#ccc">Your client portal</div></header>
-<main><div class="head"><div><h1 id="company">Your project workspace</h1><p>Share your project details and files, review your website, and manage payments—all in one place.</p></div><button id="refresh">Refresh</button></div><p id="message" role="status">Loading your invoices…</p><nav class="portal-nav" aria-label="Portal sections"><a href="#project-details">Project details</a><a href="#project-files">Files</a><a href="#website-edits">Website edits</a><a href="#project-payments">Payments</a></nav>
+#website-fields label{display:block;font-weight:700;margin:20px 0 8px}#website-fields textarea{display:block;width:100%;margin-top:8px;min-height:90px;padding:14px;border:1px solid #dedbd4;border-radius:12px;background:#faf9f6;color:#17191c;font:400 16px/1.5 Inter,Arial,sans-serif;resize:vertical}#website-actions{margin-top:24px}#website-actions[hidden]{display:none}#website-reviews:empty{display:none}.portal-nav{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.portal-nav a{padding:10px 16px;border:1px solid #dedbd4;border-radius:30px;text-decoration:none;color:#17191c;font-size:14px;font-weight:700;background:#fff}.portal-nav a:hover{border-color:#ff5a36;color:#d33c19}.project-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0}.project-grid label,#project-files label{display:block;font-weight:700;font-size:14px}.project-grid textarea,.project-grid input,#file-category{display:block;width:100%;padding:12px;margin-top:8px;border:1px solid #dedbd4;border-radius:10px;background:#faf9f6;font:400 16px/1.5 Inter,Arial,sans-serif;color:#17191c}.project-grid textarea{min-height:95px;resize:vertical}#file-category{max-width:320px;margin-bottom:20px}#project-upload{display:block;margin:12px 0;width:100%}#project-files small{display:block;color:#60646b;line-height:1.5}.project-file{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-top:1px solid #eee}.project-file strong{overflow-wrap:anywhere}.project-file small{margin-top:5px}.project-file button{flex-shrink:0;font-size:14px;padding:9px 14px}.card,section{scroll-margin-top:24px}@media(max-width:600px){.project-grid{grid-template-columns:1fr}.portal-nav a{padding:9px 12px}.project-file{align-items:flex-start}}.editor-grid{display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:24px}#website-fields:not(:empty){max-height:680px;overflow:auto;padding-right:12px}#website-fields select{width:100%;padding:12px;margin-top:8px;font:400 15px/1.5 Inter,Arial,sans-serif;border:1px solid #dedbd4;border-radius:10px;background:#faf9f6}#website-preview{width:100%;height:620px;border:1px solid #dedbd4;border-radius:12px;background:white}#website-preview-wrap[hidden]{display:none}#website-actions{display:flex;flex-wrap:wrap;gap:10px}@media(max-width:800px){.editor-grid{grid-template-columns:1fr}#website-fields:not(:empty){max-height:450px}#website-preview{height:480px}}</style></head><body><header class="site-header" style="display:flex;justify-content:space-between;align-items:center;gap:20px"><div><strong>BUILT BY DAVILA</strong><div style="margin-top:8px;color:#ccc">Your project portal</div></div></header>
+<main><div class="head"><div><h1 id="company">Your project workspace</h1><p>Share your project details and files, then review and edit your website here.</p></div><button id="refresh">Refresh</button></div><p id="message" role="status">Loading your project…</p><nav class="portal-nav" aria-label="Portal sections"><a href="#project-details">Project details</a><a href="#project-files">Files</a><a href="#website-edits">Website edits</a></nav>
 <section class="card" id="project-details"><div class="head"><h2>Tell us about your project</h2><span class="badge">Start here</span></div><p>You can start before a quote or invoice is created. Save what you know and update it later.</p><form id="project-form"><div id="project-questions" class="project-grid"></div><button type="submit" class="primary" id="save-project">Save project details</button><p id="project-message" role="status"></p></form></section>
 <section class="card" id="project-files"><h2>Project files</h2><p>Upload your logo, photos, brand guidelines, or website content. Files are private to your project and Built By Davila.</p><label for="file-category">What are these files?</label><select id="file-category"><option>Logo</option><option>Photos</option><option>Brand guidelines</option><option>Website content</option><option>Other</option></select><label for="project-upload">Choose files</label><input type="file" id="project-upload" multiple accept=".jpg,.jpeg,.png,.webp,.pdf,.docx,.xlsx,.zip,.txt,.csv"><small>Up to 10 MB per file · 30 files / 100 MB per project. JPG, PNG, WebP, PDF, DOCX, XLSX, ZIP, TXT, CSV.</small><p><button class="primary" id="upload-files">Upload files</button></p><p id="upload-message" role="status"></p><div id="project-file-list"></div></section>
-<section id="project-payments"><h2>Invoices & payments</h2><div id="invoices"></div></section><section class="card" id="website-edits"><div class="head"><h2>Website edits</h2><button id="load-website">Edit wording</button></div><p>Update your website wording and submit it for Built By Davila to review before it goes live.</p><p id="website-message" role="status"></p><div id="website-fields"></div><div id="website-actions" hidden><button id="save-wording">Save draft</button> <button class="primary" id="submit-wording">Submit for approval</button></div><div id="website-reviews" class="history"></div></section></main>
-<div class="backdrop" id="checkout" role="dialog" aria-modal="true" aria-labelledby="checkout-title"><div class="popup"><div class="head"><div><small style="color:#ff5a36;font-weight:700">BUILT BY DAVILA · SECURE CHECKOUT</small><h2 id="checkout-title">Invoice payment</h2></div><button id="close" aria-label="Close checkout">×</button></div><p id="checkout-status" role="status"></p><div id="mount"></div></div></div>
-<script src="https://js.stripe.com/endive/stripe.js"></script>
+<section class="card" id="website-edits"><div class="head"><h2>Website edits</h2><button id="load-website">Open editor</button></div><p>Edit wording and replace photos using your project uploads. Preview your changes, then submit them for approval. Layout and styling stay protected.</p><p id="website-message" role="status"></p><div class="editor-grid"><div id="website-fields"></div><div id="website-preview-wrap" hidden><h3>Website preview</h3><iframe id="website-preview" title="Website preview" sandbox="" referrerpolicy="no-referrer"></iframe></div></div><div id="website-actions" hidden><button id="save-wording">Save draft</button> <button id="preview-wording">Preview changes</button> <button class="primary" id="submit-wording">Submit for approval</button></div><div id="website-reviews" class="history"></div></section></main>
+
 <script>
 const base='https://built-by-davila-backend.onrender.com',el=id=>document.getElementById(id);
 const access=new URLSearchParams(location.hash.slice(1)).get('access')||sessionStorage.getItem('bbd_customer_access')||'';
 if(access){sessionStorage.setItem('bbd_customer_access',access);history.replaceState(null,'',location.pathname);}
 const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n||0));
 const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let checkout=null,generation=0,lastFocus=null;
 async function api(path,options={}){
  const r=await fetch(base+path,{...options,headers:{'Content-Type':'application/json',Authorization:'Bearer '+access},signal:AbortSignal.timeout(75000)});
  const data=await r.json();if(!r.ok)throw new Error(data.error||'Unable to complete this request.');return data;
 }
-function closeCheckout(){generation++;if(checkout){checkout.destroy();checkout=null;}el('checkout').classList.remove('open');lastFocus?.focus();}
-el('close').onclick=closeCheckout;
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCheckout()});
-async function load(){
- if(!access){el('message').textContent='Please use the private portal link provided by Built By Davila.';return;}
- el('refresh').disabled=true;
+async function load(){if(!access){el('message').textContent='Please use the private customer link provided by Built By Davila.';return;}try{const d=await api('/customer-api/profile');el('company').textContent=d.company;el('message').textContent='';}catch(e){el('message').textContent=e.message;}}
+let wordingFields=[],draftKey='',projectImages=[],photoPreparing=0;const preparedPhotos=new Map();
+function imageOptions(field,files){return '<option value="'+field.value+'">Keep current image</option>'+files.filter(f=>['image/jpeg','image/png','image/webp'].includes(f.content_type)).map(f=>'<option value="'+esc(f.id)+'">'+esc(f.filename)+'</option>').join('');}
+
+async function prepareEditorPhoto(field){
+ const select=el(field.id),file=projectImages.find(f=>f.id===select.value);if(!file||Number(file.size_bytes)<=400*1024)return;
+ photoPreparing++;select.disabled=true;for(const id of ['save-wording','preview-wording','submit-wording'])el(id).disabled=true;el('website-message').textContent='Preparing '+file.filename+' for your website…';
  try{
-  const d=await api('/customer-api/invoices');el('company').textContent=d.company;
-  el('invoices').innerHTML=d.invoices.map(i=>{
-   const deposit=Math.min(Number(i.balance_due),Math.max(0,Math.round(Number(i.total)*Number(i.deposit_percent)/100*100)/100-Number(i.amount_paid)));
-   const payable=Number(i.balance_due)>=.5&&!['Void','Draft','Paid'].includes(i.status);
-   const kind=deposit>=.5?'deposit':'balance',amount=kind==='deposit'?deposit:i.balance_due;
-   return '<section class="card"><div class="head"><h2>'+esc(i.invoice_number)+'</h2><span class="badge">'+esc(i.status)+'</span></div><div class="numbers"><div><small>Project total</small><strong>'+money(i.total)+'</strong></div><div><small>Paid</small><strong>'+money(i.amount_paid)+'</strong></div><div><small>Remaining balance</small><strong>'+money(i.balance_due)+'</strong></div></div><p>'+esc(i.notes)+'</p>'+(payable?'<button class="primary pay" data-id="'+esc(i.id)+'" data-kind="'+kind+'">Pay '+(kind==='deposit'?'Deposit ':'Balance ')+money(amount)+'</button>':'')+'<div class="history"><strong>Payment history</strong>'+((d.payments.filter(p=>p.invoice_id===i.id)).map(p=>'<p>'+esc(p.type)+' · '+money(p.amount)+' · '+esc(p.status)+'</p>').join('')||'<p>No payments received yet.</p>')+'</div></section>';
-  }).join('')||'<section class="card">No invoices yet.</section>';
-  document.querySelectorAll('.pay').forEach(button=>button.onclick=()=>pay(button));
-  el('message').textContent='';
- }catch(e){el('message').textContent=e.message;el('message').className='error';}
- finally{el('refresh').disabled=false;}
-}
-async function pay(button){
- lastFocus=button;const run=++generation;el('checkout').classList.add('open');el('close').focus();el('checkout-status').textContent='Loading secure payment form…';el('mount').innerHTML='';
- try{
-  if(typeof Stripe!=='function')throw new Error('Payment form could not load. Refresh and try again.');
-  const r=await api('/customer-api/invoices/'+button.dataset.id+'/stripe-checkout',{method:'POST',body:JSON.stringify({kind:button.dataset.kind,embedded:true})});
-  if(run!==generation)return;
-  const stripe=Stripe(r.publishableKey),create=r.uiMode==='embedded_page'?stripe.createEmbeddedCheckoutPage.bind(stripe):stripe.initEmbeddedCheckout.bind(stripe);
-  const instance=await create({fetchClientSecret:async()=>r.clientSecret,onComplete:async()=>{
-   closeCheckout();el('message').textContent='Payment submitted. Waiting for Stripe confirmation…';
-   await load();
-   let attempts=0;const poll=setInterval(async()=>{attempts++;await load();if(attempts>=6)clearInterval(poll)},3000);
-  }});
-  if(run!==generation){instance.destroy();return;}
-  checkout=instance;el('checkout-status').textContent='';checkout.mount('#mount');
- }catch(e){if(run===generation)el('checkout-status').textContent=e.message;}
+  if(!preparedPhotos.has(file.id))preparedPhotos.set(file.id,(async()=>{
+   const response=await fetch(base+'/customer-api/uploads/'+file.id,{headers:{Authorization:'Bearer '+access},signal:AbortSignal.timeout(75000)});if(!response.ok)throw Error('Unable to load this project photo.');
+   const bitmap=await createImageBitmap(await response.blob()),canvas=document.createElement('canvas');let width=Math.min(1600,bitmap.width),height=Math.round(width*bitmap.height/bitmap.width);if(height>1600){width=Math.round(width*1600/height);height=1600;}let blob;
+   try{for(let pass=0;pass<8;pass++){canvas.width=Math.max(1,width);canvas.height=Math.max(1,height);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.8));if(blob&&blob.size<=400*1024)break;width=Math.round(width*.75);height=Math.round(height*.75);}if(!blob||blob.size>400*1024)throw Error('Choose a smaller replacement photo.');}finally{bitmap.close();}
+   const suffix={'image/webp':'webp','image/png':'png','image/jpeg':'jpg'}[blob.type];if(!suffix)throw Error('This browser could not prepare the photo. Try a smaller JPG or PNG.');const name=file.filename.replace(/\.[^.]+$/,'')+'-website.'+suffix;const upload=await fetch(base+'/customer-api/uploads',{method:'POST',headers:{'Content-Type':'application/octet-stream',Authorization:'Bearer '+access,'X-File-Name':encodeURIComponent(name),'X-File-Category':'Website content'},body:blob,signal:AbortSignal.timeout(120000)});const data=await upload.json();if(!upload.ok)throw Error(data.error||'Unable to prepare photo.');return {...data,content_type:blob.type};
+  })());
+  const ready=await preparedPhotos.get(file.id);if(!projectImages.some(f=>f.id===ready.id))projectImages.push(ready);const option=document.createElement('option');option.value=ready.id;option.textContent=ready.filename;select.append(option);select.value=ready.id;el('website-message').textContent='Photo ready. Preview your changes before submitting.';
+ }catch(e){preparedPhotos.delete(file.id);select.value=field.value;el('website-message').textContent=e.message;}
+ finally{photoPreparing--;select.disabled=false;if(!photoPreparing)for(const id of ['save-wording','preview-wording','submit-wording'])el(id).disabled=false;}
 }
 
-let wordingFields=[],draftKey='';
+el('preview-wording').onclick=async()=>{const b=el('preview-wording');b.disabled=true;el('website-message').textContent='Preparing preview…';try{const d=await api('/customer-api/website/preview',{method:'POST',body:JSON.stringify({changes:draftChanges()})});el('website-preview').srcdoc=d.html;el('website-message').textContent='Preview updated. Submit for approval when ready.';}catch(e){el('website-message').textContent=e.message;}finally{b.disabled=false;}};
 const draftChanges=()=>wordingFields.map(f=>({id:f.id,value:el(f.id).value,original:f.value})).filter((c,i)=>c.value.trim()!==wordingFields[i].value);
 el('load-website').onclick=async()=>{
- el('load-website').disabled=true;el('website-message').textContent='Loading website wording…';
+ el('load-website').disabled=true;el('website-message').textContent='Loading your website editor…';
  try{
   const d=await api('/customer-api/website');
   if(!d.available){el('website-message').textContent='Website editing setup is pending. Please contact Built By Davila.';return;}
-  wordingFields=d.fields;draftKey='bbd_wording_'+access;
+  wordingFields=d.fields;draftKey='bbd_wording_'+d.clientId;
+  try{const legacy=localStorage.getItem('bbd_wording_'+access);if(legacy&&!localStorage.getItem(draftKey))localStorage.setItem(draftKey,legacy);localStorage.removeItem('bbd_wording_'+access);}catch{}
   let draft=[];try{draft=JSON.parse(localStorage.getItem(draftKey)||'[]')}catch{}
-  el('website-fields').innerHTML=d.fields.map(f=>'<label for="'+f.id+'">'+esc(f.label)+'<textarea id="'+f.id+'" maxlength="4000">'+esc(draft.find(c=>c.id===f.id)?.value??f.value)+'</textarea></label>').join('');
+  const materials=await api('/customer-api/project');projectImages=materials.uploads;
+  el('website-fields').innerHTML=d.fields.map(f=>['image','background'].includes(f.type)?'<label for="'+f.id+'">'+esc(f.label)+'<select id="'+f.id+'">'+imageOptions(f,materials.uploads)+'</select></label>':'<label for="'+f.id+'">'+esc(f.label)+'<textarea id="'+f.id+'" maxlength="4000">'+esc(draft.find(c=>c.id===f.id)?.value??f.value)+'</textarea></label>').join('');
+  for(const f of d.fields.filter(f=>['image','background'].includes(f.type))){const saved=draft.find(c=>c.id===f.id);if(saved&&[...el(f.id).options].some(o=>o.value===saved.value))el(f.id).value=saved.value;}
+  el('website-fields').insertAdjacentHTML('beforeend','<p>Choose a JPG, PNG, or WebP from Project files. Larger photos are prepared automatically. Up to five replacements per review.</p>');
+  for(const field of d.fields.filter(f=>['image','background'].includes(f.type)))el(field.id).onchange=()=>prepareEditorPhoto(field);
+  el('website-preview-wrap').hidden=false;el('website-preview').srcdoc=d.previewHtml;
   el('website-actions').hidden=false;
   el('website-reviews').innerHTML='<strong>Review history</strong>'+d.reviews.map(r=>'<p>'+esc(r.status)+' · '+new Date(r.submitted_at).toLocaleDateString()+(r.published_at?' · Published':'')+(r.review_note?' · '+esc(r.review_note):'')+'</p>').join('');
   el('website-message').textContent=draft.length?'Your saved draft is restored.':'Edit the fields below. Your website layout stays protected.';
@@ -82,12 +69,13 @@ el('submit-wording').onclick=async()=>{
 const projectQuestions=[['business','What does your business do?'],['audience','Who is your ideal customer?'],['goal','What should your website accomplish?'],['services','What services or products do you offer?'],['pages','What pages do you need?'],['cta','What action should visitors take?'],['style','How should the website look and feel?'],['colors','What are your brand colors?'],['inspiration','Websites or brands you like'],['musthave','What must the website include?'],['avoid','Anything you do not want?'],['domain','Your domain name or existing website'],['competitors','Competitors we should know about'],['timing','Your ideal launch date'],['budget','Your budget range'],['notes','Anything else we should know?']];
 el('project-questions').innerHTML=projectQuestions.map(([id,label])=>'<label for="project-'+id+'">'+esc(label)+'<textarea id="project-'+id+'" maxlength="6000"></textarea></label>').join('');
 async function loadProject(){
+ el('save-project').disabled=true;el('upload-files').disabled=true;
  if(!access)return;
  try{
   const d=await api('/customer-api/project');
   for(const [id]of projectQuestions)el('project-'+id).value=d.intake?.answers?.[id]||'';
   el('project-message').textContent=d.intake?.updated_at?'Last saved '+new Date(d.intake.updated_at).toLocaleString():'';
-  renderProjectFiles(d.uploads);
+  renderProjectFiles(d.uploads);el('save-project').disabled=false;el('upload-files').disabled=false;
  }catch(e){el('project-message').textContent=e.message;}
 }
 function renderProjectFiles(files){
@@ -118,4 +106,5 @@ loadProject();
 
 el('refresh').onclick=async()=>{await load();await loadProject()};load();
 </script><script src="language.js?v=2" defer></script></body></html>
+
 
