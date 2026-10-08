@@ -27,3 +27,35 @@
 
 /* Customer document brand */
 header>a{display:flex;align-items:center;gap:12px}header>a>span{margin-left:-12px}.billing-logo{width:52px;height:52px;object-fit:contain;flex:none}@media(max-width:480px){header>a{font-size:21px;gap:9px}header>a>span{margin-left:-9px}.billing-logo{width:42px;height:42px}}
+
+/* Give short invoices a balanced full-page print layout. */
+@media print{
+ .print-invoice{display:flex;flex-direction:column;min-height:9.35in;font:12pt/1.6 Arial,sans-serif}
+ .pi-header{gap:24px;padding:8px 0 32px}
+ .pi-logo{width:112px;flex-basis:112px}
+ .pi-logo img{width:106px;height:88px}
+ .pi-company{font-size:11pt;line-height:1.65}
+ .pi-company strong{font-size:14pt}
+ .pi-header h1{font-size:24pt}
+ .pi-billing{padding-bottom:38px;margin-top:0;gap:24px}
+ .pi-client{font-size:12pt;padding-top:20px}
+ .pi-label{font-size:10pt;margin-bottom:6px}
+ .pi-meta td{padding:22px 5px;font-size:11pt}
+ .pi-meta span{font-size:9pt}
+ .pi-meta strong{font-size:16pt}
+ .pi-items{margin:12px 0 0}
+ .pi-items th{padding:15px 8px;font-size:10pt}
+ .pi-items td{padding:24px 8px;font-size:11pt;line-height:1.75}
+ .pi-bottom{padding-top:34px;gap:28px}
+ .pi-methods h2{font-size:20pt;margin-bottom:14px}
+ .pi-methods p{font-size:10pt;line-height:1.75;margin:12px 0 18px}
+ .pi-link{font-size:14pt;padding:14px 26px}
+ .pi-totals>div{font-size:11pt;padding:15px 8px}
+ .pi-due strong{font-size:24pt}
+ .pi-totals p{font-size:10pt;line-height:1.6;margin-top:12px}
+ .pi-totals p.pi-thanks{font-size:12pt;margin-top:18px}
+ .pi-terms{margin-top:auto;padding-top:20px;font-size:10pt;line-height:1.7}
+ .pi-terms strong{font-size:11pt}
+ .pi-terms p{margin-top:10px}
+ .pi-footer{font-size:10pt;margin-top:20px}
+}
