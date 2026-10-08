@@ -83,6 +83,8 @@ async function loadEditingCopy(){
   const doc=new DOMParser().parseFromString(new TextDecoder().decode(bytes),'text/html');
   doc.querySelectorAll('script,iframe,object,embed,base,meta[http-equiv]').forEach(e=>e.remove());
   doc.querySelectorAll('*').forEach(e=>{for(const a of [...e.attributes])if(/^on/i.test(a.name))e.removeAttribute(a.name);});
+  doc.querySelectorAll('.reveal').forEach(e=>e.classList.add('visible'));
+  const visible=doc.createElement('style');visible.textContent='.reveal{opacity:1!important;transform:none!important;transition:none!important}';doc.head.append(visible);
   const base=doc.createElement('base');base.href='https://davilatechteam.github.io/kplay-usa/';doc.head.prepend(base);
   editingCopy='<!doctype html>'+doc.documentElement.outerHTML;reloadEditingCopy();
  }catch(e){toast(e.message);}
