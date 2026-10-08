@@ -131,18 +131,9 @@ function badge(status){return `<span class="badge ${esc(String(status||'').toLow
 function clientOptions(selected=''){return `<option value="">Select a client</option>`+store.clients.map(c=>`<option value="${c.id}" ${c.id===selected?'selected':''}>${esc(c.company_name)}</option>`).join('')}
 
 function renderClients(list=store.clients){
-  $('#client-body').innerHTML=list.length?list.map(c=>`<tr>
-    <td><strong>${esc(c.company_name)}</strong></td><td>${esc(contactName(c))}</td><td>${esc(c.email||'—')}</td><td>${esc(c.phone||'—')}</td><td>${badge(c.status)}</td>
-    <td class="actions-cell"><button class="mini-btn edit-client" data-id="${c.id}">Edit</button> <button class="mini-btn client-materials" data-id="${c.id}">Project Details & Files</button>${c.id!=='9756cec8-8fbb-4614-b259-6853df83581a'?` <button class="mini-btn primary-mini open-client-portal" data-id="${c.id}">Open Customer Portal</button> <button class="mini-btn copy-client-portal" data-id="${c.id}">Copy Portal Link</button><span class="client-portal-link" data-id="${c.id}"></span>`:''} </td>
-  </tr>`).join(''):`<tr><td colspan="6">No clients yet.</td></tr>`;
-  $$('.edit-client').forEach(b=>b.onclick=()=>openClient(b.dataset.id));
-  $$('.client-materials').forEach(b=>b.onclick=()=>openClientMaterials(b.dataset.id));
-  $$('.open-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,true));
-  $$('.copy-client-portal').forEach(b=>b.onclick=()=>clientPortal(b,false));
-  $('#qb-client').innerHTML=clientOptions($('#qb-client').value);
-  $('#sf-client').innerHTML=clientOptions();
+  $('#client-body').innerHTML=list.length?list.map(c=>`<tr><td><a href="client-workspace.html?client=${encodeURIComponent(c.id)}" style="color:inherit;font-weight:800;text-decoration:none">${esc(c.company_name)} ↗</a></td><td>${esc(contactName(c))}</td><td>${esc(c.email||'—')}</td><td>${esc(c.phone||'—')}</td><td>${badge(c.status)}</td><td class="actions-cell"><a class="mini-btn" href="client-workspace.html?client=${encodeURIComponent(c.id)}">Open Client</a></td></tr>`).join(''):`<tr><td colspan="6">No clients yet.</td></tr>`;
+  $('#qb-client').innerHTML=clientOptions($('#qb-client').value);$('#sf-client').innerHTML=clientOptions();
 }
-
 async function clientPortal(button,open){
  const tab=open?window.open('about:blank','_blank'):null;
  if(tab)tab.opener=null;
@@ -629,6 +620,7 @@ $('#sub-form').onsubmit=async e=>{
 async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{method:'PATCH',body:JSON.stringify({status})});await reload('subscriptions')}catch(e){toast(e.message,'error')}}
 
 renderLines();
-(async()=>{const ok=await initAuth();if(ok)await loadAll()})();
+(async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';updatePreview();}}})();
+
 
 
