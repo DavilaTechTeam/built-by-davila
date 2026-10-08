@@ -597,28 +597,10 @@ async function openStudioCheckout(invoice,sandbox,kind){
 const zellePaymentEmail='jdavila@builtbydavila.com';
 const zellePaymentURL='https://enroll.zellepay.com/qr-codes?data=eyJuYW1lIjoiSk9BUVVJTiBEQVZJTEEiLCJhY3Rpb24iOiJwYXltZW50IiwidG9rZW4iOiJqZGF2aWxhQGJ1aWx0YnlkYXZpbGEuY29tIn0=';
 function attachEmailComposer(record,kind){
- const client=store.clients.find(c=>c.id===record.client_id)||{};
- const host=kind==='quote'?$('#qd-content'):$('#id-content');
- const prefix=kind==='quote'?'qe':'ie';
- const number=kind==='quote'?record.quote_number:record.invoice_number;
- const section=document.createElement('div');section.className='detail-section';
- section.innerHTML='<h4>Email '+(kind==='quote'?'quote':'invoice')+'</h4><label>Recipient</label><input id="'+prefix+'-to" type="email" style="width:100%;margin:8px 0"><label>Subject</label><input id="'+prefix+'-subject" style="width:100%;margin:8px 0"><label>Message — review before sending</label><textarea id="'+prefix+'-body" rows="14" style="width:100%;margin:8px 0"></textarea><button class="btn primary" id="'+prefix+'-open">Open Email Draft</button> <button class="btn secondary" id="'+prefix+'-copy">Copy Email</button><p>Send from your email app. Studio does not send or track delivery yet; opening this draft does not mark the document as sent.</p>';
- host.appendChild(section);
- $('#'+prefix+'-to').value=client.billing_email||client.email||record.billing_email||record.email||'';
- $('#'+prefix+'-subject').value='KPLAY USA'===record.company_name?'KPLAY USA — '+(kind==='quote'?'Website quote':'Website deposit invoice')+' '+number:(record.company_name||'')+' — '+number;
- let body;
- if(kind==='quote')body=quoteMessage(record,client);
- else{
- const due=depositDue(record)>=0.5?depositDue(record):Number(record.balance_due);
- body=['Hi '+(client.contact_first_name||record.contact_first_name||'there')+',','','Here is your invoice '+number+' for '+record.company_name+'.','',...(record.items||[]).map(it=>it.description+': '+money(it.amount)),'','Project total: '+money(record.total),'Amount due now: '+money(due),'Remaining project balance after this payment: '+money(Number(record.balance_due)-due),'',record.notes||'','Payment options:','Zelle: '+zellePaymentEmail,'Recipient: JOAQUIN DAVILA','Zelle QR link: '+zellePaymentURL,'Use '+number+' as your payment reference.','For card payment, paste the generated Stripe payment link here before sending.','','Work begins after the deposit is received. Remaining build balance is due before launch.','','Joaquin Davila','Built by Davila','https://builtbydavila.com'].join('\n');
- }
- $('#'+prefix+'-body').value=body;
- $('#'+prefix+'-open').onclick=()=>{
- const to=$('#'+prefix+'-to').value.trim();
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to))return toast('Enter a valid recipient email.','error');
- window.location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent($('#'+prefix+'-subject').value)+'&body='+encodeURIComponent($('#'+prefix+'-body').value);
- };
- $('#'+prefix+'-copy').onclick=async()=>{try{await navigator.clipboard.writeText('To: '+$('#'+prefix+'-to').value+'\nSubject: '+$('#'+prefix+'-subject').value+'\n\n'+$('#'+prefix+'-body').value);toast('Email copied.')}catch{toast('Select the message and copy it manually.','error')}};
+ const client=store.clients.find(c=>c.id===record.client_id)||{},host=kind==='quote'?$('#qd-content'):$('#id-content'),section=document.createElement('section');section.className='detail-section';
+ section.innerHTML='<h4>Email '+kind+'</h4><p>Send a branded email with a secure document link and payment options.</p><label>To</label><input type="email" class="billing-to" style="width:100%;margin:8px 0"><label>Personal message</label><textarea class="billing-note" rows="3" style="width:100%;margin:8px 0" placeholder="Add a short note for your customer"></textarea><button class="btn primary billing-review">Review email</button><div class="billing-preview"></div>';
+ host.appendChild(section);section.querySelector('.billing-to').value=client.billing_email||client.email||record.billing_email||record.email||'';
+ section.querySelector('.billing-review').onclick=async()=>{const preview=section.querySelector('.billing-preview');try{const draft=await api('/api/billing/'+kind+'/'+record.id+'/prepare',{method:'POST',body:JSON.stringify({to:section.querySelector('.billing-to').value,note:section.querySelector('.billing-note').value})});preview.innerHTML='<div style="margin:20px 0;padding:16px;background:#f2f4f6;border-radius:8px;color:#222"><strong>From:</strong> '+esc(draft.from)+'<br><strong>To:</strong> '+esc(draft.to)+'<br><strong>Subject:</strong> '+esc(draft.subject)+'</div><iframe sandbox="" referrerpolicy="no-referrer" title="Customer email preview" style="width:100%;height:760px;border:1px solid #e4e8ec;border-radius:12px;background:white"></iframe><p><a class="btn secondary" target="_blank" rel="noopener noreferrer" href="'+esc(draft.url)+'">Open customer document</a></p><button class="btn primary billing-send" '+(draft.configured?'':'disabled')+'>Send '+kind+'</button><p class="billing-result">'+(draft.configured?'Review the recipient and email before sending.':'Email delivery needs to be connected. The preview and customer document are ready.')+'</p>';preview.querySelector('iframe').srcdoc=draft.html;preview.querySelector('.billing-send').onclick=async e=>{e.target.disabled=true;try{const result=await api('/api/billing/deliveries/'+draft.id+'/send',{method:'POST',body:'{}'});preview.querySelector('.billing-result').textContent=result.message;}catch(err){preview.querySelector('.billing-result').textContent=err.message;}};}catch(e){toast(e.message,'error')}};
 }
 
 /* Payments */
@@ -652,6 +634,7 @@ async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{meth
 
 renderLines();
 (async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';if(p.get('offer')==='kplay-growth-30'&&p.get('client')==='3c856081-18b6-40f8-9f16-fc98031927a0'){lineItems=[{package_key:'growth',description:quotePackages.growth.description,quantity:1,unit_price:3995}];$('#qb-deposit').value=50;$('#qb-discount-type').value='percent';$('#qb-discount-value').value=30;$('#qb-discount-label').value='Introductory client discount — 30%';$('#qb-notes').value=quotePackages.growth.terms+' Introductory discount applies to the one-time website build only. Zelle: jdavila@builtbydavila.com (JOAQUIN DAVILA).';renderLines();}updatePreview();}}})();
+
 
 
 
