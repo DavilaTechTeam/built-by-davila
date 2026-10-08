@@ -11,7 +11,7 @@
 <script>
 const base='https://built-by-davila-backend.onrender.com',el=id=>document.getElementById(id);
 const access=new URLSearchParams(location.hash.slice(1)).get('access')||sessionStorage.getItem('bbd_customer_access')||'';
-if(access){sessionStorage.setItem('bbd_customer_access',access);history.replaceState(null,'',location.pathname);}
+if(access){sessionStorage.setItem('bbd_customer_access',access);history.replaceState(null,'',location.pathname+location.search);}
 const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n||0));
 const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function api(path,options={}){
