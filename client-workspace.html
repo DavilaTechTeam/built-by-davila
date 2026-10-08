@@ -23,7 +23,14 @@ async function load(){el('save-profile').disabled=true;el('save-notes').disabled
 
 function renderAnswers(materials){
  const english=materials.translations?.english||{};
- el('answers').innerHTML=materials.intake?'<div class="answers">'+Object.entries(materials.intake.answers).filter(([,v])=>v).map(([k,v])=>'<div class="answer"><strong>'+esc(k)+'</strong><div class="bilingual-answer"><div><small>Original answer</small><p>'+esc(v)+'</p></div><div><small>English · automated translation</small><p>'+esc(english[k]||'Not translated yet.')+'</p></div></div></div>').join('')+'</div>':'<p>The customer has not saved project details yet.</p>';
+ el('answers').innerHTML=materials.intake?'<div class="answers">'+Object.entries(materials.intake.answers).filter(([,v])=>v).map(([k,v])=>'<div class="answer"><div class="head"><strong>'+esc(k)+'</strong><button type="button" data-clear-answer="'+esc(k)+'">Clear answer</button></div><div class="bilingual-answer"><div><small>Original answer</small><p>'+esc(v)+'</p></div><div><small>English · automated translation</small><p>'+esc(english[k]||'Not translated yet.')+'</p></div></div></div>').join('')+'</div>':'<p>The customer has not saved project details yet.</p>';
+ el('answers').querySelectorAll('[data-clear-answer]').forEach(button=>button.onclick=async()=>{
+  const key=button.dataset.clearAnswer,original=materials.intake.answers[key];
+  if(!confirm('Clear this '+key+' answer and its English translation? This cannot be undone.'))return;
+  button.disabled=true;
+  try{await api('/api/clients/'+encodeURIComponent(id)+'/project-answers/'+encodeURIComponent(key),{method:'DELETE',body:JSON.stringify({original})});const fresh=await api('/api/clients/'+encodeURIComponent(id)+'/project-materials');projectMaterialsData=fresh;renderAnswers(fresh);el('translation-message').textContent='Answer and its translation cleared.';}
+  catch(e){el('translation-message').textContent=e.message;button.disabled=false;}
+ });
  el('translate-answers').disabled=translationBusy||!materials.intake||!Object.values(materials.intake.answers).some(Boolean);
 }
 async function translateProjectAnswers(createPromise){
@@ -67,7 +74,14 @@ async function autoTranslateAnswers(){
 
 function renderFiles(files){
  const images=f=>['image/jpeg','image/png','image/webp'].includes(f.content_type);
- el('file-list').innerHTML=files.map(f=>'<div class="file"><div>'+(images(f)?'<button class="file-name-preview" data-preview="'+esc(f.id)+'"><strong>'+esc(f.filename)+'</strong></button>':'<strong>'+esc(f.filename)+'</strong>')+'<small>'+esc(f.category)+' · '+(Number(f.size_bytes)/1048576).toFixed(2)+' MB</small></div><div class="file-actions">'+(images(f)?'<button data-preview="'+esc(f.id)+'">View image</button> ':'')+'<button data-file="'+esc(f.id)+'" data-name="'+esc(f.filename)+'">Download</button></div></div>').join('')||'<p>No files uploaded yet.</p>';
+ el('file-list').innerHTML=files.map(f=>'<div class="file"><div>'+(images(f)?'<button class="file-name-preview" data-preview="'+esc(f.id)+'"><strong>'+esc(f.filename)+'</strong></button>':'<strong>'+esc(f.filename)+'</strong>')+'<small>'+esc(f.category)+' · '+(Number(f.size_bytes)/1048576).toFixed(2)+' MB</small></div><div class="file-actions">'+(images(f)?'<button data-preview="'+esc(f.id)+'">View image</button> ':'')+'<button data-file="'+esc(f.id)+'" data-name="'+esc(f.filename)+'">Download</button> <button type="button" data-remove-file="'+esc(f.id)+'">Remove file</button></div></div>').join('')||'<p>No files uploaded yet.</p>';
+ el('file-list').querySelectorAll('[data-remove-file]').forEach(button=>button.onclick=async()=>{
+  const file=files.find(f=>f.id===button.dataset.removeFile);if(!file)return;
+  if(!confirm('Remove "'+file.filename+'" from this project and the customer portal? This cannot be undone.'))return;
+  button.disabled=true;
+  try{await api('/api/clients/'+encodeURIComponent(id)+'/uploads/'+encodeURIComponent(file.id),{method:'DELETE'});const fresh=await api('/api/clients/'+encodeURIComponent(id)+'/project-materials');renderFiles(fresh.uploads);el('owner-upload-message').textContent='File removed from the project.';}
+  catch(e){el('owner-upload-message').textContent=e.message;button.disabled=false;}
+ });
  el('file-list').querySelectorAll('[data-file]').forEach(b=>b.onclick=()=>download(b));
  el('file-list').querySelectorAll('[data-preview]').forEach(b=>b.onclick=()=>{const f=files.find(f=>f.id===b.dataset.preview);if(f)window.bbdPreviewProjectFile({url:base+'/api/client-uploads/'+encodeURIComponent(f.id),token,name:f.filename,type:f.content_type});});
 }
