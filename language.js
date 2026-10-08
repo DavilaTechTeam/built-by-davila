@@ -34,6 +34,6 @@ const header=document.querySelector('.site-header .nav-wrap')||document.querySel
 control.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setLanguage(b.dataset.lang)});
 // Keep submission values stable while translating option labels.
 document.querySelectorAll('select option').forEach(o=>{if(!o.hasAttribute('value'))o.value=o.textContent});
-fetch('translations-es.json?v=20261007-portal-complete').then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{dict=d;setLanguage(lang);new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;translate()})}).observe(document.body,{childList:true,characterData:true,subtree:true});}).catch(()=>{control.hidden=true;document.documentElement.lang='en'});
+fetch('translations-es.json?v=20261007-file-preview').then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{dict=d;setLanguage(lang);new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;translate()})}).observe(document.body,{childList:true,characterData:true,subtree:true});}).catch(()=>{control.hidden=true;document.documentElement.lang='en'});
 })();
 
