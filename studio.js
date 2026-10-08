@@ -141,7 +141,7 @@ async function clientPortal(button,open){
  try{
   const r=await api('/api/clients/'+button.dataset.id+'/portal-link',{method:'POST',body:'{}'});
   const url=new URL(r.url);
-  if(url.origin!==location.origin||url.pathname!=='/client-portal.html')throw new Error('Invalid customer portal link.');
+  if(url.origin!==location.origin||(url.pathname!=='/customer-login.html'||!(/^[A-Za-z0-9_-]{43}$/).test(new URLSearchParams(url.hash.slice(1)).get('invite')||'')))throw new Error('Invalid customer portal link.');
   const holder=[...$$('.client-portal-link')].find(el=>el.dataset.id===button.dataset.id);
   if(holder){holder.innerHTML='';const link=document.createElement('a');link.className='mini-btn';link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open portal ↗';holder.append(link);}
   if(open){if(tab)tab.location.replace(url.href);else toast('Use the Open portal link in this client row.');}
