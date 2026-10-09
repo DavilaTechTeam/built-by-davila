@@ -1,7 +1,15 @@
 <!doctype html>
 <html lang="en">
 <head>
-<style id="admin-lock">body{visibility:hidden}</style>
+<style id="admin-lock">body{visibility:hidden}
+.project-confirm{width:min(460px,calc(100vw - 32px));padding:30px;border:1px solid #e5e1da;border-radius:20px;background:#faf9f6;color:#17191c;box-shadow:0 24px 80px #11141833;font-family:Inter,Arial,sans-serif}
+.project-confirm::backdrop{background:#11141899;backdrop-filter:blur(5px)}
+.project-confirm h2{font-size:26px;letter-spacing:-.04em;margin:14px 0 12px}
+.project-confirm p{font-size:15px;margin:0;overflow-wrap:anywhere}
+.project-confirm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:26px}
+.project-confirm button:focus-visible{outline:3px solid #17191c;outline-offset:3px}
+.project-confirm p{line-height:1.6;color:#667085}.project-confirm .eyebrow{color:#ff4f38}.project-confirm-actions .tool-btn{min-height:44px;padding:10px 18px}
+</style>
 <script src="admin-access.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -48,6 +56,28 @@ const API_BASE='https://built-by-davila-backend.onrender.com';
 const frame=document.getElementById('site-frame'),holder=document.getElementById('frame-holder'),empty=document.getElementById('empty-inspector'),textInspector=document.getElementById('text-inspector'),imageInspector=document.getElementById('image-inspector'),reviewInspector=document.getElementById('review-inspector'),hoverPreview=document.getElementById('hover-preview'),hoverLabel=document.getElementById('hover-label'),changeCount=document.getElementById('change-count'),undoBtn=document.getElementById('undo-btn');
 let editing=true,selected=null,selectedType=null,pendingImageData=null,hovered=null;const STORAGE='bbd_kplay_visual_draft_photo_layout_v4';let patches=JSON.parse(localStorage.getItem(STORAGE)||'[]'),history=[];
 const friendlyMap=[['.hero-copy h1','Hero Headline'],['.hero-copy p','Hero Description'],['.hero .gold-btn','Primary Hero Button'],['.hero .ghost-btn','Secondary Hero Button'],['.hero-photo','Hero Background Image'],['header .logo','Site Logo'],['nav .gold-btn','Header CTA'],['#about h2','About Heading'],['#about p','About Text'],['#services h2','Services Heading'],['#portfolio h2','Portfolio Heading'],['#contact h2','Contact Heading']];
+let projectConfirmPending=false;
+function confirmProjectAction({title,message,action}){
+ if(projectConfirmPending)return Promise.resolve(false);
+ projectConfirmPending=true;
+ return new Promise(resolve=>{
+  const previousFocus=document.activeElement,dialog=document.createElement('dialog');
+  dialog.className='project-confirm';
+  dialog.setAttribute('aria-labelledby','project-confirm-title');
+  dialog.setAttribute('aria-describedby','project-confirm-description');
+  dialog.innerHTML='<div class="eyebrow">BUILT BY DAVILA</div><h2 id="project-confirm-title"></h2><p id="project-confirm-description"></p><div class="project-confirm-actions"><button type="button" class="tool-btn" data-cancel autofocus>Cancel</button><button type="button" class="tool-btn review-submit" data-confirm></button></div>';
+  dialog.querySelector('h2').textContent=title;
+  dialog.querySelector('p').textContent=message;
+  dialog.querySelector('[data-confirm]').textContent=action;
+  let accepted=false;
+  dialog.querySelector('[data-cancel]').onclick=()=>dialog.close();
+  dialog.querySelector('[data-confirm]').onclick=()=>{accepted=true;dialog.close();};
+  dialog.addEventListener('click',event=>{if(event.target===dialog){const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dialog.close();}});
+  dialog.addEventListener('close',()=>{dialog.remove();projectConfirmPending=false;if(previousFocus?.isConnected)previousFocus.focus();resolve(accepted);},{once:true});
+  document.body.append(dialog);
+  dialog.showModal();
+ });
+}
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
 function allPanelsOff(){empty.classList.add('hidden');textInspector.classList.add('hidden');imageInspector.classList.add('hidden');reviewInspector.classList.add('hidden')}
 function showEmpty(){allPanelsOff();empty.classList.remove('hidden');selected=null;selectedType=null}
@@ -100,7 +130,7 @@ document.getElementById('apply-image').onclick=()=>{if(!selected||!pendingImageD
 document.querySelectorAll('[data-device]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-device]').forEach(x=>x.classList.toggle('active',x===b));holder.className='frame-holder '+(b.dataset.device==='desktop'?'':b.dataset.device)});
 document.getElementById('toggle-edit').onclick=e=>{editing=!editing;e.target.textContent=editing?'Editing On':'Editing Off';e.target.classList.toggle('active',!editing);if(frame.contentDocument)hideHoverBadge(frame.contentDocument);showEmpty()};
 document.getElementById('save-btn').onclick=()=>{savePatches();toast('Draft saved — live site unchanged')};
-document.getElementById('clear-btn').onclick=()=>{if(!confirm('Clear all draft changes?'))return;snapshot();patches=[];savePatches();reloadEditingCopy();showEmpty();toast('Draft cleared')};
+document.getElementById('clear-btn').onclick=async()=>{if(!patches.length){toast('No draft changes to clear');return;}if(!await confirmProjectAction({title:'Clear draft changes?',message:'This removes your saved edits from this draft. You can restore them with Undo until you refresh or leave the editor.',action:'Clear draft'}))return;snapshot();patches=[];savePatches();reloadEditingCopy();showEmpty();toast('Draft cleared')};
 document.getElementById('undo-btn').onclick=()=>{if(!history.length)return;patches=JSON.parse(history.pop());savePatches();reloadEditingCopy();showEmpty();toast('Last change undone')};
 document.getElementById('review-btn').onclick=()=>{allPanelsOff();reviewInspector.classList.remove('hidden');const list=document.getElementById('review-list');list.innerHTML=patches.length?patches.map((p,i)=>`<div class="review-item"><strong>${i+1}. ${p.label||p.type}</strong><div>${p.type==='text'?String(p.value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])):'Replacement image selected'}</div></div>`).join(''):'<div class="review-item">No draft changes yet.</div>'};
 document.getElementById('submit-review-btn').onclick=async()=>{if(!patches.length){toast('Make at least one change before submitting.');return;}const btn=document.getElementById('submit-review-btn');btn.disabled=true;btn.textContent='Submitting…';savePatches();try{const r=await fetch(API_BASE+'/portal-api/reviews',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({client_key:'kplay-usa',client_name:'KPLAY USA',site_url:'https://davilatechteam.github.io/kplay-usa/',changes:patches})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'Unable to submit changes.');localStorage.setItem('bbd_last_portal_submission',data.id||'');btn.textContent='Submitted for Review';toast('Submitted to Built by Davila for review');}catch(e){btn.disabled=false;btn.textContent='Submit for Review';toast(e.message||'Could not submit review.');}};
