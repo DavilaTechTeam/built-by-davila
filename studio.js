@@ -184,7 +184,7 @@ function invoiceDisplay(i){
   const cents=Number(i.sandbox_paid_cents || i.sandbox_payments?.reduce((sum,p)=>sum+Number(p.amount_cents),0) || 0);
   if(i.client_id!=='9756cec8-8fbb-4614-b259-6853df83581a'||cents<=0||i.status==='Void')return i;
   const paid=Math.min(Number(i.total),cents/100);
-  return {...i,amount_paid:paid,balance_due:Math.max(0,Number(i.total)-paid),status:paid>=Number(i.total)?'Paid (Test)':'Partially Paid (Test)'};
+  return {...i,real_amount_paid:i.real_amount_paid??i.amount_paid,amount_paid:paid,balance_due:Math.max(0,Number(i.total)-paid),status:paid>=Number(i.total)?'Paid (Test)':'Partially Paid (Test)'};
 }
 function renderInvoices(){
   $('#invoice-body').innerHTML=store.invoices.length?store.invoices.map(invoiceDisplay).map(i=>`<tr>
@@ -513,7 +513,7 @@ async function openInvoiceDetail(id){
     $('#id-actions').innerHTML=`
       ${checkoutAvailable(i)?`<button class="btn primary" id="id-checkout">${esc(checkoutLabel(i))}</button>${deposit>=0.5&&deposit<Number(i.balance_due)?`<button class="btn secondary" id="id-pay-full">${sandbox?'Test: ':''}Pay Full Balance ${money(i.balance_due)}</button>`:''}`:''}
       ${Number(i.balance_due)>0&&i.status!=='Void'?`<button class="btn secondary" id="id-payment">Record Manual Payment</button>`:''}
-      ${Number(i.amount_paid||0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
+      ${Number(i.real_amount_paid??i.amount_paid??0)===0&&i.status!=='Void'?`<button class="btn danger" id="id-void">Void Invoice</button>`:''}`;
     if(!sandbox&&checkoutAvailable(i)){
       $('#id-content').insertAdjacentHTML('beforeend',`<div class="detail-section"><h4>Customer payment link</h4><button class="btn secondary" id="id-get-portal">Get Customer Portal Link</button><p>Payment due: ${money(deposit>=0.5?deposit:i.balance_due)}. Generate a secure link to share with your customer.</p><button class="btn secondary" id="id-get-link">Get Payment Link</button><div id="id-link-result"></div></div>`);
       $('#id-get-portal').onclick=async()=>{
