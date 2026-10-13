@@ -118,6 +118,7 @@ async function loadAll(){
     ]);
     Object.assign(store,{clients,quotes,invoices,payments,subscriptions,dashboard});
     renderAll();
+    rawFetch('/api/onboarding').then(r=>r.ok?r.json():null).then(d=>{const n=d?.items?.filter(i=>i.status==='Form completed'&&i.quote_status==='Draft').length||0;const badge=$('#onboarding-count');if(badge)badge.textContent=n?'('+n+')':'';}).catch(()=>{});
   }catch(err){console.error(err);setStatus('Could not load','error')}
 }
 async function reload(resource){
@@ -639,7 +640,8 @@ $('#sub-form').onsubmit=async e=>{
 async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{method:'PATCH',body:JSON.stringify({status})});await reload('subscriptions')}catch(e){toast(e.message,'error')}}
 
 renderLines();
-(async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';if(p.get('offer')==='kplay-growth-30'&&p.get('client')==='3c856081-18b6-40f8-9f16-fc98031927a0'){lineItems=[{package_key:'growth',description:quotePackages.growth.description,quantity:1,unit_price:3995}];$('#qb-deposit').value=50;$('#qb-discount-type').value='percent';$('#qb-discount-value').value=30;$('#qb-discount-label').value='Introductory client discount — 30%';$('#qb-notes').value=quotePackages.growth.terms+' Introductory discount applies to the one-time website build only. Zelle: jdavila@builtbydavila.com (JOAQUIN DAVILA).';renderLines();}updatePreview();}}})();
+(async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='clients'){nav('clients');}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';if(p.get('offer')==='kplay-growth-30'&&p.get('client')==='3c856081-18b6-40f8-9f16-fc98031927a0'){lineItems=[{package_key:'growth',description:quotePackages.growth.description,quantity:1,unit_price:3995}];$('#qb-deposit').value=50;$('#qb-discount-type').value='percent';$('#qb-discount-value').value=30;$('#qb-discount-label').value='Introductory client discount — 30%';$('#qb-notes').value=quotePackages.growth.terms+' Introductory discount applies to the one-time website build only. Zelle: jdavila@builtbydavila.com (JOAQUIN DAVILA).';renderLines();}updatePreview();}}})();
+
 
 
 
