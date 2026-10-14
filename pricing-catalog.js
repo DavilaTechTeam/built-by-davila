@@ -42,5 +42,34 @@ function calculate(input){
 const money=n=>'$'+Number(n).toFixed(2);
 function quoteItems(p){if(p.mode!=='catalog')return [{description:p.scope||'Project setup — scope subject to review',quantity:1,unit_price:p.setup??0,amount:p.setup??0}];const rows=p.items.filter(i=>i.cycle==='setup').map(i=>({description:i.name+(i.complimentary?' — COMPLIMENTARY (standard value '+money(i.value)+')':''),quantity:i.quantity,unit_price:i.complimentary?0:i.price,amount:i.amount}));if(p.setup_discount_amount)rows.push({description:'Build-out discount'+(p.setup_discount.type==='percent'?' — '+p.setup_discount.value+'%':''),quantity:1,unit_price:-p.setup_discount_amount,amount:-p.setup_discount_amount});if(!rows.length)rows.push({description:'Monthly services only — no one-time setup charge',quantity:1,unit_price:0,amount:0});return rows;}
 function summary(p){return ['Build-out standard value: '+money(p.setup_value)+'.','Complimentary setup services: '+money(p.setup_complimentary)+'.','Additional build-out discount: '+money(p.setup_discount_amount)+'.','Final one-time setup: '+money(p.setup)+'.',...p.items.filter(i=>i.cycle==='monthly').map(i=>'Monthly: '+i.name+' × '+i.quantity+' — '+(i.complimentary?'COMPLIMENTARY (standard value '+money(i.value)+'/month)':money(i.amount)+'/month')+'.'),'Monthly standard value: '+money(p.monthly_value)+'. Complimentary monthly value: '+money(p.monthly_complimentary)+'.','Recurring services are billed separately from the one-time setup total.'].join('\n');}
-window.BBDPricing={catalog,calculate,quoteItems,summary};
+// Published packages are alternatives to component pricing, not additional charges.
+const guideCatalog=[
+ ...catalog.map(i=>({...i,group:i.cycle==='setup'?'Individual build-out services':'Individual monthly services',name:i.id==='website'?'Website design component — up to 5 pages (form and SEO separate)':i.name})),
+ ...[
+ ['starter-package','Website packages — choose one','Starter Website — up to 5 pages, lead form, basic SEO, 2 revision rounds',1995,'setup','from'],
+ ['growth-package','Website packages — choose one','Business / Growth Website — up to 10 pages, portfolio, analytics and scoped integrations',3995,'setup','from'],
+ ['premium-package','Website packages — choose one','Premium Website — up to 20 pages, advanced forms and scoped workflows',5995,'setup','from'],
+ ['business-os-package','Website packages — choose one','Business OS / custom digital project — discovery, CRM, portal and automation as scoped',7500,'setup','from'],
+ ['essential-care','Website care plans — choose one','Essential Care — hosting coordination, security checks, monitoring and minor updates',79,'monthly','exact'],
+ ['growth-care','Website care plans — choose one','Growth Care — Essential plus priority edits, analytics review and SEO basics',149,'monthly','exact'],
+ ['pro-care','Website care plans — choose one','Pro Care — priority support, frequent changes and conversion improvements',299,'monthly','exact'],
+ ['brand-refresh','Additional digital services','Full logo / brand refresh',395,'setup','from'],
+ ['landing-page','Additional digital services','Landing page',495,'setup','from'],
+ ['local-seo','Additional digital services','Local SEO setup',350,'setup','from'],
+ ['email-marketing','Additional digital services','Email marketing setup',350,'setup','from'],
+ ['crm-automation','Additional digital services','CRM / automation setup',750,'setup','from'],
+ ['client-portal','Custom services — quote after questionnaire','Customer portals and guided website content editing',null,'setup','quote'],
+ ['payments','Custom services — quote after questionnaire','Payment-provider, quote and invoice integrations',null,'setup','quote'],
+ ['appointments','Custom services — quote after questionnaire','Appointment booking and calendar connections',null,'setup','quote'],
+ ['followup','Custom services — quote after questionnaire','Lead capture, routing and follow-up automation',null,'setup','quote'],
+ ['ai-workflows','Custom services — quote after questionnaire','AI-assisted workflows, draft replies and task summaries',null,'setup','quote'],
+ ['ai-employees','Custom services — quote after questionnaire','AI employee implementation and connected tools',null,'setup','quote'],
+ ['custom-software','Custom services — quote after questionnaire','Custom business software and workflow integrations',null,'setup','quote'],
+ ['ongoing-marketing','Custom services — quote after questionnaire','Ongoing marketing, local visibility and advanced SEO',null,'monthly','quote']
+ ].map(([id,group,name,price,cycle,price_kind])=>({id,group,name,price,cycle,price_kind}))
+];
+const guideGroups=['Website packages — choose one','Website care plans — choose one','Individual build-out services','Individual monthly services','Additional digital services','Custom services — quote after questionnaire'];
+function guidePrice(item,monthlyLabel='/month',quoteLabel='Quoted after questionnaire',includedLabel='Included with management'){if(item.price===null)return quoteLabel;if(item.price===0)return includedLabel;return (item.price_kind==='from'?'From ':'')+'$'+Number(item.price).toFixed(2)+(item.cycle==='monthly'?monthlyLabel:'');}
+
+window.BBDPricing={catalog,guideCatalog,guideGroups,guidePrice,calculate,quoteItems,summary};
 })();
