@@ -5,3 +5,10 @@
 
 
 .email-text-editor{padding:16px;background:#f4f7fa;border:1px solid var(--line);border-radius:10px;margin:15px 0 22px}.email-text-editor summary{font-weight:700}.email-text-editor fieldset:disabled{opacity:.7}.email-text-editor input,.email-text-editor textarea{background:white}.email-text-editor label{font-size:12px}
+
+/* Give the email preview enough space to show its full desktop layout. */
+.ob-wrap{max-width:1720px;padding-inline:32px}
+.ob-layout,.ob-layout:has(.quote-builder){grid-template-columns:minmax(340px,.9fr) minmax(680px,1.6fr);align-items:start;gap:26px}
+.ob-frame{height:900px;display:block}
+@media(max-width:1200px){.ob-layout,.ob-layout:has(.quote-builder){grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.ob-wrap{padding-inline:16px}.ob-frame{height:760px}}
