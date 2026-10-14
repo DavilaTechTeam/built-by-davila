@@ -29,6 +29,8 @@
   <small>STUDIO BACK OFFICE</small>
   <nav>
     <button class="active" data-view="dashboard">Dashboard</button>
+    <button type="button" onclick="location.href='pipeline.html'">Customer Pipeline</button>
+    <button type="button" onclick="location.href='seo.html'">SEO Dashboard</button>
     <button type="button" onclick="window.location.href='onboarding.html'">Onboarding <span id="onboarding-count"></span></button>
     <button type="button" onclick="window.location.href='prospects.html'">Prospects</button>
     <button type="button" onclick="window.location.href='projects.html'">Projects</button>
@@ -59,6 +61,7 @@
   </div>
 
   <section class="view active" id="dashboard">
+    <div class="panel" style="margin-bottom:18px;display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap"><div><h3 style="margin:0 0 6px">Where every customer stands</h3><p style="margin:0;color:#667085">Track questionnaires, quotes, deposits, project delivery and SEO.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn primary" href="pipeline.html">Open Customer Pipeline</a><a class="btn secondary" href="seo.html">SEO Dashboard</a></div></div>
     <div class="cards">
       <div class="metric"><span>Payments received</span><strong id="metric-revenue">$0</strong></div>
       <div class="metric"><span>Monthly recurring revenue</span><strong id="metric-mrr">$0</strong></div>
@@ -284,6 +287,7 @@
 
 </body>
 </html>
+
 
 
 

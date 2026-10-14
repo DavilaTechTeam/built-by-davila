@@ -27,8 +27,9 @@ async function detail(id){current=id;const i=await api('/onboarding/'+id);$('#co
 if(i.submitted_at){try{const access=await api('/onboarding/'+id+'/portal-access');$('#portal-access-status').textContent='Portal access: '+access.status+(access.sent_at?' · Submitted '+date(access.sent_at):'')+(access.error?' · '+access.error:'')+(!access.configured?' · Automatic email delivery needs configuration.':'');}catch{$('#portal-access-status').textContent='Portal status unavailable. Refresh to check again.';}}
 bindPricing($('#price-form'));
 $('#email-preview').srcdoc=i.email_html;const emailIsDirty=bindEmailText(i);$('#back').onclick=run(list);$('#copy').onclick=run(async()=>{await navigator.clipboard.writeText(i.welcome_url);msg('Welcome link copied.');});$('#send').onclick=run(async()=>{if(emailIsDirty())throw Error('Save your email text before sending.');await api('/onboarding/'+id+'/send',{});await detail(id);msg('Invitation sent.');});$('#revoke').onclick=run(async()=>{await api('/onboarding/'+id+'/revoke',{});await detail(id);msg('Form link revoked.');});$('#price-form').onsubmit=run(async()=>{if(emailIsDirty())throw Error('Save your email text before changing pricing.');await api('/onboarding/'+id+'/pricing',getPricing($('#price-form')),'PATCH');await detail(id);msg('Pricing saved. Any linked draft quote has been updated.');});document.querySelectorAll('[data-task]').forEach(c=>c.onchange=run(async()=>{try{await api('/onboarding/'+id+'/checklist',{task:c.dataset.task,done:c.checked},'PATCH');}catch(e){c.checked=!c.checked;throw e;}}));}
-$('#new').onclick=run(create);$('#refresh').onclick=run(()=>current?detail(current):list());run(list)();
+$('#new').onclick=run(create);$('#refresh').onclick=run(()=>current?detail(current):list());run(()=>{const id=new URLSearchParams(location.search).get('invitation');return id?detail(id):list();})();
 })();
+
 
 
 
