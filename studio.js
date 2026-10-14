@@ -595,8 +595,6 @@ async function openStudioCheckout(invoice,sandbox,kind){
 
 
 /* Email drafts: the email app owns delivery; opening a draft never marks it sent. */
-const zellePaymentEmail='jdavila@builtbydavila.com';
-const zellePaymentURL='https://enroll.zellepay.com/qr-codes?data=eyJuYW1lIjoiSk9BUVVJTiBEQVZJTEEiLCJhY3Rpb24iOiJwYXltZW50IiwidG9rZW4iOiJqZGF2aWxhQGJ1aWx0YnlkYXZpbGEuY29tIn0=';
 function attachEmailComposer(record,kind){
  const client=store.clients.find(c=>c.id===record.client_id)||{},host=kind==='quote'?$('#qd-content'):$('#id-content'),section=document.createElement('section');section.className='detail-section billing-workspace';
  section.innerHTML='<div class="billing-editor"><div class="eyebrow">CUSTOMER EMAIL</div><h4>Send '+kind+'</h4><p>Send a branded email with a secure document link and payment options.</p><label>To</label><input type="email" class="billing-to" style="width:100%;margin:8px 0"><label>Personal message</label><textarea class="billing-note" rows="3" style="width:100%;margin:8px 0" placeholder="Add a short note for your customer"></textarea><button class="btn primary billing-review">Update preview</button></div><div class="billing-preview"><div class="billing-preview-empty"><span>EMAIL PREVIEW</span><h3>Ready for your customer.</h3><p>Review the recipient and add a personal note, The email preview loads automatically. Update it after changing your message.</p></div></div>';
@@ -640,7 +638,8 @@ $('#sub-form').onsubmit=async e=>{
 async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{method:'PATCH',body:JSON.stringify({status})});await reload('subscriptions')}catch(e){toast(e.message,'error')}}
 
 renderLines();
-(async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='clients'){nav('clients');}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';if(p.get('offer')==='kplay-growth-30'&&p.get('client')==='3c856081-18b6-40f8-9f16-fc98031927a0'){lineItems=[{package_key:'growth',description:quotePackages.growth.description,quantity:1,unit_price:3995}];$('#qb-deposit').value=50;$('#qb-discount-type').value='percent';$('#qb-discount-value').value=30;$('#qb-discount-label').value='Introductory client discount — 30%';$('#qb-notes').value=quotePackages.growth.terms+' Introductory discount applies to the one-time website build only. Zelle: jdavila@builtbydavila.com (JOAQUIN DAVILA).';renderLines();}updatePreview();}}})();
+(async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='clients'){nav('clients');}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';if(p.get('offer')==='kplay-growth-30'&&p.get('client')==='3c856081-18b6-40f8-9f16-fc98031927a0'){lineItems=[{package_key:'growth',description:quotePackages.growth.description,quantity:1,unit_price:3995}];$('#qb-deposit').value=50;$('#qb-discount-type').value='percent';$('#qb-discount-value').value=30;$('#qb-discount-label').value='Introductory client discount — 30%';$('#qb-notes').value=quotePackages.growth.terms+' Introductory discount applies to the one-time website build only. For Zelle payment instructions, contact hello@builtbydavila.com.';renderLines();}updatePreview();}}})();
+
 
 
 
