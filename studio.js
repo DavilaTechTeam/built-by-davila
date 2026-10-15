@@ -439,7 +439,7 @@ function whatsappURL(phone,message){
 }
 function safeEmailPreview(html){
  const doc=new DOMParser().parseFromString(String(html||''),'text/html');
- for(const link of doc.querySelectorAll('a[href]')){link.target='_blank';link.rel='noopener noreferrer';}
+ for(const link of doc.querySelectorAll('a[href]')){try{const url=new URL(link.getAttribute('href'),location.origin);if(url.origin===location.origin&&url.pathname==='/billing.html'){url.searchParams.set('v','20261015-approval-wide');link.href=url.href;}}catch{}link.target='_blank';link.rel='noopener noreferrer';}
  return '<!doctype html>'+doc.documentElement.outerHTML;
 }
 function attachQuoteComposer(q){
@@ -457,7 +457,7 @@ function attachQuoteComposer(q){
     if(!section.isConnected)return;
     const url=new URL(draft.url,location.origin);
     if(url.protocol!=='https:'||url.origin!==location.origin){status.textContent='A valid customer quote link could not be prepared.';open.disabled=true;return;}
-    const next=url.href;
+    url.searchParams.set('v','20261015-approval-wide');const next=url.href;
     if(lastURL&&message.value.includes(lastURL))message.value=message.value.replace(lastURL,next);
     else if(!lastURL||!edited)message.value+='\n\nReview your quote:\n'+next;
     lastURL=next;ready=true;open.disabled=false;status.textContent='Ready. Review the number and message before opening WhatsApp.';
