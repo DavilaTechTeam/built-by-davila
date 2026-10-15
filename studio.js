@@ -432,32 +432,47 @@ function quoteMessage(q,c){
   ].join('\n');
 }
 function whatsappURL(phone,message){
-  const digits=String(phone).replace(/[^0-9]/g,'');
+  let digits=String(phone).replace(/[^0-9]/g,'');
+  if(digits.length===10)digits='1'+digits;
   if(digits.length<8||digits.length>15)throw new Error('Enter the client phone number with its country code (for example, 1 followed by the US number).');
   return 'https://wa.me/'+digits+'?text='+encodeURIComponent(message);
 }
 function attachQuoteComposer(q){
   const c=store.clients.find(c=>c.id===q.client_id)||{};
-  const section=document.createElement('div');section.className='detail-section';
-  section.innerHTML=`<h4>Proposal message</h4>
-    <label for="qm-phone">WhatsApp number (include country code)</label>
-    <input id="qm-phone" type="tel" style="width:100%;margin:8px 0 16px" value="${esc(c.phone||'')}" placeholder="1 + US phone number">
-    <label for="qm-message">Message — edit before sharing</label>
-    <textarea id="qm-message" rows="12" style="width:100%;margin:8px 0 16px"></textarea>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn secondary" id="qm-copy">Copy Message</button><button class="btn primary" id="qm-whatsapp">Open in WhatsApp</button></div>
-    <p style="font-size:13px">Review the recipient and tap Send in WhatsApp. Opening a chat does not mark this quote as sent. Message edits stay here until you close this quote.</p>`;
+  const section=document.createElement('section');section.className='detail-section billing-workspace billing-whatsapp';section.hidden=true;
+  section.innerHTML='<div class="billing-editor"><div class="eyebrow">CUSTOMER WHATSAPP</div><h4>WhatsApp quote</h4><p>Share the same branded quote available from the email.</p><label for="qm-phone">Private WhatsApp number</label><input id="qm-phone" type="tel" placeholder="US number or country code + number"><label for="qm-message">Message — edit before sharing</label><textarea id="qm-message" rows="9"></textarea><button type="button" class="btn primary" id="qm-whatsapp" disabled>Open WhatsApp</button><button type="button" class="btn secondary" id="qm-copy">Copy message</button><p class="qm-status" role="status">Preparing your quote link…</p><p>Press Send in WhatsApp after reviewing. Opening a chat does not mark the quote as sent. This private number is not published on the website.</p></div><div class="billing-preview"><h4>Branded quote preview</h4><iframe sandbox="" referrerpolicy="no-referrer" title="WhatsApp quote preview" style="width:100%;height:680px;border:1px solid #e4e8ec;border-radius:12px;background:white"></iframe><p><a class="btn secondary qm-document" target="_blank" rel="noopener noreferrer" hidden>Open quote document</a></p></div>';
   $('#qd-content').appendChild(section);
-  $('#qm-message').value=quoteMessage(q,c);
-  $('#qm-copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#qm-message').value);toast('Message copied.')}catch{toast('Select the message and copy it manually.','error')}};
-  $('#qm-whatsapp').onclick=()=>{
-    try{
-      const message=$('#qm-message').value.trim();if(!message)throw new Error('Enter a message first.');
-      const url=whatsappURL($('#qm-phone').value,message);
-      window.open(url,'_blank','noopener,noreferrer');
+  const phone=section.querySelector('#qm-phone'),message=section.querySelector('#qm-message'),open=section.querySelector('#qm-whatsapp'),status=section.querySelector('.qm-status');
+  phone.value=c.phone||'';
+  let ready=false,lastURL='',edited=false;
+  message.value='Hi '+(c.contact_first_name||c.company_name||q.company_name||'there')+',\n\nYour quote '+q.quote_number+' is ready.\nSetup: '+money(q.total)+'\nDeposit ('+Number(q.deposit_percent||0)+'%): '+money(Math.round(Number(q.total)*Number(q.deposit_percent||0))/100)+'\n\nReview the full scope, complimentary services and monthly pricing using the branded quote link below.\n\nBuilt By Davila\nhello@builtbydavila.com';
+  message.oninput=()=>{edited=true};
+  let phoneEdited=false;phone.oninput=()=>{phoneEdited=true};
+  section.setDraft=draft=>{
+    if(!section.isConnected)return;
+    const url=new URL(draft.url,location.origin);
+    if(url.protocol!=='https:'||url.origin!==location.origin){status.textContent='A valid customer quote link could not be prepared.';open.disabled=true;return;}
+    const next=url.href;
+    if(lastURL&&message.value.includes(lastURL))message.value=message.value.replace(lastURL,next);
+    else if(!lastURL||!edited)message.value+='\n\nReview your quote:\n'+next;
+    lastURL=next;ready=true;open.disabled=false;status.textContent='Ready. Review the number and message before opening WhatsApp.';
+    section.querySelector('iframe').srcdoc=draft.html;
+    const link=section.querySelector('.qm-document');link.href=next;link.hidden=false;
+  };
+  section.setDraftError=()=>{if(!ready&&section.isConnected)status.textContent='Quote link unavailable. Use Email quote → Update preview to try again.';};
+  section.querySelector('#qm-copy').onclick=async()=>{try{if(!ready)throw Error('Wait for the quote link to finish loading.');await navigator.clipboard.writeText(message.value);toast('WhatsApp message copied.')}catch(e){toast(e.message,'error')}};
+  open.onclick=()=>{
+    try{if(!ready)throw Error('Prepare the quote link first.');if(!message.value.trim())throw Error('Enter a message first.');
+      window.open(whatsappURL(phone.value,message.value.trim()),'_blank','noopener,noreferrer');
     }catch(e){toast(e.message,'error')}
   };
+  api('/api/onboarding').then(async data=>{
+    const linked=(data.items||[]).find(i=>i.quote_id===q.id);
+    if(!linked)return;
+    const detail=await api('/api/onboarding/'+linked.id);
+    if(section.isConnected&&!phoneEdited&&detail.private_whatsapp)phone.value=detail.private_whatsapp;
+  }).catch(()=>{});
 }
-
 async function openQuoteDetail(id){
   try{
     const q=await api('/api/quotes/'+id);
@@ -608,11 +623,14 @@ function attachEmailComposer(record,kind){
  const client=store.clients.find(c=>c.id===record.client_id)||{},host=kind==='quote'?$('#qd-content'):$('#id-content'),section=document.createElement('section');section.className='detail-section billing-workspace';
  section.innerHTML='<div class="billing-editor"><div class="eyebrow">CUSTOMER EMAIL</div><h4>Send '+kind+'</h4><p>Send a branded email with a secure document link and payment options.</p><label>To</label><input type="email" class="billing-to" style="width:100%;margin:8px 0"><label>Personal message</label><textarea class="billing-note" rows="3" style="width:100%;margin:8px 0" placeholder="Add a short note for your customer"></textarea><button class="btn primary billing-review">Update preview</button></div><div class="billing-preview"><div class="billing-preview-empty"><span>EMAIL PREVIEW</span><h3>Ready for your customer.</h3><p>Review the recipient and add a personal note, The email preview loads automatically. Update it after changing your message.</p></div></div>';
  host.appendChild(section);
- host.parentElement.querySelector('.billing-tabs')?.remove();const tabs=document.createElement('nav');tabs.className='billing-tabs';tabs.setAttribute('aria-label','Document views');tabs.innerHTML='<button class="active" type="button">Overview</button><button type="button">Email '+kind+'</button>';host.before(tabs);section.hidden=true;const actions=host.parentElement.querySelector('.detail-actions');function switchView(email){for(const child of host.children)child.hidden=email?child!==section:child===section;if(actions)actions.hidden=email;tabs.children[0].classList.toggle('active',!email);tabs.children[1].classList.toggle('active',email);}tabs.children[0].onclick=()=>switchView(false);tabs.children[1].onclick=()=>switchView(true);
+ const whatsapp=kind==='quote'?host.querySelector('.billing-whatsapp'):null;
+ host.parentElement.querySelector('.billing-tabs')?.remove();const tabs=document.createElement('nav');tabs.className='billing-tabs';tabs.setAttribute('aria-label','Document views');tabs.innerHTML='<button type="button">Overview</button><button type="button">Email '+kind+'</button>'+(whatsapp?'<button type="button">WhatsApp quote</button>':'');host.before(tabs);section.hidden=true;const actions=host.parentElement.querySelector('.detail-actions');
+ function switchView(view){for(const child of host.children)child.hidden=view==='overview'?(child===section||child===whatsapp):child!==(view==='email'?section:whatsapp);if(actions)actions.hidden=view!=='overview';Array.from(tabs.children).forEach((button,index)=>button.classList.toggle('active',index===({overview:0,email:1,whatsapp:2}[view])));}
+ tabs.children[0].onclick=()=>switchView('overview');tabs.children[1].onclick=()=>switchView('email');if(whatsapp)tabs.children[2].onclick=()=>switchView('whatsapp');
  section.querySelector('.billing-to').value=client.billing_email||client.email||record.billing_email||record.email||'';
  const reviewButton=section.querySelector('.billing-review');
- reviewButton.onclick=async()=>{const preview=section.querySelector('.billing-preview');try{const draft=await api('/api/billing/'+kind+'/'+record.id+'/prepare',{method:'POST',body:JSON.stringify({to:section.querySelector('.billing-to').value,note:section.querySelector('.billing-note').value})});preview.innerHTML='<div class="billing-envelope"><strong>From:</strong> '+esc(draft.from)+(draft.cc?'<br><strong>CC:</strong> '+esc(draft.cc):'')+'<br><strong>To:</strong> '+esc(draft.to)+'<br><strong>Subject:</strong> '+esc(draft.subject)+'</div><iframe sandbox="" referrerpolicy="no-referrer" title="Customer email preview" style="width:100%;height:680px;border:1px solid #e4e8ec;border-radius:12px;background:white"></iframe><p><a class="btn secondary" target="_blank" rel="noopener noreferrer" href="'+esc(draft.url)+'">Open customer document</a></p><button class="btn primary billing-send" '+(draft.configured?'':'disabled')+'>Send '+kind+'</button><p class="billing-result">'+(draft.configured?'Review the recipient and email before sending.':'Email delivery needs to be connected. The preview and customer document are ready.')+'</p>';preview.querySelector('iframe').srcdoc=draft.html;preview.querySelector('.billing-send').onclick=async e=>{e.target.disabled=true;try{const result=await api('/api/billing/deliveries/'+draft.id+'/send',{method:'POST',body:'{}'});preview.querySelector('.billing-result').textContent=result.message;}catch(err){preview.querySelector('.billing-result').textContent=err.message;}};}catch(e){preview.innerHTML='<p class="billing-result">'+esc(e.message)+'</p>';toast(e.message,'error')}};
- switchView(true);
+ reviewButton.onclick=async()=>{const preview=section.querySelector('.billing-preview');try{const draft=await api('/api/billing/'+kind+'/'+record.id+'/prepare',{method:'POST',body:JSON.stringify({to:section.querySelector('.billing-to').value,note:section.querySelector('.billing-note').value})});preview.innerHTML='<div class="billing-envelope"><strong>From:</strong> '+esc(draft.from)+(draft.cc?'<br><strong>CC:</strong> '+esc(draft.cc):'')+'<br><strong>To:</strong> '+esc(draft.to)+'<br><strong>Subject:</strong> '+esc(draft.subject)+'</div><iframe sandbox="" referrerpolicy="no-referrer" title="Customer email preview" style="width:100%;height:680px;border:1px solid #e4e8ec;border-radius:12px;background:white"></iframe><p><a class="btn secondary" target="_blank" rel="noopener noreferrer" href="'+esc(draft.url)+'">Open customer document</a></p><button class="btn primary billing-send" '+(draft.configured?'':'disabled')+'>Send '+kind+'</button><p class="billing-result">'+(draft.configured?'Review the recipient and email before sending.':'Email delivery needs to be connected. The preview and customer document are ready.')+'</p>';preview.querySelector('iframe').srcdoc=draft.html;whatsapp?.setDraft(draft);preview.querySelector('.billing-send').onclick=async e=>{e.target.disabled=true;try{const result=await api('/api/billing/deliveries/'+draft.id+'/send',{method:'POST',body:'{}'});preview.querySelector('.billing-result').textContent=result.message;}catch(err){preview.querySelector('.billing-result').textContent=err.message;}};}catch(e){preview.innerHTML='<p class="billing-result">'+esc(e.message)+'</p>';whatsapp?.setDraftError();toast(e.message,'error')}};
+ switchView('email');
  section.querySelector('.billing-preview').innerHTML='<p class="billing-result" role="status">Loading email preview…</p>';
  reviewButton.click();
 }
