@@ -368,3 +368,14 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08
 .db-status.loading:before{width:13px;height:13px}
 @keyframes studio-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.studio-spinner,.auth-card button[aria-busy="true"]:before,.db-status.loading:before{animation:none}}
+
+
+/* Give the client record room for its hub and editable details. */
+#client-modal{padding:16px}
+#client-modal>.client-modal{width:min(1320px,100%);max-height:calc(100dvh - 32px);padding:28px 32px}
+#client-modal .client-snapshot{grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));align-items:stretch}
+#client-modal .client-snapshot-card{min-width:0;overflow-wrap:anywhere}
+#client-modal .modal-header{position:sticky;top:-28px;z-index:2;background:#fff;padding:16px 0;margin-top:-16px;border-bottom:1px solid var(--line)}
+@media(max-width:900px){#client-modal .client-snapshot{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){#client-modal{padding:8px}#client-modal>.client-modal{padding:20px;max-height:calc(100dvh - 16px)}#client-modal .modal-header{top:-20px}}
+@media(max-width:420px){#client-modal .client-snapshot{grid-template-columns:minmax(0,1fr)}}
