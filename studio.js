@@ -52,16 +52,22 @@ $('#confirm-cancel').onclick=()=>{
 };
 
 
+let studioPending=0,studioWaitTimer=null,loginBusy=false;
+function beginStudioWork(){studioPending++;const status=$('#studio-working');if(status)status.hidden=false;if(studioPending===1){$('#studio-working-label').textContent='Working…';studioWaitTimer=setTimeout(()=>{if(studioPending)$('#studio-working-label').textContent='Still working — the server may be waking up…';},8000);}let ended=false;return ()=>{if(ended)return;ended=true;studioPending=Math.max(0,studioPending-1);if(!studioPending){clearTimeout(studioWaitTimer);if(status)status.hidden=true;}};}
+function setLoginBusy(busy,label='Signing in…'){loginBusy=busy;const button=$('#login-submit');button.disabled=busy;button.setAttribute('aria-busy',String(busy));button.textContent=busy?label:'Enter Studio';$('#login-password').disabled=busy;$('#login-form').setAttribute('aria-busy',String(busy));}
+
 async function rawFetch(path,options={}){
+  const finish=beginStudioWork();
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),75000);
   try{
     const headers={'Content-Type':'application/json',...(options.headers||{})};
     if(token) headers.Authorization=`Bearer ${token}`;
     return await fetch(API_BASE+path,{...options,headers,signal:controller.signal});
-  }finally{clearTimeout(timer)}
+  }finally{clearTimeout(timer);finish()}
 }
 async function api(path,options={}){
+  const finish=beginStudioWork();try{
   setStatus('Working…','loading');
   let r;
   try{r=await rawFetch(path,options);}
@@ -72,32 +78,35 @@ async function api(path,options={}){
     throw new Error(data.error||'Authentication required.');
   }
   if(!r.ok){setStatus('Action failed','error');throw new Error(data.error||`HTTP ${r.status}`)}
-  setStatus('Live database','ok');return data;
+  setStatus(studioPending>1?'Working…':'Live database',studioPending>1?'loading':'ok');return data;
+  }finally{finish();}
 }
 
 async function initAuth(){
   showAuth();
   if(!token)return false;
+  setLoginBusy(true,'Checking session…');$('#login-message').textContent='Checking your saved session…';
   try{
-    const r=await rawFetch('/api/auth/session');
-    const data=await r.json();
-    if(!r.ok || data.authenticated!==true || data.role!=='admin'){
+    const r=await rawFetch('/api/auth/session');const data=await r.json();
+    if(!r.ok||data.authenticated!==true||data.role!=='admin'){
       if(r.status===401){token='';sessionStorage.removeItem('bbd_token');}
-      $('#login-message').textContent=data.error||'Please sign in again.';
-      return false;
+      $('#login-message').textContent=data.error||'Please sign in again.';return false;
     }
-    hideAuth();return true;
+    hideAuth();$('#login-message').textContent='';return true;
   }catch{$('#login-message').textContent='Unable to verify your session. Please try again.';return false;}
+  finally{setLoginBusy(false);}
 }
 function showAuth(){$('.app').style.display='none';$('#auth-screen').classList.remove('hidden');$('#login-password').focus();}
 function hideAuth(){$('#auth-screen').classList.add('hidden');$('.app').style.display='';}
 $('#login-form').addEventListener('submit',async e=>{
-  e.preventDefault();const msg=$('#login-message');msg.textContent='Signing in…';
+  e.preventDefault();if(loginBusy)return;const msg=$('#login-message'),password=$('#login-password').value;
+  setLoginBusy(true);msg.className='form-message';msg.textContent='Signing in…';
   try{
-    const data=await rawFetch('/api/auth/login',{method:'POST',body:JSON.stringify({password:$('#login-password').value})}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Login failed');return d});
-    if(!data.token)throw new Error('Administrator login is unavailable.');token=data.token;sessionStorage.setItem('bbd_token',token)
-    hideAuth();msg.textContent='';await loadAll();
-  }catch(err){msg.textContent=err.message;msg.className='form-message error'}
+    const data=await rawFetch('/api/auth/login',{method:'POST',body:JSON.stringify({password})}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Login failed');return d});
+    if(!data.token)throw new Error('Administrator login is unavailable.');token=data.token;sessionStorage.setItem('bbd_token',token);
+    $('#login-password').value='';hideAuth();msg.textContent='';await loadAll();
+  }catch(err){msg.textContent=err.name==='AbortError'?'Sign-in took too long. Please try again.':err.message;msg.className='form-message error';}
+  finally{setLoginBusy(false);}
 });
 
 function nav(view){
@@ -639,6 +648,7 @@ async function updateSub(id,status){try{await api('/api/subscriptions/'+id,{meth
 
 renderLines();
 (async()=>{const ok=await initAuth();if(ok){await loadAll();const p=new URLSearchParams(location.search);if(p.get('invoice')){nav('invoices');await openInvoiceDetail(p.get('invoice'));}else if(p.get('quote')){nav('quotes');await openQuoteDetail(p.get('quote'));}else if(p.get('view')==='clients'){nav('clients');}else if(p.get('view')==='quote-builder'){nav('quote-builder');$('#qb-client').value=p.get('client')||'';if(p.get('offer')==='kplay-growth-30'&&p.get('client')==='3c856081-18b6-40f8-9f16-fc98031927a0'){lineItems=[{package_key:'growth',description:quotePackages.growth.description,quantity:1,unit_price:3995}];$('#qb-deposit').value=50;$('#qb-discount-type').value='percent';$('#qb-discount-value').value=30;$('#qb-discount-label').value='Introductory client discount — 30%';$('#qb-notes').value=quotePackages.growth.terms+' Introductory discount applies to the one-time website build only. For Zelle payment instructions, contact hello@builtbydavila.com.';renderLines();}updatePreview();}}})();
+
 
 
 

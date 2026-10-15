@@ -353,3 +353,18 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08
 #invoice-detail-modal .detail-actions,#quote-detail-modal .detail-actions{border-top:1px solid #e6ebef;padding-top:20px}.detail-actions .btn{border-radius:8px;font-size:13px}
 #confirm-modal{z-index:1200}
 @media(max-width:800px){.billing-workspace{grid-template-columns:1fr}.billing-editor{position:static}.billing-preview-empty{min-height:240px;padding:30px}#invoice-detail-modal .detail-modal,#quote-detail-modal .detail-modal{padding:22px}.detail-summary strong{font-size:19px}}
+
+
+/* Full approved branding and request progress. */
+.auth-card>img{width:260px;max-width:100%;height:auto;object-fit:contain;object-position:left;border-radius:0;margin-bottom:22px}
+.side-logo{width:100%;height:auto;min-height:72px;overflow:visible;border-radius:10px;background:#fff;padding:10px}
+.side-logo img{width:100%;height:auto;max-height:95px;object-fit:contain;object-position:left}
+.studio-working{position:fixed;bottom:22px;right:22px;z-index:4500;display:flex;align-items:center;gap:10px;padding:12px 17px;border:1px solid #e5e0d8;border-radius:12px;background:#fff;color:#25333c;box-shadow:0 8px 30px #1725301a;font-size:13px;max-width:calc(100vw - 36px)}
+.studio-working[hidden]{display:none}
+.studio-spinner,.auth-card button[aria-busy="true"]:before,.db-status.loading:before{content:'';display:inline-block;width:17px;height:17px;box-sizing:border-box;flex:0 0 auto;border:2px solid #f2d8ce;border-top-color:#f45b38;border-radius:50%;animation:studio-spin .8s linear infinite}
+.auth-card button[aria-busy="true"]{display:flex;align-items:center;justify-content:center;gap:10px;cursor:wait;opacity:.85}
+.auth-card button[aria-busy="true"]:before{border-color:#ffffff70;border-top-color:white}
+.db-status.loading{display:inline-flex;align-items:center;gap:7px}
+.db-status.loading:before{width:13px;height:13px}
+@keyframes studio-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.studio-spinner,.auth-card button[aria-busy="true"]:before,.db-status.loading:before{animation:none}}

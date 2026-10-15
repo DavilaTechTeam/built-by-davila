@@ -4,28 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Built by Davila Studio</title>
-<link rel="stylesheet" href="studio.css?v=20261008-document-workspace">
+<link rel="stylesheet" href="studio.css?v=20261015-loading">
 </head>
 <body>
+<div id="studio-working" class="studio-working" role="status" aria-live="polite" hidden><span class="studio-spinner" aria-hidden="true"></span><span id="studio-working-label">Working…</span></div>
 
 <div class="auth-screen" id="auth-screen">
   <div class="auth-card">
-    <img src="assets/built-by-davila-mark-v2.svg" alt="Built by Davila">
+    <img src="assets/built-by-davila-logo-approved.png" alt="Built by Davila">
     <div class="eyebrow">STUDIO BACK OFFICE</div>
     <h1>Welcome back.</h1>
     <p>Enter your Studio password to continue.</p>
     <form id="login-form">
       <input id="login-password" type="password" placeholder="Studio password" autocomplete="current-password" required>
-      <button class="btn primary" type="submit">Enter Studio</button>
-      <div class="form-message" id="login-message"></div>
+      <button class="btn primary" id="login-submit" type="submit">Enter Studio</button>
+      <div class="form-message" id="login-message" role="status" aria-live="polite"></div>
     </form>
   </div>
 </div>
 
 <div class="app" style="display:none">
 <aside class="side">
-  <div class="side-logo"><img src="assets/built-by-davila-mark-v2.svg" alt="Built by Davila"></div>
-  <div class="studio-brand-name">BUILT BY DAVILA</div>
+  <div class="side-logo"><img src="assets/built-by-davila-logo-approved.png" alt="Built by Davila"></div>
+  
   <small>STUDIO BACK OFFICE</small>
   <nav>
     <button class="active" data-view="dashboard">Dashboard</button>
@@ -183,7 +184,7 @@
 
 <div class="modal-backdrop" id="stripe-checkout-modal" aria-hidden="true"><div class="client-modal detail-modal" style="width:min(850px,94vw);max-height:90vh;overflow-y:auto;background:#f5f3ef"><div class="modal-header"><div><div class="eyebrow">BUILT BY DAVILA • SECURE CHECKOUT</div><h2 id="checkout-title">Invoice Payment</h2><p id="checkout-subtitle"></p></div><button class="modal-close" data-close="stripe-checkout-modal" aria-label="Close checkout">×</button></div><div id="checkout-mount"></div></div></div>
 <script src="https://js.stripe.com/endive/stripe.js"></script>
-<script src="studio.js?v=20261014-portal-contact"></script>
+<script src="studio.js?v=20261015-loading"></script>
 <script>
 (() => {
   const API_BASE='https://built-by-davila-backend.onrender.com';
@@ -287,6 +288,7 @@
 
 </body>
 </html>
+
 
 
 
