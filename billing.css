@@ -66,3 +66,8 @@ header>a{display:flex;align-items:center;gap:12px}header>a>span{margin-left:-12p
  .print-invoice:has(.pi-items tbody tr:nth-child(n+5)){min-height:0;padding-bottom:0}
  .print-invoice:has(.pi-items tbody tr:nth-child(n+5)) .pi-terms,.print-invoice:has(.pi-items tbody tr:nth-child(n+5)) .pi-footer{position:static;margin-top:24px}
 }
+
+/* Wider customer quote and invoice workspace, preserving printed page size. */
+@media screen and (min-width:801px){header,main{max-width:1480px}.layout{grid-template-columns:minmax(0,1fr) 320px;gap:28px}.paper{min-width:0;padding:40px 44px}}
+@media screen{.paper td:first-child{overflow-wrap:anywhere}.quote-approval{padding-bottom:22px;margin-bottom:24px;border-bottom:1px solid #e7eaee}}
+@media screen and (max-width:800px){main{padding-left:16px;padding-right:16px}.paper,.payment{min-width:0}}
